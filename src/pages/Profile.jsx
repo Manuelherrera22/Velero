@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { User, Mail, Phone, MapPin, Sailboat, Shield, LogOut, Edit3, Save, Loader } from 'lucide-react'
+import { User, Mail, Phone, MapPin, Sailboat, Shield, LogOut, Edit3, Save, Loader, Lock, CheckCircle, Eye, EyeOff } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
+import supabase from '../lib/supabase'
 import './Profile.css'
 
 export default function Profile() {
@@ -15,6 +16,15 @@ export default function Profile() {
     location: profile?.location || '',
   })
 
+  // Password state
+  const [showPasswordSection, setShowPasswordSection] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [passwordSaving, setPasswordSaving] = useState(false)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
+
   if (!user) return <Navigate to="/login" replace />
 
   const handleSave = async () => {
@@ -26,6 +36,34 @@ export default function Profile() {
 
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleSetPassword = async () => {
+    setPasswordError('')
+    setPasswordSuccess(false)
+
+    if (password.length < 6) {
+      setPasswordError('La contraseña debe tener al menos 6 caracteres')
+      return
+    }
+    if (password !== passwordConfirm) {
+      setPasswordError('Las contraseñas no coinciden')
+      return
+    }
+
+    setPasswordSaving(true)
+    try {
+      const { error } = await supabase.auth.updateUser({ password })
+      if (error) throw error
+      setPasswordSuccess(true)
+      setPassword('')
+      setPasswordConfirm('')
+      setTimeout(() => setPasswordSuccess(false), 5000)
+    } catch (err) {
+      setPasswordError(err.message || 'Error al crear contraseña')
+    } finally {
+      setPasswordSaving(false)
+    }
   }
 
   return (
@@ -108,6 +146,77 @@ export default function Profile() {
                 <p>{profile?.bio || '—'}</p>
               )}
             </div>
+          </div>
+
+          <div className="divider" style={{ width: '100%' }} />
+
+          {/* Password Section */}
+          <div className="profile-password-section">
+            <button
+              className="btn btn--ghost btn--sm"
+              onClick={() => setShowPasswordSection(!showPasswordSection)}
+            >
+              <Lock size={14} /> {showPasswordSection ? 'Ocultar' : 'Crear o cambiar contraseña'}
+            </button>
+
+            {showPasswordSection && (
+              <div className="profile-password-form animate-fade-in">
+                <p className="profile-password-hint">
+                  Creá una contraseña para poder iniciar sesión con email y contraseña en vez de magic link.
+                </p>
+
+                <div className="input-group" style={{ marginBottom: 'var(--space-3)' }}>
+                  <label><Lock size={14} /> Nueva contraseña</label>
+                  <div className="profile-password-input">
+                    <input
+                      className="input"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                    <button
+                      type="button"
+                      className="profile-password-toggle"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="input-group" style={{ marginBottom: 'var(--space-4)' }}>
+                  <label><Lock size={14} /> Repetir contraseña</label>
+                  <input
+                    className="input"
+                    type={showPassword ? 'text' : 'password'}
+                    value={passwordConfirm}
+                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                    placeholder="Repetí la contraseña"
+                  />
+                </div>
+
+                {passwordError && (
+                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-error)', marginBottom: 'var(--space-3)' }}>
+                    {passwordError}
+                  </p>
+                )}
+
+                {passwordSuccess && (
+                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-success)', marginBottom: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle size={14} /> ¡Contraseña guardada! Ahora podés entrar con email y contraseña.
+                  </p>
+                )}
+
+                <button
+                  className="btn btn--accent btn--sm"
+                  onClick={handleSetPassword}
+                  disabled={passwordSaving || !password || !passwordConfirm}
+                >
+                  {passwordSaving ? <Loader size={14} className="spin" /> : <><Save size={14} /> Guardar contraseña</>}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="divider" style={{ width: '100%' }} />

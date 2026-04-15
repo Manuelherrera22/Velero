@@ -95,3 +95,15 @@
   margin-bottom: var(--space-6);
   animation: float 3s ease-in-out infinite;
 }
+
+/* Password toggle */
+.login-password-toggle {
+  width: 100%;
+  margin-top: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.login-password-toggle:hover {
+  color: var(--color-accent-400);
+}

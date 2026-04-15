@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Mail, Phone, User, CreditCard, Shield, CheckCircle, Loader, Tag, AlertCircle, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, User, CreditCard, Shield, CheckCircle, Loader, Tag, AlertCircle, Download } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import useBookingStore from '../stores/bookingStore'
 import useTripStore from '../stores/tripStore'
+import supabase from '../lib/supabase'
+import { generateTicketPDF } from '../utils/generateTicket'
 import './Checkout.css'
 
 const WhatsAppIcon = () => (
@@ -164,7 +166,7 @@ export default function Checkout() {
       if (result.success) {
         setBooking(result.data)
 
-        // Send confirmation email via Netlify Function (fire & forget)
+        // 1. Send confirmation email via Netlify Function (fire & forget)
         try {
           fetch('/api/send-ticket', {
             method: 'POST',
@@ -183,6 +185,21 @@ export default function Checkout() {
           })
         } catch (emailErr) {
           console.warn('Email send failed (non-blocking):', emailErr)
+        }
+
+        // 2. Send magic link so user can access their dashboard
+        if (!user) {
+          try {
+            await supabase.auth.signInWithOtp({
+              email: formData.email,
+              options: {
+                emailRedirectTo: `${window.location.origin}/auth/callback`,
+                data: { full_name: formData.name },
+              },
+            })
+          } catch (magicErr) {
+            console.warn('Magic link failed (non-blocking):', magicErr)
+          }
         }
 
         setStep(4)
@@ -255,9 +272,22 @@ export default function Checkout() {
               </div>
             </div>
             <div className="checkout-success__actions">
-              <Link to="/" className="btn btn--accent btn--lg">
-                Volver al Inicio
-              </Link>
+              <button
+                onClick={() => generateTicketPDF({
+                  trip: trip.title,
+                  date: selectedDate ? { date: selectedDate.date, start_time: selectedDate.start_time } : null,
+                  guests,
+                  total,
+                  currency: trip.currency || 'ARS',
+                  bookingId: booking?.id,
+                  name: formData.name,
+                  email: formData.email,
+                  phone: formData.phone,
+                })}
+                className="btn btn--accent btn--lg"
+              >
+                <Download size={18} /> Descargar Boleto PDF
+              </button>
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`¡Hola! 🎫 Mi código de reserva es: *${booking?.id?.slice(0, 8).toUpperCase()}*\n\nTravesía: ${trip.title}\nPersonas: ${guests}\n\n¿Podrían confirmar los detalles?`)}`}
                 target="_blank"
@@ -267,8 +297,17 @@ export default function Checkout() {
                 <WhatsAppIcon /> Enviar código por WhatsApp
               </a>
             </div>
+
+            <div className="checkout-success__magic-link">
+              <Mail size={16} />
+              <p>
+                Enviamos un <strong>link mágico</strong> a <strong>{formData.email}</strong>. 
+                Hacé click en el link del email para acceder a tu perfil y ver tus reservas.
+              </p>
+            </div>
+
             <p className="checkout-success__note">
-              📧 Enviamos tu boleto a <strong>{formData.email}</strong> · Código: <strong>{booking?.id?.slice(0, 8).toUpperCase()}</strong>
+              Código de reserva: <strong>{booking?.id?.slice(0, 8).toUpperCase()}</strong>
             </p>
           </div>
         </div>
