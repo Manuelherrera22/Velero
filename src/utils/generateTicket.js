@@ -40,21 +40,24 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
   doc.setFillColor(20, 35, 60)
   doc.roundedRect(8, 8, 145, 84, 4, 4, 'F')
 
-  // Header accent bar
-  doc.setFillColor(0, 180, 180)
-  doc.roundedRect(8, 8, 145, 18, 4, 4, 'F')
-  doc.setFillColor(20, 35, 60)
-  doc.rect(8, 18, 145, 8, 'F')
+  // Header accent bar (Thick cyan top)
+  doc.setFillColor(38, 198, 198)
+  doc.roundedRect(8, 8, 145, 16, 4, 4, 'F')
+  // Square off bottom part of the header so it blends seamlessly
+  doc.rect(8, 20, 145, 4, 'F')
 
-  doc.setTextColor(255, 255, 255)
-  doc.setFontSize(14)
+  // Header Text (Dark inside Cyan)
+  doc.setTextColor(10, 22, 40) 
+  doc.setFontSize(16)
   doc.setFont('helvetica', 'bold')
-  doc.text('VELERO', 16, 20)
+  doc.text('VELERO', 16, 18)
 
   doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
-  doc.text('RESERVA CONFIRMADA', 105, 20)
+  doc.setFont('helvetica', 'bold')
+  doc.text('RESERVA CONFIRMADA', 105, 17)
 
+  // Trip Title (White inside dark blue panel)
+  doc.setTextColor(255, 255, 255)
   doc.setFontSize(13)
   doc.setFont('helvetica', 'bold')
   doc.text((trip || 'Travesía').substring(0, 40), 16, 36)
