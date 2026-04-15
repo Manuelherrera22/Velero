@@ -11,17 +11,20 @@ const useBookingStore = create((set, get) => ({
   createBooking: async (bookingData) => {
     set({ loading: true, error: null })
     try {
+      // Separate addons from booking data — 'addons' is not a column in bookings table
+      const { addons, ...bookingInsert } = bookingData
+
       const { data, error } = await supabase
         .from('bookings')
-        .insert(bookingData)
+        .insert(bookingInsert)
         .select()
         .single()
 
       if (error) throw error
 
       // Insert booking addons if any
-      if (bookingData.addons?.length > 0) {
-        const addonInserts = bookingData.addons.map(addon => ({
+      if (addons?.length > 0) {
+        const addonInserts = addons.map(addon => ({
           booking_id: data.id,
           addon_id: addon.id,
           name: addon.name,
