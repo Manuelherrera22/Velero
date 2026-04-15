@@ -1,9 +1,10 @@
 import jsPDF from 'jspdf'
+import QRCode from 'qrcode'
 
 /**
- * Generate a boarding-pass style PDF ticket for a booking
+ * Generate a boarding-pass style PDF ticket with QR code
  */
-export function generateTicketPDF({ trip, date, guests, total, currency, bookingId, name, email, phone }) {
+export async function generateTicketPDF({ trip, date, guests, total, currency, bookingId, name, email, phone }) {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [210, 100] })
 
   const formatPrice = (p) => {
@@ -18,8 +19,19 @@ export function generateTicketPDF({ trip, date, guests, total, currency, booking
   const timeText = date?.start_time?.slice(0, 5) || '--:--'
   const shortId = bookingId?.slice(0, 8).toUpperCase() || 'XXXXXXXX'
 
+  // Generate QR code as data URL
+  let qrDataUrl = null
+  try {
+    qrDataUrl = await QRCode.toDataURL(
+      `https://velero-ar.netlify.app/checkin/${bookingId}`,
+      { width: 200, margin: 1, color: { dark: '#26C6C6', light: '#0A1628' } }
+    )
+  } catch (e) {
+    console.warn('QR generation failed:', e)
+  }
+
   // ── Background ──
-  doc.setFillColor(10, 22, 40) // dark navy
+  doc.setFillColor(10, 22, 40)
   doc.rect(0, 0, 210, 100, 'F')
 
   // ── Left panel (main ticket) ──
@@ -27,31 +39,32 @@ export function generateTicketPDF({ trip, date, guests, total, currency, booking
   doc.roundedRect(8, 8, 145, 84, 4, 4, 'F')
 
   // Header accent bar
-  doc.setFillColor(0, 180, 180) // turquoise
+  doc.setFillColor(0, 180, 180)
   doc.roundedRect(8, 8, 145, 18, 4, 4, 'F')
   doc.setFillColor(20, 35, 60)
-  doc.rect(8, 18, 145, 8, 'F') // square off bottom corners
+  doc.rect(8, 18, 145, 8, 'F')
 
   // Brand
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(14)
   doc.setFont('helvetica', 'bold')
-  doc.text('⛵ VELERO', 16, 20)
+  doc.text('VELERO', 16, 20)
 
   // Confirmed badge
   doc.setFontSize(8)
   doc.setFont('helvetica', 'normal')
-  doc.text('✅ RESERVA CONFIRMADA', 105, 20)
+  doc.text('RESERVA CONFIRMADA', 105, 20)
 
   // Trip title
   doc.setFontSize(13)
   doc.setFont('helvetica', 'bold')
-  doc.text(trip || 'Travesía', 16, 36)
+  const titleLines = doc.splitTextToSize(trip || 'Travesía', 90)
+  doc.text(titleLines[0], 16, 36)
 
   // Passenger info
   doc.setFontSize(7)
   doc.setFont('helvetica', 'normal')
-  doc.setTextColor(148, 163, 184) // muted
+  doc.setTextColor(148, 163, 184)
 
   doc.text('PASAJERO', 16, 46)
   doc.setTextColor(255, 255, 255)
@@ -100,12 +113,12 @@ export function generateTicketPDF({ trip, date, guests, total, currency, booking
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(148, 163, 184)
   doc.text('TOTAL', 16, 78)
-  doc.setTextColor(38, 198, 198) // accent
+  doc.setTextColor(38, 198, 198)
   doc.setFontSize(14)
   doc.setFont('helvetica', 'bold')
   doc.text(formatPrice(total), 16, 85)
 
-  // ── Right panel (tear-off stub) ──
+  // ── Right panel (tear-off stub with QR) ──
   // Dashed line separator
   doc.setDrawColor(100, 116, 139)
   doc.setLineDashPattern([2, 2], 0)
@@ -115,36 +128,35 @@ export function generateTicketPDF({ trip, date, guests, total, currency, booking
   doc.setFillColor(20, 35, 60)
   doc.roundedRect(162, 8, 40, 84, 4, 4, 'F')
 
+  // QR Code
+  if (qrDataUrl) {
+    doc.addImage(qrDataUrl, 'PNG', 166, 14, 32, 32)
+  }
+
   // Booking code
   doc.setFontSize(7)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(148, 163, 184)
-  doc.text('CÓDIGO', 170, 24)
+  doc.text('CODIGO', 174, 54)
 
   doc.setTextColor(38, 198, 198)
-  doc.setFontSize(14)
+  doc.setFontSize(12)
   doc.setFont('helvetica', 'bold')
-  doc.text(shortId, 168, 33)
+  doc.text(shortId, 170, 61)
 
-  // Velero mini logo
-  doc.setTextColor(255, 255, 255)
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'bold')
-  doc.text('VELERO', 173, 50)
-
+  // Scan text
   doc.setFontSize(6)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(100, 116, 139)
-  doc.text('Experiencias', 171, 56)
-  doc.text('Náuticas', 174, 60)
+  doc.text('Presenta este QR', 167, 72)
+  doc.text('al abordar', 173, 76)
 
-  // WhatsApp note
+  // WhatsApp
   doc.setFontSize(6)
-  doc.setTextColor(37, 211, 102) // whatsapp green
-  doc.text('WhatsApp:', 168, 75)
+  doc.setTextColor(37, 211, 102)
+  doc.text('WhatsApp:', 168, 84)
   doc.setTextColor(148, 163, 184)
-  doc.text('+54 9 11', 168, 80)
-  doc.text('3669-6696', 168, 84)
+  doc.text('+54 9 11 3669-6696', 164, 88)
 
   // Save
   doc.save(`velero-ticket-${shortId}.pdf`)

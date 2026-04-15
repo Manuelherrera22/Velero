@@ -20,7 +20,7 @@ export default function Checkout() {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const { user, profile } = useAuthStore()
   const { createBooking, validateCoupon } = useBookingStore()
   const { currentTrip, tripDates, tripAddons, fetchTrip } = useTripStore()
 
@@ -54,12 +54,14 @@ export default function Checkout() {
     if (!currentTrip || currentTrip.id !== id) {
       fetchTrip(id)
     }
-    // Pre-fill if user is logged in
+    // Pre-fill if user is logged in (Google, magic link, etc)
     if (user) {
       setFormData(prev => ({
         ...prev,
+        name: profile?.full_name || user.user_metadata?.full_name || prev.name,
         email: user.email || prev.email,
         emailConfirm: user.email || prev.emailConfirm,
+        phone: profile?.phone || user.phone || prev.phone,
       }))
     }
   }, [id, user])
