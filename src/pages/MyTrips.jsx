@@ -3,7 +3,6 @@ import { Navigate, Link } from 'react-router-dom'
 import { Compass, CalendarDays, Users, MapPin, Download, Clock, CheckCircle, XCircle, Loader, AlertCircle, Ticket } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import useBookingStore from '../stores/bookingStore'
-import { generateTicketPDF } from '../utils/generateTicket'
 import './MyTrips.css'
 
 const WhatsAppIcon = ({ size = 14 }) => (
@@ -47,7 +46,8 @@ export default function MyTrips() {
 
   const displayBookings = activeTab === 'upcoming' ? upcoming : activeTab === 'past' ? past : cancelled
 
-  const handleDownloadTicket = (booking) => {
+  const handleDownloadTicket = async (booking) => {
+    const { generateTicketPDF } = await import('../utils/generateTicket')
     generateTicketPDF({
       trip: booking.trip?.title || 'Travesía',
       date: booking.trip_date ? { date: booking.trip_date.date, start_time: booking.trip_date.start_time } : null,

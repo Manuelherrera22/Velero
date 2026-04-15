@@ -5,7 +5,6 @@ import useAuthStore from '../stores/authStore'
 import useBookingStore from '../stores/bookingStore'
 import useTripStore from '../stores/tripStore'
 import supabase from '../lib/supabase'
-import { generateTicketPDF } from '../utils/generateTicket'
 import './Checkout.css'
 
 const WhatsAppIcon = () => (
@@ -39,6 +38,13 @@ export default function Checkout() {
     idType: 'dni',
     idNumber: '',
   })
+
+  // Parse booking params from URL
+  const dateId = searchParams.get('date')
+  const guests = parseInt(searchParams.get('guests')) || 2
+  const selectedAddonsParam = searchParams.get('addons')
+  let selectedAddons = {}
+  try { selectedAddons = JSON.parse(selectedAddonsParam || '{}') } catch {}
 
   // Passengers list (for multi-guest ID collection)
   const [passengers, setPassengers] = useState([
@@ -74,12 +80,7 @@ export default function Checkout() {
   const [couponError, setCouponError] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
 
-  // Parse booking params from URL
-  const dateId = searchParams.get('date')
-  const guests = parseInt(searchParams.get('guests')) || 2
-  const selectedAddonsParam = searchParams.get('addons')
-  let selectedAddons = {}
-  try { selectedAddons = JSON.parse(selectedAddonsParam || '{}') } catch {}
+
 
   useEffect(() => {
     if (!currentTrip || currentTrip.id !== id) {
@@ -328,17 +329,20 @@ export default function Checkout() {
             </div>
             <div className="checkout-success__actions">
               <button
-                onClick={() => generateTicketPDF({
-                  trip: trip.title,
-                  date: selectedDate ? { date: selectedDate.date, start_time: selectedDate.start_time } : null,
-                  guests,
-                  total,
-                  currency: trip.currency || 'ARS',
-                  bookingId: booking?.id,
-                  name: formData.name,
-                  email: formData.email,
-                  phone: formData.phone,
-                })}
+                onClick={async () => {
+                  const { generateTicketPDF } = await import('../utils/generateTicket')
+                  generateTicketPDF({
+                    trip: trip.title,
+                    date: selectedDate ? { date: selectedDate.date, start_time: selectedDate.start_time } : null,
+                    guests,
+                    total,
+                    currency: trip.currency || 'ARS',
+                    bookingId: booking?.id,
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                  })
+                }}
                 className="btn btn--accent btn--lg"
               >
                 <Download size={18} /> Descargar Boleto PDF
