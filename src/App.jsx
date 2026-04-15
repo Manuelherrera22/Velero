@@ -7,6 +7,7 @@ import TripDetail from './pages/TripDetail'
 import Checkout from './pages/Checkout'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
+import MyTrips from './pages/MyTrips'
 import AuthCallback from './pages/AuthCallback'
 import Dashboard from './pages/Dashboard'
 import Admin from './pages/Admin'
@@ -42,6 +43,12 @@ function App() {
           <Route path="/perfil" element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/mis-viajes" element={
+            <ProtectedRoute>
+              <MyTrips />
             </ProtectedRoute>
           } />
 

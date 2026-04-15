@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Sailboat, User, LogOut, LayoutDashboard } from 'lucide-react'
+import { Menu, X, Sailboat, User, LogOut, LayoutDashboard, Ticket } from 'lucide-react'
 import useAuthStore from '../../stores/authStore'
 import './Header.css'
 
@@ -62,6 +62,9 @@ export default function Header() {
 
               {userMenuOpen && (
                 <div className="header__dropdown glass animate-fade-in">
+                  <Link to="/mis-viajes" className="header__dropdown-item">
+                    <Ticket size={16} /> Mis Viajes
+                  </Link>
                   <Link to="/perfil" className="header__dropdown-item">
                     <User size={16} /> Mi Perfil
                   </Link>

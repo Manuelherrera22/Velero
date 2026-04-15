@@ -1,0 +1,246 @@
+.my-trips {
+  padding: var(--space-8) 0 var(--space-24);
+}
+
+.my-trips__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.my-trips__header h1 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-3xl);
+  font-weight: 800;
+}
+
+.my-trips__header > div > p {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
+/* Tabs */
+.my-trips__tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+  padding: var(--space-1);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.my-trips__tab {
+  flex: 1;
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.my-trips__tab:hover {
+  color: var(--text-primary);
+}
+
+.my-trips__tab--active {
+  background: rgba(0, 180, 180, 0.12);
+  color: var(--color-accent-400);
+}
+
+/* Empty state */
+.my-trips__empty {
+  text-align: center;
+  padding: var(--space-16) var(--space-8);
+  border-radius: var(--radius-2xl);
+}
+
+.my-trips__empty svg {
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-6);
+}
+
+.my-trips__empty h3 {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.my-trips__empty p {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-8);
+}
+
+/* List */
+.my-trips__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ── Boarding Pass ── */
+.boarding-pass {
+  display: flex;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.boarding-pass:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 180, 180, 0.08);
+}
+
+/* Main section */
+.boarding-pass__main {
+  flex: 1;
+  padding: var(--space-6);
+}
+
+.boarding-pass__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.boarding-pass__brand {
+  font-family: var(--font-heading);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--color-accent-400);
+}
+
+.boarding-pass__title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-5);
+}
+
+.boarding-pass__title a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.boarding-pass__title a:hover {
+  color: var(--color-accent-400);
+}
+
+/* Details grid */
+.boarding-pass__details {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+.boarding-pass__label {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-1);
+}
+
+.boarding-pass__value {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.boarding-pass__time {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 800;
+}
+
+/* Actions */
+.boarding-pass__actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Stub (right side) */
+.boarding-pass__stub {
+  width: 140px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-6);
+  background: rgba(0, 180, 180, 0.05);
+  border-left: 2px dashed rgba(255, 255, 255, 0.06);
+  text-align: center;
+}
+
+.boarding-pass__code {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-accent-400);
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-4);
+}
+
+.boarding-pass__total-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+}
+
+.boarding-pass__total {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-accent-400);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .boarding-pass {
+    flex-direction: column;
+  }
+
+  .boarding-pass__stub {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    border-left: none;
+    border-top: 2px dashed rgba(255, 255, 255, 0.06);
+    padding: var(--space-4);
+  }
+
+  .boarding-pass__code {
+    margin-bottom: 0;
+  }
+
+  .boarding-pass__details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .my-trips__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
