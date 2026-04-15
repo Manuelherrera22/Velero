@@ -1,0 +1,114 @@
+.review-page {
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--space-12) 0 var(--space-24);
+}
+
+.review-card {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: var(--space-10);
+  border-radius: var(--radius-2xl);
+}
+
+.review-card__header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.review-card__header h1 {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  margin-top: var(--space-3);
+}
+
+.review-card__trip-name {
+  font-size: var(--text-lg);
+  color: var(--color-accent-400);
+  font-weight: 600;
+  margin-top: var(--space-2);
+}
+
+.review-card__trip-location {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.review-card__existing {
+  font-size: var(--text-sm);
+  background: rgba(0, 180, 180, 0.08);
+  color: var(--color-accent-400);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+/* Stars */
+.review-stars {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.review-stars__label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.review-stars__row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.review-stars__btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1);
+  transition: transform var(--transition-fast);
+}
+
+.review-stars__btn:hover {
+  transform: scale(1.2);
+}
+
+.review-stars__text {
+  font-size: var(--text-sm);
+  color: var(--color-accent-400);
+  font-weight: 500;
+  margin-top: var(--space-2);
+  min-height: 20px;
+}
+
+.review-card__submit {
+  width: 100%;
+  margin-top: var(--space-6);
+}
+
+/* Success */
+.review-success {
+  text-align: center;
+  padding: var(--space-16) 0;
+}
+
+.review-success h1 {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  margin-top: var(--space-6);
+}
+
+.review-success p {
+  color: var(--text-secondary);
+  margin-top: var(--space-3);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.review-success__stars {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}

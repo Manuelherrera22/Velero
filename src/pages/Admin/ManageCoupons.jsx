@@ -1,0 +1,164 @@
+import { useState, useEffect } from 'react'
+import { Tag, Plus, X, Save, Loader, Calendar, Percent, DollarSign } from 'lucide-react'
+import supabase from '../../lib/supabase'
+
+export default function ManageCoupons() {
+  const [coupons, setCoupons] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({
+    code: '', type: 'percentage', value: '', valid_from: '', valid_until: '', max_uses: 100,
+  })
+
+  useEffect(() => { fetchCoupons() }, [])
+
+  const fetchCoupons = async () => {
+    setLoading(true)
+    const { data } = await supabase.from('coupons').select('*').order('created_at', { ascending: false })
+    setCoupons(data || [])
+    setLoading(false)
+  }
+
+  const handleCreate = async () => {
+    if (!form.code || !form.value) return
+    setSaving(true)
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    await supabase.from('coupons').insert({
+      code: form.code.toUpperCase(),
+      type: form.type,
+      value: parseFloat(form.value),
+      valid_from: form.valid_from || null,
+      valid_until: form.valid_until || null,
+      max_uses: parseInt(form.max_uses) || 100,
+      created_by: user?.id,
+    })
+
+    setSaving(false)
+    setShowForm(false)
+    setForm({ code: '', type: 'percentage', value: '', valid_from: '', valid_until: '', max_uses: 100 })
+    fetchCoupons()
+  }
+
+  const toggleActive = async (id, current) => {
+    await supabase.from('coupons').update({ is_active: !current }).eq('id', id)
+    fetchCoupons()
+  }
+
+  const updateField = (f, v) => setForm(p => ({ ...p, [f]: v }))
+
+  return (
+    <div>
+      <div className="dashboard__header">
+        <h1 className="dashboard__title">Cupones de Descuento</h1>
+        {!showForm && (
+          <button className="btn btn--accent btn--sm" onClick={() => setShowForm(true)}>
+            <Plus size={16} /> Nuevo Cupón
+          </button>
+        )}
+      </div>
+
+      {showForm && (
+        <div className="item-card glass" style={{ marginBottom: 'var(--space-6)' }}>
+          <div className="item-card__header">
+            <h3 className="item-card__title">Nuevo Cupón</h3>
+            <button className="btn btn--ghost btn--sm" onClick={() => setShowForm(false)}><X size={14} /></button>
+          </div>
+
+          <div className="form-row">
+            <div className="input-group">
+              <label>Código *</label>
+              <input className="input" placeholder="Ej: VERANO25" value={form.code} onChange={(e) => updateField('code', e.target.value.toUpperCase())} style={{ fontFamily: 'monospace', letterSpacing: '0.05em' }} />
+            </div>
+            <div className="input-group">
+              <label>Tipo</label>
+              <select className="input" value={form.type} onChange={(e) => updateField('type', e.target.value)}>
+                <option value="percentage">Porcentaje (%)</option>
+                <option value="fixed">Monto Fijo ($)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="input-group">
+              <label>Valor * {form.type === 'percentage' ? '(%)' : '($)'}</label>
+              <input className="input" type="number" min={0} placeholder={form.type === 'percentage' ? '25' : '5000'} value={form.value} onChange={(e) => updateField('value', e.target.value)} />
+            </div>
+            <div className="input-group">
+              <label>Usos máximos</label>
+              <input className="input" type="number" min={1} value={form.max_uses} onChange={(e) => updateField('max_uses', e.target.value)} />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="input-group">
+              <label><Calendar size={14} /> Válido desde</label>
+              <input className="input" type="date" value={form.valid_from} onChange={(e) => updateField('valid_from', e.target.value)} />
+            </div>
+            <div className="input-group">
+              <label><Calendar size={14} /> Válido hasta</label>
+              <input className="input" type="date" value={form.valid_until} onChange={(e) => updateField('valid_until', e.target.value)} />
+            </div>
+          </div>
+
+          <button className="btn btn--accent" onClick={handleCreate} disabled={saving} style={{ alignSelf: 'flex-end' }}>
+            {saving ? <Loader size={16} className="spin" /> : <><Save size={16} /> Crear Cupón</>}
+          </button>
+        </div>
+      )}
+
+      {loading && <div className="protected-loading"><p>Cargando...</p></div>}
+
+      {!loading && coupons.length === 0 && !showForm && (
+        <div className="dashboard__empty">
+          <div className="dashboard__empty-icon"><Tag size={48} /></div>
+          <h3>Sin cupones</h3>
+          <p>Crea tu primer cupón de descuento para atraer clientes.</p>
+          <button className="btn btn--accent" onClick={() => setShowForm(true)}>
+            <Plus size={16} /> Crear cupón
+          </button>
+        </div>
+      )}
+
+      <div className="dashboard__grid">
+        {coupons.map(c => (
+          <div key={c.id} className="item-card glass">
+            <div className="item-card__header">
+              <div>
+                <span className="coupon-card__code">{c.code}</span>
+                <div className="coupon-card__value" style={{ marginTop: '8px' }}>
+                  {c.type === 'percentage' ? (
+                    <><Percent size={18} style={{ verticalAlign: '-3px' }} />{c.value}</>
+                  ) : (
+                    <><DollarSign size={18} style={{ verticalAlign: '-3px' }} />{c.value?.toLocaleString('es-AR')}</>
+                  )}
+                </div>
+              </div>
+              <span className={`status-badge ${c.is_active ? 'status-badge--published' : 'status-badge--archived'}`}>
+                {c.is_active ? 'Activo' : 'Inactivo'}
+              </span>
+            </div>
+
+            <div className="coupon-card__usage">
+              Usos: {c.current_uses} / {c.max_uses}
+            </div>
+
+            {(c.valid_from || c.valid_until) && (
+              <div className="coupon-card__dates">
+                {c.valid_from && `Desde: ${new Date(c.valid_from).toLocaleDateString('es')}`}
+                {c.valid_from && c.valid_until && ' · '}
+                {c.valid_until && `Hasta: ${new Date(c.valid_until).toLocaleDateString('es')}`}
+              </div>
+            )}
+
+            <button className="btn btn--ghost btn--sm" onClick={() => toggleActive(c.id, c.is_active)} style={{ marginTop: 'auto' }}>
+              {c.is_active ? 'Desactivar' : 'Activar'}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}

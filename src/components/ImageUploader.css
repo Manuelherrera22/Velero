@@ -1,0 +1,102 @@
+.image-uploader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.image-uploader__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.image-uploader__item {
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.image-uploader__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-uploader__remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.image-uploader__item:hover .image-uploader__remove {
+  opacity: 1;
+}
+
+.image-uploader__badge {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--color-accent-500);
+  color: white;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* Dropzone */
+.image-uploader__dropzone {
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  color: var(--text-tertiary);
+}
+
+.image-uploader__dropzone:hover,
+.image-uploader__dropzone--active {
+  border-color: var(--color-accent-400);
+  background: rgba(0, 180, 180, 0.05);
+  color: var(--color-accent-400);
+}
+
+.image-uploader__dropzone p {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.image-uploader__dropzone p span {
+  color: var(--color-accent-400);
+  text-decoration: underline;
+}
+
+.image-uploader__dropzone small {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+  .image-uploader__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

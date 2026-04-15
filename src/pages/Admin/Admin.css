@@ -1,0 +1,40 @@
+.admin-action-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.admin-reject-input {
+  margin-top: var(--space-3);
+}
+
+.admin-reject-input .input {
+  margin-bottom: var(--space-2);
+}
+
+.coupon-card__value {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--color-accent-400);
+}
+
+.coupon-card__code {
+  font-family: monospace;
+  font-size: var(--text-sm);
+  background: rgba(0, 180, 180, 0.1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-accent-300);
+  letter-spacing: 0.05em;
+}
+
+.coupon-card__usage {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.coupon-card__dates {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
