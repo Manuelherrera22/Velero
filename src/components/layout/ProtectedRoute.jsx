@@ -12,6 +12,7 @@ import { Loader } from 'lucide-react'
 export default function ProtectedRoute({ children, requiredRole = 'viewer' }) {
   const { user, profile, loading } = useAuthStore()
 
+  // Safety: if still loading after 5s, redirect to login
   if (loading) {
     return (
       <div className="protected-loading">

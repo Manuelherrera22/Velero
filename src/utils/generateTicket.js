@@ -1,5 +1,4 @@
 import jsPDF from 'jspdf'
-import QRCode from 'qrcode'
 
 /**
  * Generate a boarding-pass style PDF ticket with QR code
@@ -19,9 +18,10 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
   const timeText = date?.start_time?.slice(0, 5) || '--:--'
   const shortId = bookingId?.slice(0, 8).toUpperCase() || 'XXXXXXXX'
 
-  // Generate QR code as data URL
+  // Generate QR code as data URL (dynamic import to avoid bundle issues)
   let qrDataUrl = null
   try {
+    const QRCode = (await import('qrcode')).default
     qrDataUrl = await QRCode.toDataURL(
       `https://velero-ar.netlify.app/checkin/${bookingId}`,
       { width: 200, margin: 1, color: { dark: '#26C6C6', light: '#0A1628' } }
@@ -119,7 +119,6 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
   doc.text(formatPrice(total), 16, 85)
 
   // ── Right panel (tear-off stub with QR) ──
-  // Dashed line separator
   doc.setDrawColor(100, 116, 139)
   doc.setLineDashPattern([2, 2], 0)
   doc.line(158, 12, 158, 88)
@@ -158,6 +157,5 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
   doc.setTextColor(148, 163, 184)
   doc.text('+54 9 11 3669-6696', 164, 88)
 
-  // Save
   doc.save(`velero-ticket-${shortId}.pdf`)
 }

@@ -20,6 +20,14 @@ const useAuthStore = create((set, get) => ({
   // Initialize auth — call once on app mount
   initialize: async () => {
     try {
+      // Safety timeout: force loading=false after 5s
+      const timeout = setTimeout(() => {
+        if (get().loading) {
+          console.warn('Auth init timeout — forcing loaded state')
+          set({ loading: false })
+        }
+      }, 5000)
+
       // Get current session
       const { data: { session }, error } = await supabase.auth.getSession()
       
@@ -32,13 +40,15 @@ const useAuthStore = create((set, get) => ({
         set({ loading: false })
       }
 
+      clearTimeout(timeout)
+
       // Listen for auth changes
       supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
+        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
           const profile = await get().fetchProfile(session.user.id)
-          set({ user: session.user, session, profile })
+          set({ user: session.user, session, profile, loading: false })
         } else if (event === 'SIGNED_OUT') {
-          set({ user: null, session: null, profile: null })
+          set({ user: null, session: null, profile: null, loading: false })
         }
       })
     } catch (error) {
