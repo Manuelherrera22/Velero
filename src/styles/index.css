@@ -336,6 +336,29 @@ ul, ol { list-style: none; }
   border-radius: var(--radius-full);
 }
 
+.btn--whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(37, 211, 102, 0.2);
+}
+
+.btn--whatsapp:hover {
+  background: linear-gradient(135deg, #2BE672, #25D366);
+  box-shadow: 0 0 30px rgba(37, 211, 102, 0.4);
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+/* Spinner */
+.spin {
+  animation: spinAnim 1s linear infinite;
+}
+
+@keyframes spinAnim {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* --- Cards --- */
 .card {
   background: var(--bg-card);

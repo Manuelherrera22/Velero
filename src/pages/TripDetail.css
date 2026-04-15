@@ -339,6 +339,10 @@
   margin-top: var(--space-3);
 }
 
+.booking-card__cta + .booking-card__cta {
+  margin-top: var(--space-3);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .trip-detail__layout {

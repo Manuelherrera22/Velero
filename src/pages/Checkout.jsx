@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Mail, Phone, User, CreditCard, Shield, CheckCircle, Loader, Tag, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, User, CreditCard, Shield, CheckCircle, Loader, Tag, AlertCircle, MessageCircle } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import useBookingStore from '../stores/bookingStore'
 import useTripStore from '../stores/tripStore'
 import './Checkout.css'
+
+const WhatsAppIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+)
+
+const WHATSAPP_NUMBER = '5491136696696'
 
 export default function Checkout() {
   const { id } = useParams()
@@ -14,7 +22,7 @@ export default function Checkout() {
   const { createBooking, validateCoupon } = useBookingStore()
   const { currentTrip, tripDates, tripAddons, fetchTrip } = useTripStore()
 
-  const [step, setStep] = useState(1) // 1: contact, 2: payment, 3: confirmation
+  const [step, setStep] = useState(1) // 1: contact, 2: confirm email, 3: payment, 4: confirmation
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [booking, setBooking] = useState(null)
@@ -23,6 +31,7 @@ export default function Checkout() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    emailConfirm: '',
     phone: '',
   })
 
@@ -48,6 +57,7 @@ export default function Checkout() {
       setFormData(prev => ({
         ...prev,
         email: user.email || prev.email,
+        emailConfirm: user.email || prev.emailConfirm,
       }))
     }
   }, [id, user])
@@ -99,7 +109,17 @@ export default function Checkout() {
       setError('Nombre y email son obligatorios.')
       return
     }
+    // Go to email confirmation step
     setStep(2)
+  }
+
+  const handleConfirmEmail = () => {
+    if (formData.email !== formData.emailConfirm) {
+      setError('Los emails no coinciden. Por favor verificá.')
+      return
+    }
+    setError(null)
+    setStep(3)
   }
 
   const handleCreateBooking = async () => {
@@ -145,7 +165,7 @@ export default function Checkout() {
         setBooking(result.data)
         // In production, here we'd redirect to Mercado Pago
         // For now, simulate payment success
-        setStep(3)
+        setStep(4)
       } else {
         setError(result.error || 'Error al crear la reserva. Intenta de nuevo.')
       }
@@ -154,6 +174,14 @@ export default function Checkout() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const buildWhatsAppUrl = () => {
+    const dateText = selectedDate
+      ? `\nFecha: ${new Date(selectedDate.date + 'T12:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })} a las ${selectedDate.start_time?.slice(0, 5)}hs`
+      : ''
+    const msg = `¡Hola! 👋 Quiero reservar la travesía *${trip?.title}* en ${trip?.location}.${dateText}\nSomos ${guests} persona${guests > 1 ? 's' : ''}.\nTotal: ${formatPrice(total)}\n\n¿Cómo sigo?`
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`
   }
 
   if (!trip) {
@@ -165,8 +193,8 @@ export default function Checkout() {
     )
   }
 
-  // ══════════ STEP 3: Confirmation ══════════
-  if (step === 3) {
+  // ══════════ STEP 4: Confirmation ══════════
+  if (step === 4) {
     return (
       <div className="checkout">
         <div className="container container--narrow">
@@ -210,9 +238,12 @@ export default function Checkout() {
               <Link to="/" className="btn btn--accent btn--lg">
                 Volver al Inicio
               </Link>
+              <a href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="btn btn--whatsapp btn--lg">
+                <WhatsAppIcon /> Contactar por WhatsApp
+              </a>
             </div>
             <p className="checkout-success__note">
-              ID de reserva: {booking?.id?.slice(0, 8)}... · ¿No recibiste el email? Revisa spam o contactanos a soporte@bluhar.com
+              ID de reserva: {booking?.id?.slice(0, 8)}... · ¿Dudas? Contactanos por WhatsApp
             </p>
           </div>
         </div>
@@ -220,7 +251,7 @@ export default function Checkout() {
     )
   }
 
-  // ══════════ STEPS 1 & 2 ══════════
+  // ══════════ STEPS 1, 2 & 3 ══════════
   return (
     <div className="checkout">
       <div className="container container--narrow">
@@ -232,17 +263,22 @@ export default function Checkout() {
         <div className="checkout-progress">
           <div className={`checkout-progress__step ${step >= 1 ? 'checkout-progress__step--active' : ''}`}>
             <span className="checkout-progress__num">1</span>
-            <span>Datos de contacto</span>
+            <span>Datos</span>
           </div>
           <div className="checkout-progress__line" />
           <div className={`checkout-progress__step ${step >= 2 ? 'checkout-progress__step--active' : ''}`}>
             <span className="checkout-progress__num">2</span>
-            <span>Pago</span>
+            <span>Verificar</span>
           </div>
           <div className="checkout-progress__line" />
           <div className={`checkout-progress__step ${step >= 3 ? 'checkout-progress__step--active' : ''}`}>
             <span className="checkout-progress__num">3</span>
-            <span>Confirmación</span>
+            <span>Pago</span>
+          </div>
+          <div className="checkout-progress__line" />
+          <div className={`checkout-progress__step ${step >= 4 ? 'checkout-progress__step--active' : ''}`}>
+            <span className="checkout-progress__num">4</span>
+            <span>Listo</span>
           </div>
         </div>
 
@@ -261,7 +297,7 @@ export default function Checkout() {
                 <p className="checkout-form__subtitle">
                   {user 
                     ? 'Confirma tus datos para esta reserva.'
-                    : 'No necesitas crear una cuenta. Solo necesitamos tus datos para enviarte la confirmación.'}
+                    : 'No necesitás crear una cuenta. Solo necesitamos tus datos para enviarte la confirmación.'}
                 </p>
 
                 <div className="input-group">
@@ -327,13 +363,75 @@ export default function Checkout() {
                 </div>
 
                 <button type="submit" className="btn btn--accent btn--lg checkout-form__submit">
-                  Continuar al pago
+                  Continuar
                 </button>
+
+                {/* WhatsApp alternative */}
+                <div className="checkout-whatsapp-alt">
+                  <span className="checkout-whatsapp-alt__divider">o</span>
+                  <a href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="btn btn--whatsapp btn--lg checkout-form__submit">
+                    <WhatsAppIcon /> Reservar por WhatsApp
+                  </a>
+                </div>
               </form>
             )}
 
-            {/* ── Step 2: Payment ── */}
+            {/* ── Step 2: Email Confirmation ── */}
             {step === 2 && (
+              <div className="animate-fade-in">
+                <h2>Verificá tu Email</h2>
+                <p className="checkout-form__subtitle">
+                  Asegurate de que tu correo sea correcto. Ahí te enviaremos los boletos de tu travesía después de confirmar el pago.
+                </p>
+
+                <div className="checkout-email-verify glass">
+                  <div className="checkout-email-verify__icon">
+                    <Mail size={32} />
+                  </div>
+                  <p className="checkout-email-verify__current">
+                    {formData.email}
+                  </p>
+                  <p className="checkout-email-verify__hint">
+                    ¿Es correcto? Confirma escribiéndolo nuevamente:
+                  </p>
+                  <div className="input-group" style={{ marginTop: 'var(--space-3)' }}>
+                    <input
+                      type="email"
+                      className="input"
+                      placeholder="Repetí tu email"
+                      value={formData.emailConfirm}
+                      onChange={(e) => setFormData(p => ({ ...p, emailConfirm: e.target.value }))}
+                      autoFocus
+                    />
+                  </div>
+                  {formData.emailConfirm && formData.email === formData.emailConfirm && (
+                    <p className="checkout-coupon__success" style={{ marginTop: 'var(--space-2)' }}>
+                      <CheckCircle size={14} style={{ verticalAlign: '-2px' }} /> ¡Perfecto, los emails coinciden!
+                    </p>
+                  )}
+                  {formData.emailConfirm && formData.email !== formData.emailConfirm && (
+                    <p className="checkout-coupon__error" style={{ marginTop: 'var(--space-2)' }}>
+                      Los emails no coinciden
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleConfirmEmail}
+                  className="btn btn--accent btn--lg checkout-form__submit"
+                  disabled={!formData.emailConfirm || formData.email !== formData.emailConfirm}
+                >
+                  Confirmar y continuar al pago
+                </button>
+
+                <button onClick={() => setStep(1)} className="btn btn--ghost checkout-form__back-btn">
+                  Volver a editar datos
+                </button>
+              </div>
+            )}
+
+            {/* ── Step 3: Payment ── */}
+            {step === 3 && (
               <div className="animate-fade-in">
                 <h2>Pago Seguro</h2>
                 <p className="checkout-form__subtitle">
@@ -373,7 +471,12 @@ export default function Checkout() {
                   )}
                 </button>
 
-                <button onClick={() => setStep(1)} className="btn btn--ghost checkout-form__back-btn">
+                {/* WhatsApp alternative on payment */}
+                <a href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="btn btn--whatsapp checkout-form__submit" style={{ marginTop: 'var(--space-2)' }}>
+                  <WhatsAppIcon /> ¿Preferís coordinar por WhatsApp?
+                </a>
+
+                <button onClick={() => setStep(2)} className="btn btn--ghost checkout-form__back-btn">
                   Volver
                 </button>
               </div>

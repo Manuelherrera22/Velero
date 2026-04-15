@@ -313,3 +313,69 @@
     font-size: var(--text-3xl);
   }
 }
+
+/* ── Email Verification Card ── */
+.checkout-email-verify {
+  text-align: center;
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-6);
+}
+
+.checkout-email-verify__icon {
+  color: var(--color-accent-400);
+  margin-bottom: var(--space-4);
+}
+
+.checkout-email-verify__current {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-accent-400);
+  word-break: break-all;
+  margin-bottom: var(--space-3);
+}
+
+.checkout-email-verify__hint {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+/* ── WhatsApp Alternative ── */
+.checkout-whatsapp-alt {
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+.checkout-whatsapp-alt__divider {
+  display: block;
+  position: relative;
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-4);
+}
+
+.checkout-whatsapp-alt__divider::before,
+.checkout-whatsapp-alt__divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 20px);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.checkout-whatsapp-alt__divider::before { left: 0; }
+.checkout-whatsapp-alt__divider::after { right: 0; }
+
+/* ── Success Actions ── */
+.checkout-success__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
