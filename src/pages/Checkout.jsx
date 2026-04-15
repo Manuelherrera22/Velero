@@ -163,8 +163,28 @@ export default function Checkout() {
 
       if (result.success) {
         setBooking(result.data)
-        // In production, here we'd redirect to Mercado Pago
-        // For now, simulate payment success
+
+        // Send confirmation email via Netlify Function (fire & forget)
+        try {
+          fetch('/api/send-ticket', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              trip: trip.title,
+              email: formData.email,
+              name: formData.name,
+              guests,
+              total,
+              currency: trip.currency || 'ARS',
+              bookingId: result.data.id,
+              date: selectedDate ? { date: selectedDate.date, start_time: selectedDate.start_time } : null,
+              booking: { location: trip.location },
+            }),
+          })
+        } catch (emailErr) {
+          console.warn('Email send failed (non-blocking):', emailErr)
+        }
+
         setStep(4)
       } else {
         setError(result.error || 'Error al crear la reserva. Intenta de nuevo.')
@@ -238,12 +258,17 @@ export default function Checkout() {
               <Link to="/" className="btn btn--accent btn--lg">
                 Volver al Inicio
               </Link>
-              <a href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="btn btn--whatsapp btn--lg">
-                <WhatsAppIcon /> Contactar por WhatsApp
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`¡Hola! 🎫 Mi código de reserva es: *${booking?.id?.slice(0, 8).toUpperCase()}*\n\nTravesía: ${trip.title}\nPersonas: ${guests}\n\n¿Podrían confirmar los detalles?`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn--whatsapp btn--lg"
+              >
+                <WhatsAppIcon /> Enviar código por WhatsApp
               </a>
             </div>
             <p className="checkout-success__note">
-              ID de reserva: {booking?.id?.slice(0, 8)}... · ¿Dudas? Contactanos por WhatsApp
+              📧 Enviamos tu boleto a <strong>{formData.email}</strong> · Código: <strong>{booking?.id?.slice(0, 8).toUpperCase()}</strong>
             </p>
           </div>
         </div>
