@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Mail, Phone, User, CreditCard, Shield, CheckCircle, Loader, Tag, AlertCircle, Download } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, User, CreditCard, Shield, CheckCircle, Loader, Tag, AlertCircle, Download, Globe, FileText, Plus, Trash2 } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import useBookingStore from '../stores/bookingStore'
 import useTripStore from '../stores/tripStore'
@@ -35,7 +35,38 @@ export default function Checkout() {
     email: '',
     emailConfirm: '',
     phone: '',
+    nationality: 'AR',
+    idType: 'dni',
+    idNumber: '',
   })
+
+  // Passengers list (for multi-guest ID collection)
+  const [passengers, setPassengers] = useState([
+    { name: '', nationality: 'AR', idType: 'dni', idNumber: '' }
+  ])
+
+  // Sync passengers count with URL guests
+  useEffect(() => {
+    setPassengers(prev => {
+      if (prev.length === guests) return prev
+      if (prev.length < guests) {
+        return [...prev, ...Array(guests - prev.length).fill(null).map(() => ({ name: '', nationality: 'AR', idType: 'dni', idNumber: '' }))]
+      }
+      return prev.slice(0, guests)
+    })
+  }, [guests])
+
+  const updatePassenger = (idx, field, value) => {
+    setPassengers(prev => prev.map((p, i) => {
+      if (i !== idx) return p
+      const updated = { ...p, [field]: value }
+      // Auto-switch ID type based on nationality
+      if (field === 'nationality') {
+        updated.idType = value === 'AR' ? 'dni' : 'passport'
+      }
+      return updated
+    }))
+  }
 
   // Coupon
   const [couponCode, setCouponCode] = useState('')
@@ -113,6 +144,22 @@ export default function Checkout() {
       setError('Nombre y email son obligatorios.')
       return
     }
+    // Validate all passengers have IDs
+    for (let i = 0; i < passengers.length; i++) {
+      const p = passengers[i]
+      if (!p.name.trim()) {
+        setError(`Completá el nombre del pasajero ${i + 1}.`)
+        return
+      }
+      if (!p.idNumber.trim()) {
+        setError(`Completá el ${p.idType === 'dni' ? 'DNI' : 'Pasaporte'} del pasajero ${i + 1} (${p.name || 'sin nombre'}).`)
+        return
+      }
+    }
+    // Auto-fill first passenger with contact data if empty
+    if (!passengers[0].name) {
+      updatePassenger(0, 'name', formData.name)
+    }
     // Go to email confirmation step
     setStep(2)
   }
@@ -159,6 +206,12 @@ export default function Checkout() {
           selected_addons: addonsList,
           currency: trip?.currency || 'ARS',
           contact: { name: formData.name, email: formData.email, phone: formData.phone },
+          passengers: passengers.map(p => ({
+            name: p.name,
+            nationality: p.nationality,
+            id_type: p.idType,
+            id_number: p.idNumber,
+          })),
         },
         addons: addonsList,
       }
@@ -402,6 +455,78 @@ export default function Checkout() {
                     value={formData.phone}
                     onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
                   />
+                </div>
+
+                {/* ── Passengers ID Section ── */}
+                <div className="checkout-passengers">
+                  <h3><FileText size={16} /> Identificación de pasajeros</h3>
+                  <p className="checkout-passengers__hint">
+                    Por regulación marítima y seguro obligatorio, cada pasajero debe presentar identificación.
+                  </p>
+
+                  {passengers.map((pax, idx) => (
+                    <div key={idx} className="checkout-passenger-card glass">
+                      <div className="checkout-passenger-card__header">
+                        <span>Pasajero {idx + 1} {idx === 0 ? '(titular)' : ''}</span>
+                      </div>
+
+                      <div className="checkout-passenger-card__fields">
+                        <div className="input-group">
+                          <label><User size={14} /> Nombre completo *</label>
+                          <input
+                            type="text"
+                            className="input"
+                            placeholder={idx === 0 ? formData.name || 'Nombre del pasajero' : 'Nombre del pasajero'}
+                            value={pax.name}
+                            onChange={(e) => updatePassenger(idx, 'name', e.target.value)}
+                            required
+                          />
+                        </div>
+
+                        <div className="checkout-passenger-card__row">
+                          <div className="input-group" style={{ flex: 1 }}>
+                            <label><Globe size={14} /> Nacionalidad *</label>
+                            <select
+                              className="input"
+                              value={pax.nationality}
+                              onChange={(e) => updatePassenger(idx, 'nationality', e.target.value)}
+                            >
+                              <option value="AR">🇦🇷 Argentina</option>
+                              <option value="BR">🇧🇷 Brasil</option>
+                              <option value="CL">🇨🇱 Chile</option>
+                              <option value="UY">🇺🇾 Uruguay</option>
+                              <option value="PY">🇵🇾 Paraguay</option>
+                              <option value="BO">🇧🇴 Bolivia</option>
+                              <option value="PE">🇵🇪 Perú</option>
+                              <option value="CO">🇨🇴 Colombia</option>
+                              <option value="EC">🇪🇨 Ecuador</option>
+                              <option value="VE">🇻🇪 Venezuela</option>
+                              <option value="MX">🇲🇽 México</option>
+                              <option value="US">🇺🇸 Estados Unidos</option>
+                              <option value="ES">🇪🇸 España</option>
+                              <option value="IT">🇮🇹 Italia</option>
+                              <option value="FR">🇫🇷 Francia</option>
+                              <option value="DE">🇩🇪 Alemania</option>
+                              <option value="GB">🇬🇧 Reino Unido</option>
+                              <option value="OTHER">🌍 Otro</option>
+                            </select>
+                          </div>
+
+                          <div className="input-group" style={{ flex: 1 }}>
+                            <label><FileText size={14} /> {pax.idType === 'dni' ? 'DNI *' : 'N° Pasaporte *'}</label>
+                            <input
+                              type="text"
+                              className="input"
+                              placeholder={pax.idType === 'dni' ? 'Ej: 35.123.456' : 'Ej: AB1234567'}
+                              value={pax.idNumber}
+                              onChange={(e) => updatePassenger(idx, 'idNumber', e.target.value)}
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Coupon */}

@@ -299,6 +299,62 @@
   color: var(--text-tertiary);
 }
 
+/* ── Passengers ID Section ── */
+.checkout-passengers {
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.checkout-passengers h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.checkout-passengers__hint {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-5);
+  line-height: var(--leading-relaxed);
+}
+
+.checkout-passenger-card {
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.checkout-passenger-card__header {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-accent-400);
+  margin-bottom: var(--space-4);
+  letter-spacing: 0.02em;
+}
+
+.checkout-passenger-card__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.checkout-passenger-card__row {
+  display: flex;
+  gap: var(--space-3);
+}
+
+@media (max-width: 480px) {
+  .checkout-passenger-card__row {
+    flex-direction: column;
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .checkout-layout {
