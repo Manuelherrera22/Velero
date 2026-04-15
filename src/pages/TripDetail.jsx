@@ -21,6 +21,7 @@ export default function TripDetail() {
   const [guests, setGuests] = useState(2)
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedAddons, setSelectedAddons] = useState({})
+  const [bookingMode, setBookingMode] = useState('shared') // 'shared' | 'private'
 
   useEffect(() => {
     fetchTrip(id)
@@ -44,7 +45,10 @@ export default function TripDetail() {
   }
 
   const addonsTotal = tripAddons.reduce((sum, a) => sum + (selectedAddons[a.id] || 0) * a.price, 0)
-  const subtotal = (trip.price_per_person || 0) * guests
+  
+  // Dynamic Pricing based on Mode
+  const basePrice = bookingMode === 'private' ? trip.full_boat_price : trip.price_per_person
+  const subtotal = bookingMode === 'private' ? basePrice : (basePrice || 0) * guests
   const total = subtotal + addonsTotal
 
   const formatPrice = (p, cur) => {
@@ -64,7 +68,8 @@ export default function TripDetail() {
     const dateText = selectedDateObj
       ? `\nFecha: ${new Date(selectedDateObj.date + 'T12:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })} a las ${selectedDateObj.start_time?.slice(0, 5)}hs`
       : ''
-    const msg = `¡Hola! 👋 Me interesa la travesía *${trip.title}* en ${trip.location}.${dateText}\nSomos ${guests} persona${guests > 1 ? 's' : ''}.\n\n¿Podrían darme más información?`
+    const modeText = bookingMode === 'private' ? ' (Navío exclusivo)' : ' (Lugares compartidos)'
+    const msg = `¡Hola! 👋 Me interesa la travesía *${trip.title}* en ${trip.location}${modeText}.${dateText}\nSomos ${guests} persona${guests > 1 ? 's' : ''}.\n\n¿Podrían darme más información?`
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`
   }
 
@@ -97,8 +102,10 @@ export default function TripDetail() {
             <div className="trip-detail__meta">
               <span><MapPin size={16} /> {trip.location}</span>
               <span><Users size={16} /> Hasta {trip.capacity} personas</span>
+              {trip.boat?.cabins && <span>🛏 {trip.boat.cabins} Camarotes</span>}
+              {trip.boat?.bathrooms && <span>🚿 {trip.boat.bathrooms} Baños</span>}
             </div>
-
+            
             <div className="trip-detail__rating-bar">
               <div className="card__rating">
                 <Star size={16} fill="currentColor" /> {trip.avgRating || '—'}
@@ -141,15 +148,49 @@ export default function TripDetail() {
                 </div>
               </div>
             )}
+            
+            {(trip.cancellation_policy || trip.pension_type) && (
+              <div className="trip-detail__section" style={{ background: 'var(--color-bg-secondary)', padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)' }}>
+                <h2>Políticas y Reglas</h2>
+                <ul style={{ paddingLeft: '20px', color: 'var(--text-secondary)', marginTop: '10px' }}>
+                  {trip.pension_type && <li><strong>Pensión:</strong> {trip.pension_type}</li>}
+                  {trip.cancellation_policy && <li><strong>Cancelación:</strong> Política {trip.cancellation_policy}</li>}
+                  {trip.min_passengers && <li><strong>Pasajeros mínimos:</strong> Requiere {trip.min_passengers} pasajeros para zarpar.</li>}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Right Column — Booking Card */}
           <div className="trip-detail__sidebar">
             <div className="booking-card glass">
-              <div className="booking-card__price">
-                {formatPrice(trip.price_per_person, trip.currency)}
-                <span>/persona</span>
+              
+              {/* Dynamic Price Header */}
+              <div className="booking-card__price mb-4">
+                {formatPrice(basePrice, trip.currency)}
+                <span className="text-sm">
+                  {bookingMode === 'private' ? ' / navío' : ' / persona'}
+                </span>
               </div>
+
+              {/* Mode Selector */}
+              {trip.allow_full_boat && (
+                <div className="flex bg-secondary/20 p-1 rounded-xl mb-6">
+                  <button 
+                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${bookingMode === 'shared' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                    onClick={() => setBookingMode('shared')}
+                  >
+                    Compartido
+                  </button>
+                  <button 
+                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${bookingMode === 'private' ? 'bg-primary text-primary-content shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                    onClick={() => setBookingMode('private')}
+                  >
+                    Navío Exclusivo
+                  </button>
+                </div>
+              )}
+
 
               {/* Date Selection */}
               <div className="booking-card__section">
@@ -183,11 +224,11 @@ export default function TripDetail() {
                   <Users size={16} /> Personas
                 </label>
                 <div className="booking-card__counter">
-                  <button className="booking-card__counter-btn" onClick={() => setGuests(Math.max(1, guests - 1))}>
+                  <button className="booking-card__counter-btn" disabled={bookingMode === 'private'} onClick={() => setGuests(Math.max(1, guests - 1))}>
                     <Minus size={16} />
                   </button>
-                  <span className="booking-card__counter-value">{guests}</span>
-                  <button className="booking-card__counter-btn" onClick={() => setGuests(Math.min(trip.capacity, guests + 1))}>
+                  <span className="booking-card__counter-value">{bookingMode === 'private' ? `Hasta ${trip.capacity}` : guests}</span>
+                  <button className="booking-card__counter-btn" disabled={bookingMode === 'private'} onClick={() => setGuests(Math.min(trip.capacity, guests + 1))}>
                     <Plus size={16} />
                   </button>
                 </div>
@@ -216,7 +257,7 @@ export default function TripDetail() {
               {/* Summary */}
               <div className="booking-card__summary">
                 <div className="booking-card__line">
-                  <span>{formatPrice(trip.price_per_person, trip.currency)} × {guests}</span>
+                  <span>{formatPrice(basePrice, trip.currency)} × {bookingMode === 'private' ? '1 navío' : guests}</span>
                   <span>{formatPrice(subtotal, trip.currency)}</span>
                 </div>
                 {addonsTotal > 0 && (
@@ -233,7 +274,7 @@ export default function TripDetail() {
 
               {/* CTA Buttons */}
               <Link
-                to={`/checkout/${trip.id}?date=${selectedDate}&guests=${guests}&addons=${JSON.stringify(selectedAddons)}&total=${total}`}
+                to={`/checkout/${trip.id}?date=${selectedDate}&guests=${guests}&addons=${JSON.stringify(selectedAddons)}&total=${total}&mode=${bookingMode}`}
                 className={`btn btn--accent btn--lg booking-card__cta ${!selectedDate ? 'booking-card__cta--disabled' : ''}`}
               >
                 Reservar ahora

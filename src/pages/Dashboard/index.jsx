@@ -1,7 +1,7 @@
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import { Sailboat, Ship, CalendarCheck, BarChart3, Plus } from 'lucide-react'
 import MyTrips from './MyTrips'
-import TripEditor from './TripEditor'
+import TripWizard from './TripWizard/TripWizard'
 import MyBoats from './MyBoats'
 import Bookings from './Bookings'
 import './Dashboard.css'
@@ -29,13 +29,12 @@ export default function Dashboard() {
             </nav>
           </aside>
 
-          {/* Content */}
           <div className="dashboard__content">
             <Routes>
               <Route index element={<Navigate to="travesias" replace />} />
               <Route path="travesias" element={<MyTrips />} />
-              <Route path="travesias/nueva" element={<TripEditor />} />
-              <Route path="travesias/:tripId/editar" element={<TripEditor />} />
+              <Route path="travesias/nueva" element={<TripWizard />} />
+              <Route path="travesias/:tripId/editar" element={<TripWizard />} />
               <Route path="embarcaciones" element={<MyBoats />} />
               <Route path="reservas" element={<Bookings />} />
             </Routes>
