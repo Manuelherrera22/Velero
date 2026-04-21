@@ -49,7 +49,7 @@ const initialData = {
 
 export const useTripWizardStore = create((set, get) => ({
   currentStep: 1,
-  totalSteps: 10,
+  totalSteps: 8,
   formData: { ...initialData },
 
   // Navigation

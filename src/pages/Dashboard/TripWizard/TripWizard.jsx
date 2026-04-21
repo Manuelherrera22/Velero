@@ -21,11 +21,9 @@ const STEPS_CONFIG = [
   { id: 3, label: 'Itinerario' },
   { id: 4, label: 'Fotos' },
   { id: 5, label: 'Servicios' },
-  { id: 6, label: 'Etiquetas' },
-  { id: 7, label: 'Políticas' },
-  { id: 8, label: 'Precios' },
-  { id: 9, label: 'Fechas' },
-  { id: 10, label: 'Finalizar' }
+  { id: 6, label: 'Precios' },
+  { id: 7, label: 'Fechas' },
+  { id: 8, label: 'Finalizar' }
 ]
 
 const TripWizard = () => {
@@ -44,11 +42,9 @@ const TripWizard = () => {
       case 3: return <Step3Itinerary />
       case 4: return <Step4Photos />
       case 5: return <Step5Services />
-      case 6: return <div className="text-center p-20 text-muted-foreground"><h3 className="text-2xl font-bold mb-2">Paso 6: Etiquetas</h3><p>Funcionalidad en desarrollo...</p></div>
-      case 7: return <div className="text-center p-20 text-muted-foreground"><h3 className="text-2xl font-bold mb-2">Paso 7: Políticas extra</h3><p>Funcionalidad en desarrollo...</p></div>
-      case 8: return <Step8Pricing />
-      case 9: return <Step9Dates />
-      case 10: return <Step10Finalize />
+      case 6: return <Step8Pricing />
+      case 7: return <Step9Dates />
+      case 8: return <Step10Finalize />
       default:
         return <div>Paso {currentStep} en construcción...</div>
     }
