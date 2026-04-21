@@ -25,14 +25,26 @@ export default function TripDetail() {
 
   useEffect(() => {
     fetchTrip(id)
-    return () => clearCurrentTrip()
   }, [id])
 
-  if (loading || !trip) {
+  const isWrongTrip = trip && trip.id !== id;
+
+  if (loading && (!trip || isWrongTrip)) {
     return (
       <div className="protected-loading">
         <Loader size={32} className="spin" />
         <p>Cargando travesía...</p>
+      </div>
+    )
+  }
+
+  // If loading finished but there's no trip (error or not found)
+  if (!loading && (!trip || isWrongTrip)) {
+    return (
+      <div className="protected-loading">
+        <Loader size={32} style={{ opacity: 0 }} />
+        <p>No se pudo cargar la travesía. Por favor, refresca la página.</p>
+        <Link to="/explorar" className="btn btn--accent mt-4">Volver a Explorar</Link>
       </div>
     )
   }

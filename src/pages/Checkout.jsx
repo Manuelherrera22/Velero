@@ -21,7 +21,7 @@ export default function Checkout() {
   const navigate = useNavigate()
   const { user, profile } = useAuthStore()
   const { createBooking, validateCoupon } = useBookingStore()
-  const { currentTrip, tripDates, tripAddons, fetchTrip } = useTripStore()
+  const { currentTrip, tripDates, tripAddons, fetchTrip, loading: tripLoading, error: tripError } = useTripStore()
 
   const [step, setStep] = useState(1) // 1: contact, 2: confirm email, 3: payment, 4: confirmation
   const [loading, setLoading] = useState(false)
@@ -277,11 +277,23 @@ export default function Checkout() {
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`
   }
 
-  if (!trip) {
+  const isWrongTrip = trip && trip.id !== id;
+
+  if (tripLoading && (!trip || isWrongTrip)) {
     return (
       <div className="protected-loading">
         <Loader size={32} className="spin" />
-        <p>Cargando...</p>
+        <p>Cargando información de reserva...</p>
+      </div>
+    )
+  }
+
+  if (!tripLoading && (!trip || isWrongTrip)) {
+    return (
+      <div className="protected-loading">
+        <Loader size={32} style={{ opacity: 0 }} />
+        <p>No se pudo cargar la travesía. Por favor, refresca la página.</p>
+        <Link to="/explorar" className="btn btn--accent mt-4">Explorar travesías</Link>
       </div>
     )
   }

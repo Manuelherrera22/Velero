@@ -136,6 +136,7 @@ const useTripStore = create((set, get) => ({
 
       return { trip: { ...trip, avgRating, reviewCount: reviews?.length || 0 }, dates, addons, reviews }
     } catch (error) {
+      console.error('Error en fetchTrip:', error)
       set({ error: error.message, loading: false })
       return null
     }
