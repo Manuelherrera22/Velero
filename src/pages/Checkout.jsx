@@ -43,6 +43,7 @@ export default function Checkout() {
   const dateId = searchParams.get('date')
   const guests = parseInt(searchParams.get('guests')) || 2
   const selectedAddonsParam = searchParams.get('addons')
+  const mode = searchParams.get('mode') || 'shared'
   let selectedAddons = {}
   try { selectedAddons = JSON.parse(selectedAddonsParam || '{}') } catch {}
 
@@ -102,8 +103,11 @@ export default function Checkout() {
   const selectedDate = tripDates.find(d => d.id === dateId)
 
   // Calculate totals
-  const pricePerPerson = trip?.price_per_person || 0
-  const subtotal = pricePerPerson * guests
+  const basePriceOriginal = mode === 'private' ? trip?.full_boat_price : trip?.price_per_person
+  const discountMultiplier = trip?.discount_percentage ? (1 - trip.discount_percentage / 100) : 1
+  const pricePerPerson = (basePriceOriginal || 0) * discountMultiplier
+
+  const subtotal = mode === 'private' ? pricePerPerson : pricePerPerson * guests
   const addonsTotal = tripAddons.reduce((sum, a) => sum + (selectedAddons[a.id] || 0) * a.price, 0)
   const grossTotal = subtotal + addonsTotal
 
@@ -114,6 +118,13 @@ export default function Checkout() {
     : 0
 
   const total = grossTotal - discount
+
+  // Advance Payment calculations (Anticipo)
+  const isAdvancePayment = trip?.requires_full_payment === false;
+  const kailuCommission = 0.20; // 20% base
+  const serviceFeePercent = 0.03; // 3%
+  const advanceAmount = isAdvancePayment ? Math.round(((total * kailuCommission) + (total * serviceFeePercent)) * 100) / 100 : Math.round((total + total * serviceFeePercent) * 100) / 100;
+  const remainingAmount = isAdvancePayment ? Math.round((total - (total * kailuCommission)) * 100) / 100 : 0;
 
   const formatPrice = (p) => {
     if (!trip) return '$0'
@@ -360,7 +371,7 @@ export default function Checkout() {
                 <Download size={18} /> Descargar Boleto PDF
               </button>
               <a
-                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`¡Hola! 🎫 Mi código de reserva es: *${booking?.id?.slice(0, 8).toUpperCase()}*\n\nTravesía: ${trip.title}\nPersonas: ${guests}\n\n¿Podrían confirmar los detalles?`)}`}
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`¡Hola! 🎫 Mi código de reserva es: *${booking?.id?.slice(0, 8).toUpperCase()}*\n\nTravesía: ${trip.title}\nLugar de Salida: ${trip.location}\nFecha: ${selectedDate ? new Date(selectedDate.date + 'T12:00:00').toLocaleDateString('es') : 'A coordinar'}\nHora: ${selectedDate ? selectedDate.start_time?.slice(0, 5) + 'hs' : '-'}\nPersonas: ${guests}\n\n¿Podrían confirmar los detalles?`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn--whatsapp btn--lg"
@@ -674,16 +685,11 @@ export default function Checkout() {
                   {loading ? (
                     <><Loader size={18} className="spin" /> Procesando...</>
                   ) : (
-                    `Pagar ${formatPrice(total)} con Mercado Pago`
+                    `Pagar ${formatPrice(advanceAmount)} con Mercado Pago`
                   )}
                 </button>
 
-                {/* WhatsApp alternative on payment */}
-                <a href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="btn btn--whatsapp checkout-form__submit" style={{ marginTop: 'var(--space-2)' }}>
-                  <WhatsAppIcon /> ¿Preferís coordinar por WhatsApp?
-                </a>
-
-                <button onClick={() => setStep(2)} className="btn btn--ghost checkout-form__back-btn">
+                <button onClick={() => setStep(2)} className="btn btn--ghost checkout-form__back-btn" style={{ marginTop: 'var(--space-4)' }}>
                   Volver
                 </button>
               </div>
@@ -702,7 +708,7 @@ export default function Checkout() {
             </div>
             <div className="checkout-summary__lines">
               <div className="checkout-summary__line">
-                <span>{formatPrice(pricePerPerson)} × {guests} persona{guests > 1 ? 's' : ''}</span>
+                <span>{formatPrice(pricePerPerson)} × {mode === 'private' ? '1 navío' : `${guests} persona${guests > 1 ? 's' : ''}`}</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
               {tripAddons.filter(a => selectedAddons[a.id] > 0).map(a => (
@@ -718,9 +724,25 @@ export default function Checkout() {
                 </div>
               )}
             </div>
-            <div className="checkout-summary__total">
-              <span>Total</span>
-              <strong>{formatPrice(total)}</strong>
+            <div className="checkout-summary__total" style={{ flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 'var(--text-lg)' }}>
+                <span>Valor Total a Pagar</span>
+                <strong>{formatPrice(total)}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '12px' }}>
+                <span style={{ fontSize: 'var(--text-md)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {isAdvancePayment ? '🔥 Anticipo hoy + 3% Tasa Servicio' : 'Pago Total hoy + 3% Tasa Servicio'}
+                </span>
+                <strong style={{ fontSize: 'var(--text-xl)', color: 'var(--accent-color, var(--color-primary))' }}>
+                  {formatPrice(advanceAmount)}
+                </strong>
+              </div>
+              {isAdvancePayment && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '4px', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
+                  <span>A abonar en el puerto</span>
+                  <strong>{formatPrice(remainingAmount)}</strong>
+                </div>
+              )}
             </div>
           </div>
         </div>

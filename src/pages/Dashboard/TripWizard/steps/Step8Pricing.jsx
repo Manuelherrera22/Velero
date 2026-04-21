@@ -84,6 +84,35 @@ const Step8Pricing = () => {
           </div>
         </div>
 
+        {/* Descuentos Promocionales */}
+        <div className="space-y-4 pt-6 border-t border-border/50">
+          <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase block">
+            Descuento Promocional
+          </label>
+          <p className="text-sm text-muted-foreground mb-4">¿Querés ofrecer un porcentaje de descuento? La tarifa base aparecerá tachada para resaltar la oportunidad.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3 relative">
+              <label className="flex items-center gap-2 text-sm font-bold tracking-tight text-foreground/80 uppercase">
+                Porcentaje de descuento
+                <div className="tooltip" data-tip="Se aplicará este descuento sobre el precio base.">
+                  <Info className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">%</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  className="input input-bordered w-full h-14 pl-10 text-lg font-bold"
+                  value={formData.discount_percentage || ''}
+                  onChange={(e) => updateFormData({ discount_percentage: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Límites de Pasajeros */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-border/50">
           <div className="space-y-3">
@@ -196,12 +225,15 @@ const Step8Pricing = () => {
               />
               <span className="font-semibold select-none flex items-center gap-2">
                 Reserva con Anticipo (Seña)
-                <div className="tooltip" data-tip="Cobraste un anticipo del 30% online, y el resto se arregla en persona.">
+                <div className="tooltip" data-tip="El cliente paga online el anticipo (comisión Kailu + 3% servicio), y el saldo lo cubre a bordo.">
                   <Info className="w-4 h-4 text-muted-foreground/60" />
                 </div>
               </span>
             </label>
           </div>
+          <p className="text-xs text-muted-foreground mt-4">
+            Nota: Todos los cobros online incluyen una tasa de servicio del 3% procesada por la plataforma.
+          </p>
         </div>
 
       </div>

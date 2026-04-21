@@ -91,8 +91,14 @@ const useAuthStore = create((set, get) => ({
       if (error) throw error
       return { success: true }
     } catch (error) {
-      set({ error: error.message })
-      return { success: false, error: error.message }
+      let msg = error.message
+      if (msg.includes('Error sending confirmation email') || msg.includes('rate limit')) {
+        msg = 'No pudimos enviar el correo (límite alcanzado o proveedor satuturado). Por favor intenta más tarde o usa otro método.'
+      } else if (msg.includes('Invalid email')) {
+        msg = 'El formato del correo electrónico no es válido.'
+      }
+      set({ error: msg })
+      return { success: false, error: msg }
     }
   },
 
@@ -104,8 +110,12 @@ const useAuthStore = create((set, get) => ({
       if (error) throw error
       return { success: true }
     } catch (error) {
-      set({ error: error.message })
-      return { success: false, error: error.message }
+      let msg = error.message
+      if (msg.includes('rate limit') || msg.includes('sending sms')) {
+        msg = 'Límite de SMS excedido. Intenta más tarde.'
+      }
+      set({ error: msg })
+      return { success: false, error: msg }
     }
   },
 

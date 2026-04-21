@@ -110,6 +110,73 @@ const Step1Details = () => {
           </div>
         </div>
 
+        {/* Tags */}
+        <div className="space-y-4 pt-4 border-t border-border/50">
+          <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase block">
+            Categorías y Etiquetas
+          </label>
+          <p className="text-sm text-muted-foreground mb-2">Seleccioná los tags que describen tu travesía o escribí los tuyos presionando Enter.</p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].map(tag => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => {
+                  const currentTags = formData.tags || [];
+                  updateFormData({ 
+                    tags: currentTags.includes(tag) 
+                      ? currentTags.filter(t => t !== tag) 
+                      : [...currentTags, tag] 
+                  })
+                }}
+                className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
+                  (formData.tags || []).includes(tag)
+                    ? 'bg-primary text-primary-content border-primary'
+                    : 'bg-secondary/20 border-border/50 text-foreground/80 hover:border-primary/50'
+                } border`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Escribir nuevo tag y presionar Enter..."
+              className="input input-bordered w-full"
+              onKeyDown={(e) => {
+                const currentTags = formData.tags || [];
+                if (e.key === 'Enter' && e.target.value.trim() !== '') {
+                  e.preventDefault();
+                  const newTag = e.target.value.trim().charAt(0).toUpperCase() + e.target.value.trim().slice(1);
+                  if (!currentTags.includes(newTag)) {
+                    updateFormData({ tags: [...currentTags, newTag] });
+                  }
+                  e.target.value = '';
+                }
+              }}
+            />
+          </div>
+          
+          {/* Custom Tags rendering */}
+          {formData.tags?.filter(t => !['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].includes(t)).length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {formData.tags.filter(t => !['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].includes(t)).map(tag => (
+                <span key={tag} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-full flex items-center border border-border">
+                  {tag}
+                  <button 
+                    type="button" 
+                    className="ml-2 text-muted-foreground hover:text-foreground"
+                    onClick={() => updateFormData({ tags: formData.tags.filter(t => t !== tag) })}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   )

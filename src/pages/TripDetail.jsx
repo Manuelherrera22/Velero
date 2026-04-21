@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { MapPin, Clock, Users, Star, Anchor, ArrowLeft, CalendarDays, Plus, Minus, Shield, ChevronRight, Compass, Loader, MessageCircle } from 'lucide-react'
+import { MapPin, Clock, Users, Star, Anchor, ArrowLeft, CalendarDays, Plus, Minus, Shield, ChevronRight, ChevronLeft, Compass, Loader, MessageCircle, Image } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import useTripStore from '../stores/tripStore'
 import './TripDetail.css'
@@ -22,6 +22,7 @@ export default function TripDetail() {
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedAddons, setSelectedAddons] = useState({})
   const [bookingMode, setBookingMode] = useState('shared') // 'shared' | 'private'
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   useEffect(() => {
     fetchTrip(id)
@@ -59,7 +60,10 @@ export default function TripDetail() {
   const addonsTotal = tripAddons.reduce((sum, a) => sum + (selectedAddons[a.id] || 0) * a.price, 0)
   
   // Dynamic Pricing based on Mode
-  const basePrice = bookingMode === 'private' ? trip.full_boat_price : trip.price_per_person
+  const basePriceOriginal = bookingMode === 'private' ? trip.full_boat_price : trip.price_per_person
+  const discountMultiplier = trip.discount_percentage ? (1 - trip.discount_percentage / 100) : 1
+  const basePrice = basePriceOriginal * discountMultiplier
+
   const subtotal = bookingMode === 'private' ? basePrice : (basePrice || 0) * guests
   const total = subtotal + addonsTotal
 
@@ -70,8 +74,16 @@ export default function TripDetail() {
   }
 
   const getImageUrl = () => {
-    if (trip.images?.length > 0) return trip.images[0]
+    if (trip.images?.length > 0) return trip.images[currentImageIndex]
     return null
+  }
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % trip.images.length)
+  }
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + trip.images.length) % trip.images.length)
   }
 
   const selectedDateObj = tripDates.find(d => d.id === selectedDate)
@@ -95,11 +107,28 @@ export default function TripDetail() {
         <div className="trip-detail__layout">
           {/* Left Column — Info */}
           <div className="trip-detail__info">
-            {/* Image */}
+            {/* Image Carousel */}
             {getImageUrl() ? (
-              <img src={getImageUrl()} alt={trip.title} style={{ width: '100%', borderRadius: 'var(--radius-xl)', marginBottom: 'var(--space-6)', aspectRatio: '16/9', objectFit: 'cover' }} />
+              <div className="relative group mb-6 overflow-hidden" style={{ borderRadius: 'var(--radius-xl)', aspectRatio: '16/9' }}>
+                <img src={getImageUrl()} alt={trip.title} className="w-full h-full object-cover transition-opacity duration-300" />
+                {trip.images?.length > 1 && (
+                  <>
+                    <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
+                      <ChevronLeft size={24} />
+                    </button>
+                    <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
+                      <ChevronRight size={24} />
+                    </button>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 p-2 rounded-full bg-black/20 backdrop-blur-md">
+                      {trip.images.map((_, idx) => (
+                        <div key={idx} className={`w-2 h-2 rounded-full transition-all ${idx === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50'}`} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             ) : (
-              <div className="trip-card__image-placeholder" style={{ borderRadius: 'var(--radius-xl)', marginBottom: 'var(--space-6)', height: '300px' }}>
+              <div className="trip-card__image-placeholder" style={{ borderRadius: 'var(--radius-xl)', marginBottom: 'var(--space-6)', aspectRatio: '16/9' }}>
                 <Compass size={60} />
                 <span>{trip.location}</span>
               </div>
@@ -120,8 +149,13 @@ export default function TripDetail() {
             
             <div className="trip-detail__rating-bar">
               <div className="card__rating">
-                <Star size={16} fill="currentColor" /> {trip.avgRating || '—'}
-                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>({trip.reviewCount} reseñas)</span>
+                <Star size={16} fill={trip.reviewCount > 0 ? "currentColor" : "none"} color={trip.reviewCount > 0 ? "currentColor" : "var(--text-tertiary)"} />
+                <span style={{ fontWeight: 'bold' }}>
+                  {trip.reviewCount > 0 ? trip.avgRating : 'Nuevo'}
+                </span>
+                <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
+                  ({trip.reviewCount === 1 ? '1 reseña' : `${trip.reviewCount || 0} reseñas`})
+                </span>
               </div>
             </div>
 
@@ -178,11 +212,23 @@ export default function TripDetail() {
             <div className="booking-card glass">
               
               {/* Dynamic Price Header */}
-              <div className="booking-card__price mb-4">
-                {formatPrice(basePrice, trip.currency)}
-                <span className="text-sm">
-                  {bookingMode === 'private' ? ' / navío' : ' / persona'}
-                </span>
+              <div className="booking-card__price mb-4 flex flex-col">
+                {trip.discount_percentage > 0 && (
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-muted-foreground line-through text-lg font-normal">
+                      {formatPrice(basePriceOriginal, trip.currency)}
+                    </span>
+                    <span className="badge badge-primary bg-primary/10 text-primary border-none text-xs font-bold px-2 py-1">
+                      -{trip.discount_percentage}% dto
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-baseline gap-1">
+                  {formatPrice(basePrice, trip.currency)}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {bookingMode === 'private' ? ' / navío' : ' / persona'}
+                  </span>
+                </div>
               </div>
 
               {/* Mode Selector */}
@@ -221,7 +267,7 @@ export default function TripDetail() {
                           {new Date(d.date + 'T12:00:00').toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' })}
                         </span>
                         <span className="booking-card__date-time">{d.start_time?.slice(0, 5)}hs</span>
-                        <span className="booking-card__date-spots">{d.available_spots} lugares</span>
+                        <span className="booking-card__date-spots">{d.available_spots} disponibles</span>
                       </button>
                     ))}
                   </div>

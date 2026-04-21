@@ -37,6 +37,7 @@ const initialData = {
   price_per_person: 0,
   allow_full_boat: false,
   full_boat_price: 0,
+  discount_percentage: 0,
   min_passengers: 1,
   max_passengers: 6,
   allowed_payment_methods: ['PayPal'],
