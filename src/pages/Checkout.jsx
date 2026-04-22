@@ -483,7 +483,9 @@ export default function Checkout() {
                     onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
                     required
                   />
-                  <span className="text-xs text-muted-foreground mt-1">Necesario para contactarte ante cambios climáticos o de fuerza mayor.</span>
+                  <p className="checkout-form__subtitle" style={{ marginTop: '8px', marginBottom: 0 }}>
+                    Necesario para contactarte ante cambios climáticos o de fuerza mayor.
+                  </p>
                 </div>
 
                 {/* ── Passengers ID Section ── */}
@@ -721,21 +723,27 @@ export default function Checkout() {
               )}
             </div>
             <div className="checkout-summary__total" style={{ flexDirection: 'column', gap: '4px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 'var(--text-lg)' }}>
-                <span>Valor Total a Pagar</span>
-                <strong>{formatPrice(total)}</strong>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
+                <span>Valor de la experiencia</span>
+                <span>{formatPrice(total)}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '12px' }}>
-                <span style={{ fontSize: 'var(--text-md)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  {isAdvancePayment ? '🔥 Anticipo hoy + 3% Tasa Servicio' : 'Pago Total hoy + 3% Tasa Servicio'}
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 'var(--text-md)', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                <span>Tasa de servicio (3%)</span>
+                <span>{formatPrice(total * 0.03)}</span>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '12px', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
+                <span style={{ fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
+                  {isAdvancePayment ? 'Cobro online (Anticipo + Tasa)' : 'Total a pagar hoy'}
                 </span>
                 <strong style={{ fontSize: 'var(--text-xl)', color: 'var(--accent-color, var(--color-primary))' }}>
                   {formatPrice(advanceAmount)}
                 </strong>
               </div>
+              
               {isAdvancePayment && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '4px', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
-                  <span>A abonar en el puerto</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '8px', fontSize: 'var(--text-md)', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)', padding: '8px', borderRadius: '8px' }}>
+                  <span>Saldo a abonar en puerto</span>
                   <strong>{formatPrice(remainingAmount)}</strong>
                 </div>
               )}
