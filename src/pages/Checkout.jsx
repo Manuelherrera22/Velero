@@ -152,8 +152,8 @@ export default function Checkout() {
   const handleSubmitContact = (e) => {
     e.preventDefault()
     setError(null)
-    if (!formData.name || !formData.email) {
-      setError('Nombre y email son obligatorios.')
+    if (!formData.name || !formData.email || !formData.phone) {
+      setError('Nombre, email y teléfono son obligatorios.')
       return
     }
     // Validate all passengers have IDs
@@ -473,7 +473,7 @@ export default function Checkout() {
                 </div>
 
                 <div className="input-group">
-                  <label htmlFor="checkout-phone"><Phone size={14} /> Teléfono (opcional)</label>
+                  <label htmlFor="checkout-phone"><Phone size={14} /> Teléfono *</label>
                   <input
                     id="checkout-phone"
                     type="tel"
@@ -481,7 +481,9 @@ export default function Checkout() {
                     placeholder="+54 11 1234 5678"
                     value={formData.phone}
                     onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
+                    required
                   />
+                  <span className="text-xs text-muted-foreground mt-1">Necesario para contactarte ante cambios climáticos o de fuerza mayor.</span>
                 </div>
 
                 {/* ── Passengers ID Section ── */}
@@ -584,13 +586,7 @@ export default function Checkout() {
                   Continuar
                 </button>
 
-                {/* WhatsApp alternative */}
-                <div className="checkout-whatsapp-alt">
-                  <span className="checkout-whatsapp-alt__divider">o</span>
-                  <a href={buildWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="btn btn--whatsapp btn--lg checkout-form__submit">
-                    <WhatsAppIcon /> Reservar por WhatsApp
-                  </a>
-                </div>
+
               </form>
             )}
 
