@@ -102,29 +102,46 @@ export default function Checkout() {
   const trip = currentTrip
   const selectedDate = tripDates.find(d => d.id === dateId)
 
-  // Calculate totals
+  // Calculate totals (Base prices without discount)
   const basePriceOriginal = mode === 'private' ? trip?.full_boat_price : trip?.price_per_person
-  const discountMultiplier = trip?.discount_percentage ? (1 - trip.discount_percentage / 100) : 1
-  const pricePerPerson = (basePriceOriginal || 0) * discountMultiplier
-
-  const subtotal = mode === 'private' ? pricePerPerson : pricePerPerson * guests
+  const subtotalOriginal = mode === 'private' ? basePriceOriginal : basePriceOriginal * guests
   const addonsTotal = tripAddons.reduce((sum, a) => sum + (selectedAddons[a.id] || 0) * a.price, 0)
-  const grossTotal = subtotal + addonsTotal
+  
+  // Gross total before any discount
+  const grossTotal = subtotalOriginal + addonsTotal
 
-  const discount = coupon
+  // Trip Promotional Discount (%)
+  const tripDiscountAmount = trip?.discount_percentage ? (grossTotal * (trip.discount_percentage / 100)) : 0
+
+  // Coupon Discount
+  const couponDiscountAmount = coupon
     ? coupon.type === 'percentage'
-      ? grossTotal * (coupon.value / 100)
-      : Math.min(coupon.value, grossTotal)
+      ? (grossTotal - tripDiscountAmount) * (coupon.value / 100)
+      : Math.min(coupon.value, grossTotal - tripDiscountAmount)
     : 0
 
-  const total = grossTotal - discount
+  const totalDiscount = tripDiscountAmount + couponDiscountAmount
+  
+  // Net subtotal (Subtotal - Discounts)
+  const total = grossTotal - totalDiscount
+
+  // Service Fee (3% over Net subtotal)
+  const serviceFeePercent = 0.03;
+  const serviceFeeAmount = total * serviceFeePercent;
 
   // Advance Payment calculations (Anticipo)
   const isAdvancePayment = trip?.requires_full_payment === false;
-  const kailuCommission = 0.20; // 20% base
-  const serviceFeePercent = 0.03; // 3%
-  const advanceAmount = isAdvancePayment ? Math.round(((total * kailuCommission) + (total * serviceFeePercent)) * 100) / 100 : Math.round((total + total * serviceFeePercent) * 100) / 100;
-  const remainingAmount = isAdvancePayment ? Math.round((total - (total * kailuCommission)) * 100) / 100 : 0;
+  
+  // Kailu Commission (20% default, can be overridden per trip/captain in DB)
+  const kailuCommission = trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20;
+  
+  const advanceAmount = isAdvancePayment 
+    ? Math.round(((total * kailuCommission) + serviceFeeAmount) * 100) / 100 
+    : Math.round((total + serviceFeeAmount) * 100) / 100;
+    
+  const remainingAmount = isAdvancePayment 
+    ? Math.round((total - (total * kailuCommission)) * 100) / 100 
+    : 0;
 
   const formatPrice = (p) => {
     if (!trip) return '$0'
@@ -715,26 +732,28 @@ export default function Checkout() {
                   <span>{formatPrice(a.price * selectedAddons[a.id])}</span>
                 </div>
               ))}
-              {discount > 0 && (
-                <div className="checkout-summary__line" style={{ color: 'var(--color-success)' }}>
-                  <span>Descuento ({coupon?.code})</span>
-                  <span>-{formatPrice(discount)}</span>
-                </div>
-              )}
             </div>
             <div className="checkout-summary__total" style={{ flexDirection: 'column', gap: '4px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
-                <span>Valor de la experiencia</span>
-                <span>{formatPrice(total)}</span>
+                <span>Subtotal de la experiencia</span>
+                <span>{formatPrice(grossTotal)}</span>
               </div>
+              
+              {totalDiscount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 'var(--text-md)', color: 'var(--color-success)', marginTop: '4px' }}>
+                  <span>Descuento {trip?.discount_percentage ? `${trip.discount_percentage}%` : ''} {coupon ? `(${coupon.code})` : ''}</span>
+                  <span>- {formatPrice(totalDiscount)}</span>
+                </div>
+              )}
+
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 'var(--text-md)', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 <span>Tasa de servicio (3%)</span>
-                <span>{formatPrice(total * 0.03)}</span>
+                <span>{formatPrice(serviceFeeAmount)}</span>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '12px', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
                 <span style={{ fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
-                  {isAdvancePayment ? 'Cobro online (Anticipo + Tasa)' : 'Total a pagar hoy'}
+                  {isAdvancePayment ? 'Total a pagar (Cobro online)' : 'Total a pagar'}
                 </span>
                 <strong style={{ fontSize: 'var(--text-xl)', color: 'var(--accent-color, var(--color-primary))' }}>
                   {formatPrice(advanceAmount)}
