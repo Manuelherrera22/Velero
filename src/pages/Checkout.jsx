@@ -759,8 +759,8 @@ export default function Checkout() {
             </div>
             <div className="checkout-summary__lines">
               <div className="checkout-summary__line">
-                <span>{formatPrice(pricePerPerson)} × {mode === 'private' ? '1 navío' : `${guests} persona${guests > 1 ? 's' : ''}`}</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>{formatPrice(basePriceOriginal)} × {mode === 'private' ? '1 navío' : `${guests} persona${guests > 1 ? 's' : ''}`}</span>
+                <span>{formatPrice(subtotalOriginal)}</span>
               </div>
               {tripAddons.filter(a => selectedAddons[a.id] > 0).map(a => (
                 <div key={a.id} className="checkout-summary__line">
