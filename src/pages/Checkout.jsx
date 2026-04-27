@@ -37,6 +37,7 @@ export default function Checkout() {
     nationality: 'AR',
     idType: 'dni',
     idNumber: '',
+    termsAccepted: false,
   })
 
   // Parse booking params from URL
@@ -169,8 +170,16 @@ export default function Checkout() {
   const handleSubmitContact = (e) => {
     e.preventDefault()
     setError(null)
-    if (!formData.name || !formData.email || !formData.phone) {
-      setError('Nombre, email y teléfono son obligatorios.')
+    if (!formData.name || !formData.email || !formData.emailConfirm || !formData.phone) {
+      setError('Todos los campos de contacto son obligatorios.')
+      return
+    }
+    if (formData.email.trim().toLowerCase() !== formData.emailConfirm.trim().toLowerCase()) {
+      setError('Los correos electrónicos no coinciden.')
+      return
+    }
+    if (!formData.termsAccepted) {
+      setError('Debes aceptar los Términos y Condiciones para continuar.')
       return
     }
     // Validate all passengers have IDs
@@ -490,6 +499,19 @@ export default function Checkout() {
                 </div>
 
                 <div className="input-group">
+                  <label htmlFor="checkout-email-confirm"><Mail size={14} /> Confirmar Email *</label>
+                  <input
+                    id="checkout-email-confirm"
+                    type="email"
+                    className="input"
+                    placeholder="tu@email.com"
+                    value={formData.emailConfirm}
+                    onChange={(e) => setFormData(p => ({ ...p, emailConfirm: e.target.value }))}
+                    required
+                  />
+                </div>
+
+                <div className="input-group">
                   <label htmlFor="checkout-phone"><Phone size={14} /> Teléfono *</label>
                   <input
                     id="checkout-phone"
@@ -599,6 +621,20 @@ export default function Checkout() {
                       ✓ Cupón aplicado: {coupon.type === 'percentage' ? `${coupon.value}% de descuento` : `${formatPrice(coupon.value)} de descuento`}
                     </p>
                   )}
+                </div>
+
+                <div className="input-group" style={{ flexDirection: 'row', alignItems: 'flex-start', gap: '12px', marginTop: '16px', marginBottom: '24px' }}>
+                  <input
+                    type="checkbox"
+                    id="terms-checkbox"
+                    checked={formData.termsAccepted}
+                    onChange={(e) => setFormData(p => ({ ...p, termsAccepted: e.target.checked }))}
+                    style={{ marginTop: '4px', cursor: 'pointer', width: '18px', height: '18px', accentColor: 'var(--color-primary)' }}
+                    required
+                  />
+                  <label htmlFor="terms-checkbox" style={{ fontSize: '0.9rem', lineHeight: '1.4', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                    He leído y acepto los <a href="/terminos" target="_blank" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>Términos y Condiciones</a> y las Políticas de Cancelación.
+                  </label>
                 </div>
 
                 <button type="submit" className="btn btn--accent btn--lg checkout-form__submit">

@@ -108,15 +108,37 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
   doc.setFont('helvetica', 'bold')
   doc.text(`${timeText}hs`, 110, 67)
 
+  // Embarque
+  doc.setFontSize(7)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(148, 163, 184)
+  doc.text('PUNTO DE EMBARQUE', 16, 78)
+  doc.setTextColor(255, 255, 255)
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'bold')
+  const loc = (trip?.location || 'A coordinar con el capitán').substring(0, 40)
+  doc.text(loc, 16, 83)
+  
+  if (trip?.location) {
+    doc.setTextColor(38, 198, 198) // Cyan link
+    doc.setFontSize(7)
+    doc.setFont('helvetica', 'normal')
+    try {
+      doc.textWithLink('Abrir en Google Maps ->', 16, 88, { url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trip.location)}` })
+    } catch(e) {
+      doc.text('Ver en mapa', 16, 88)
+    }
+  }
+
   // Total
   doc.setFontSize(7)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(148, 163, 184)
-  doc.text('TOTAL', 16, 78)
+  doc.text('TOTAL', 110, 78)
   doc.setTextColor(38, 198, 198)
   doc.setFontSize(14)
   doc.setFont('helvetica', 'bold')
-  doc.text(formatPrice(total), 16, 85)
+  doc.text(formatPrice(total), 110, 85)
 
   // ── Right panel ──
   doc.setDrawColor(100, 116, 139)
