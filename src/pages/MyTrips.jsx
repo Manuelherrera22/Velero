@@ -67,7 +67,7 @@ export default function MyTrips() {
         <div className="my-trips__header">
           <div>
             <h1><Ticket size={28} /> Mis Viajes</h1>
-            <p>Tus experiencias náuticas con Velero</p>
+            <p>Tus experiencias náuticas con Kailu</p>
           </div>
           <Link to="/explorar" className="btn btn--accent">
             <Compass size={16} /> Explorar Travesías
@@ -106,7 +106,7 @@ export default function MyTrips() {
           <div className="my-trips__empty glass animate-fade-in">
             <Compass size={48} />
             <h3>{activeTab === 'upcoming' ? 'No tenés viajes próximos' : activeTab === 'past' ? 'Aún no completaste ningún viaje' : 'Sin cancelaciones'}</h3>
-            <p>Explorá las travesías disponibles y viví la experiencia Velero.</p>
+            <p>Explorá las travesías disponibles y viví la experiencia Kailu.</p>
             <Link to="/explorar" className="btn btn--accent btn--lg">
               Explorar Travesías
             </Link>

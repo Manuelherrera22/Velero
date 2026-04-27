@@ -26,7 +26,7 @@ export default function Footer() {
           <div className="footer__brand">
             <Link to="/" className="footer__logo">
               <Sailboat size={24} />
-              <span>Velero</span>
+              <span>Kailu</span>
             </Link>
             <p className="footer__tagline">
               Conectamos viajeros con capitanes que ofrecen experiencias en velero únicas, accesibles y sostenibles.
@@ -48,7 +48,7 @@ export default function Footer() {
           <div className="footer__col">
             <h4 className="footer__heading">Explorar</h4>
             <Link to="/explorar" className="footer__link">Buscar Travesías</Link>
-            <a href="/#beneficios" className="footer__link">¿Por qué Velero?</a>
+            <a href="/#beneficios" className="footer__link">¿Por qué Kailu?</a>
             <a href="/#testimonios" className="footer__link">Testimonios</a>
           </div>
 
@@ -70,7 +70,7 @@ export default function Footer() {
         </div>
 
         <div className="footer__bottom">
-          <p>© {new Date().getFullYear()} Velero. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} Kailu. Todos los derechos reservados.</p>
           <p className="footer__made">
             Hecho con <Heart size={14} className="footer__heart" /> para el agua
           </p>

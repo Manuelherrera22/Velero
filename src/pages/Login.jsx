@@ -138,7 +138,7 @@ export default function Login() {
           <Sailboat size={36} />
         </div>
 
-        <h1 className="login-card__title">Bienvenido a Velero</h1>
+        <h1 className="login-card__title">Bienvenido a Kailu</h1>
         <p className="login-card__subtitle">
           {usePassword
             ? 'Ingresa con tu email y contraseña.'

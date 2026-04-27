@@ -69,7 +69,7 @@ export default function QRLanding() {
       <div className="qr-landing">
         <div className="container" style={{ textAlign: 'center', padding: 'var(--space-24) 0' }}>
           <Sailboat size={64} style={{ color: 'var(--color-accent-400)', marginBottom: 'var(--space-4)' }} />
-          <h1>Velero</h1>
+          <h1>Kailu</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Escanea un código QR para ver travesías cerca de tu hotel.</p>
           <Link to="/explorar" className="btn btn--accent btn--lg" style={{ marginTop: 'var(--space-6)' }}>
             Explorar todas las travesías <ArrowRight size={18} />

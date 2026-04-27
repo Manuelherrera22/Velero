@@ -30,9 +30,9 @@ export default function Header() {
   return (
     <header className={`header ${scrolled ? 'header--scrolled' : ''}`}>
       <div className="container header__inner">
-        <Link to="/" className="header__logo" aria-label="Velero Home">
+        <Link to="/" className="header__logo" aria-label="Kailu Home">
           <Sailboat size={28} strokeWidth={2.2} />
-          <span className="header__logo-text">Velero</span>
+          <span className="header__logo-text">Kailu</span>
         </Link>
 
         <nav className={`header__nav ${menuOpen ? 'header__nav--open' : ''}`}>
@@ -40,7 +40,7 @@ export default function Header() {
             Explorar Travesías
           </Link>
           <a href="/#beneficios" className="header__link">
-            ¿Por qué Velero?
+            ¿Por qué Kailu?
           </a>
           <a href="/#testimonios" className="header__link">
             Testimonios

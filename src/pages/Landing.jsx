@@ -144,7 +144,7 @@ export default function Landing() {
       {/* ══════════════════ BENEFICIOS ══════════════════ */}
       <section className="section" id="beneficios" ref={addRevealRef}>
         <div className="container reveal" ref={addRevealRef}>
-          <p className="section__label">¿Por qué Velero?</p>
+          <p className="section__label">¿Por qué Kailu?</p>
           <h2 className="section__title">
             Cada travesía está pensada para ofrecer algo más que un paseo
           </h2>
@@ -273,7 +273,7 @@ export default function Landing() {
                   <ArrowRight size={18} />
                 </Link>
                 <a 
-                  href="https://wa.me/5491136696696?text=Hola%20Velero!%20Quiero%20agendar%20una%20reunión%20como%20capitán" 
+                  href="https://wa.me/5491136696696?text=Hola%20Kailu!%20Quiero%20agendar%20una%20reunión%20como%20capitán" 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn--ghost btn--lg"
