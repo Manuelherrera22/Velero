@@ -217,7 +217,7 @@
 
 /* Day Groups */
 .booking-card__day-group {
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .booking-card__day-group:last-child {
@@ -231,23 +231,29 @@
   text-transform: capitalize;
   margin-bottom: var(--space-2);
   padding-left: var(--space-1);
+  letter-spacing: 0.03em;
 }
 
 .booking-card__day-slots {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--space-2);
-  flex-wrap: wrap;
 }
 
 .booking-card__day-slots .booking-card__date {
-  flex: 1 1 auto;
-  min-width: 90px;
-  justify-content: center;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
+  justify-content: center;
+  gap: 2px;
+  padding: var(--space-2) var(--space-1);
   text-align: center;
+  min-height: 72px;
+}
+
+.booking-card__day-slots .booking-card__date-time {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
 }
 
 .booking-card__date-price {

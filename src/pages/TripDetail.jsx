@@ -154,8 +154,8 @@ export default function TripDetail() {
             <div className="trip-detail__meta">
               <span><MapPin size={16} /> {trip.location}</span>
               <span><Users size={16} /> Hasta {trip.capacity} personas</span>
-              {trip.boat?.cabins && <span>🛏 {trip.boat.cabins} Camarotes</span>}
-              {trip.boat?.bathrooms && <span>🚿 {trip.boat.bathrooms} Baños</span>}
+              {trip.boat?.cabins > 0 && <span>🛏 {trip.boat.cabins} Camarotes</span>}
+              {trip.boat?.bathrooms > 0 && <span>🚿 {trip.boat.bathrooms} Baños</span>}
             </div>
             
             <div className="trip-detail__rating-bar">
@@ -280,9 +280,6 @@ export default function TripDetail() {
                               const slotPrice = bookingMode === 'private'
                                 ? (d.full_boat_price_override || trip.full_boat_price)
                                 : (d.price_per_person_override || trip.price_per_person)
-                              const hasCustomPrice = bookingMode === 'private'
-                                ? !!d.full_boat_price_override
-                                : !!d.price_per_person_override
                               return (
                                 <button
                                   key={d.id}
@@ -290,9 +287,7 @@ export default function TripDetail() {
                                   onClick={() => setSelectedDate(d.id)}
                                 >
                                   <span className="booking-card__date-time">{d.start_time?.slice(0, 5)}hs</span>
-                                  {hasCustomPrice && (
-                                    <span className="booking-card__date-price">{formatPrice(slotPrice, trip.currency)}</span>
-                                  )}
+                                  <span className="booking-card__date-price">{formatPrice(slotPrice, trip.currency)}</span>
                                   <span className="booking-card__date-spots">{d.available_spots} disp.</span>
                                 </button>
                               )
