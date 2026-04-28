@@ -308,7 +308,8 @@ export default function Checkout() {
         setError(result.error || 'Error al crear la reserva. Intenta de nuevo.')
       }
     } catch (err) {
-      setError('Error inesperado. Intenta de nuevo.')
+      console.error('Booking flow error:', err)
+      setError(`Error inesperado: ${err.message || err}`)
     } finally {
       setLoading(false)
     }
