@@ -54,3 +54,7 @@ export async function handler(event) {
     return { statusCode: 500, body: JSON.stringify({ error: error.message }) }
   }
 }
+
+export const config = {
+  path: '/api/create-preference',
+}
