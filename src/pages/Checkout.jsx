@@ -234,10 +234,10 @@ export default function Checkout() {
         guest_email: !user ? formData.email : null,
         guest_phone: !user ? formData.phone : null,
         quantity: guests,
-        subtotal,
+        subtotal: grossTotal,
         addons_total: addonsTotal,
-        discount,
-        total,
+        discount: totalDiscount,
+        total: advanceAmount,
         coupon_id: coupon?.id || null,
         status: 'pending',
         metadata: {
