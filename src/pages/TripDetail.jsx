@@ -59,13 +59,24 @@ export default function TripDetail() {
 
   const addonsTotal = tripAddons.reduce((sum, a) => sum + (selectedAddons[a.id] || 0) * a.price, 0)
   
-  // Dynamic Pricing based on Mode
-  const basePriceOriginal = bookingMode === 'private' ? trip.full_boat_price : trip.price_per_person
+  // Dynamic Pricing based on Mode + selected time slot override
+  const selectedDateObj = tripDates.find(d => d.id === selectedDate)
+  const basePriceOriginal = bookingMode === 'private'
+    ? (selectedDateObj?.full_boat_price_override || trip.full_boat_price)
+    : (selectedDateObj?.price_per_person_override || trip.price_per_person)
   const discountMultiplier = trip.discount_percentage ? (1 - trip.discount_percentage / 100) : 1
   const basePrice = basePriceOriginal * discountMultiplier
 
   const subtotal = bookingMode === 'private' ? basePrice : (basePrice || 0) * guests
   const total = subtotal + addonsTotal
+
+  // Group dates by day for UI
+  const datesByDay = tripDates.reduce((acc, d) => {
+    const dayKey = d.date
+    if (!acc[dayKey]) acc[dayKey] = []
+    acc[dayKey].push(d)
+    return acc
+  }, {})
 
   const formatPrice = (p, cur) => {
     if (cur === 'EUR') return `€${p}`
@@ -86,7 +97,7 @@ export default function TripDetail() {
     setCurrentImageIndex((prev) => (prev - 1 + trip.images.length) % trip.images.length)
   }
 
-  const selectedDateObj = tripDates.find(d => d.id === selectedDate)
+  // selectedDateObj already defined above in pricing section
 
   const buildWhatsAppUrl = () => {
     const dateText = selectedDateObj
@@ -257,18 +268,37 @@ export default function TripDetail() {
                 </label>
                 {tripDates.length > 0 ? (
                   <div className="booking-card__dates">
-                    {tripDates.map(d => (
-                      <button
-                        key={d.id}
-                        className={`booking-card__date ${selectedDate === d.id ? 'booking-card__date--selected' : ''}`}
-                        onClick={() => setSelectedDate(d.id)}
-                      >
-                        <span className="booking-card__date-day">
-                          {new Date(d.date + 'T12:00:00').toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' })}
-                        </span>
-                        <span className="booking-card__date-time">{d.start_time?.slice(0, 5)}hs</span>
-                        <span className="booking-card__date-spots">{d.available_spots} disponibles</span>
-                      </button>
+                    {Object.entries(datesByDay).map(([dayKey, slots]) => (
+                      <div key={dayKey} className="booking-card__day-group">
+                        <div className="booking-card__day-label">
+                          {new Date(dayKey + 'T12:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'short' })}
+                        </div>
+                        <div className="booking-card__day-slots">
+                          {slots
+                            .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
+                            .map(d => {
+                              const slotPrice = bookingMode === 'private'
+                                ? (d.full_boat_price_override || trip.full_boat_price)
+                                : (d.price_per_person_override || trip.price_per_person)
+                              const hasCustomPrice = bookingMode === 'private'
+                                ? !!d.full_boat_price_override
+                                : !!d.price_per_person_override
+                              return (
+                                <button
+                                  key={d.id}
+                                  className={`booking-card__date ${selectedDate === d.id ? 'booking-card__date--selected' : ''}`}
+                                  onClick={() => setSelectedDate(d.id)}
+                                >
+                                  <span className="booking-card__date-time">{d.start_time?.slice(0, 5)}hs</span>
+                                  {hasCustomPrice && (
+                                    <span className="booking-card__date-price">{formatPrice(slotPrice, trip.currency)}</span>
+                                  )}
+                                  <span className="booking-card__date-spots">{d.available_spots} disp.</span>
+                                </button>
+                              )
+                            })}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 ) : (

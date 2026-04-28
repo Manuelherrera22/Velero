@@ -103,8 +103,10 @@ export default function Checkout() {
   const trip = currentTrip
   const selectedDate = tripDates.find(d => d.id === dateId)
 
-  // Calculate totals (Base prices without discount)
-  const basePriceOriginal = mode === 'private' ? trip?.full_boat_price : trip?.price_per_person
+  // Calculate totals (Base prices without discount, respecting per-slot overrides)
+  const basePriceOriginal = mode === 'private'
+    ? (selectedDate?.full_boat_price_override || trip?.full_boat_price)
+    : (selectedDate?.price_per_person_override || trip?.price_per_person)
   const subtotalOriginal = mode === 'private' ? basePriceOriginal : basePriceOriginal * guests
   const addonsTotal = tripAddons.reduce((sum, a) => sum + (selectedAddons[a.id] || 0) * a.price, 0)
   
