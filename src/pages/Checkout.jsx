@@ -259,28 +259,7 @@ export default function Checkout() {
       if (result.success) {
         setBooking(result.data)
 
-        // 1. Send confirmation email via Netlify Function (fire & forget)
-        try {
-          fetch('/api/send-ticket', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              trip: trip.title,
-              email: formData.email,
-              name: formData.name,
-              guests,
-              total,
-              currency: trip.currency || 'ARS',
-              bookingId: result.data.id,
-              date: selectedDate ? { date: selectedDate.date, start_time: selectedDate.start_time } : null,
-              booking: { location: trip.location },
-            }),
-          })
-        } catch (emailErr) {
-          console.warn('Email send failed (non-blocking):', emailErr)
-        }
-
-        // 2. Send magic link so user can access their dashboard
+        // 1. Send magic link so user can access their dashboard
         if (!user) {
           try {
             await supabase.auth.signInWithOtp({
@@ -295,7 +274,36 @@ export default function Checkout() {
           }
         }
 
-        setStep(4)
+        // 2. Create Mercado Pago Preference
+        try {
+          const mpResponse = await fetch('/api/create-preference', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bookingId: result.data.id,
+              title: trip.title,
+              price: advanceAmount, // Monto exacto a cobrar online (Anticipo + Tasa)
+              email: formData.email,
+              name: formData.name
+            })
+          })
+          
+          if (!mpResponse.ok) throw new Error('Error creating MP preference')
+          const mpData = await mpResponse.json()
+          
+          // Redirect to Mercado Pago!
+          if (mpData.init_point) {
+            window.location.href = mpData.init_point
+            return // Detener ejecución porque el usuario sale de la página
+          } else {
+            throw new Error('No init_point received')
+          }
+        } catch (mpError) {
+          console.error('MP Error:', mpError)
+          setError('Error al conectar con Mercado Pago. Verifica tus credenciales.')
+          setLoading(false)
+          return
+        }
       } else {
         setError(result.error || 'Error al crear la reserva. Intenta de nuevo.')
       }
