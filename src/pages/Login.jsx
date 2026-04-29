@@ -251,7 +251,7 @@ export default function Login() {
         </div>
 
         {/* Captain CTA */}
-        <Link to="/registro" className="login-captain-cta">
+        <Link to="/registro?rol=capitan" className="login-captain-cta">
           <div className="login-captain-cta__icon">
             <Sailboat size={20} />
           </div>

@@ -1,14 +1,18 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Sailboat, Compass, Anchor, ArrowRight, Eye, EyeOff, Loader, Check } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import './Register.css'
 
 export default function Register() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { signUp, error, clearError } = useAuthStore()
 
-  const [role, setRole] = useState(null) // 'viewer' | 'publisher'
+  // Auto-detect role from URL: /registro?rol=capitan
+  const isCaptain = searchParams.get('rol') === 'capitan'
+  const role = isCaptain ? 'publisher' : 'viewer'
+
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,10 +26,6 @@ export default function Register() {
     clearError()
     setLocalError('')
 
-    if (!role) {
-      setLocalError('Seleccioná un tipo de cuenta.')
-      return
-    }
     if (fullName.trim().length < 2) {
       setLocalError('Ingresá tu nombre completo.')
       return
@@ -56,7 +56,7 @@ export default function Register() {
           </div>
           <h1 className="register-card__title">¡Cuenta creada!</h1>
           <p className="register-card__subtitle">
-            {role === 'publisher'
+            {isCaptain
               ? 'Tu cuenta de capitán está lista. Revisá tu email para confirmar y luego accedé a tu panel para crear tu primera travesía.'
               : 'Tu cuenta está lista. Revisá tu email para confirmar y empezá a explorar travesías.'}
           </p>
@@ -72,47 +72,19 @@ export default function Register() {
   return (
     <div className="register-page">
       <div className="register-card glass animate-fade-in">
-        <div className="register-card__logo">
-          <Sailboat size={36} />
+        {/* Header — adapts to role */}
+        <div className={`register-role-badge ${isCaptain ? 'register-role-badge--captain' : ''}`}>
+          {isCaptain ? <Anchor size={28} /> : <Compass size={28} />}
         </div>
 
-        <h1 className="register-card__title">Creá tu cuenta</h1>
+        <h1 className="register-card__title">
+          {isCaptain ? 'Registro de Capitán' : 'Creá tu cuenta'}
+        </h1>
         <p className="register-card__subtitle">
-          Elegí cómo querés usar Kailu
+          {isCaptain
+            ? 'Completá tus datos para empezar a publicar travesías en Kailu.'
+            : 'Registrate para explorar y reservar travesías náuticas.'}
         </p>
-
-        {/* Role Selector */}
-        <div className="register-roles">
-          <button
-            type="button"
-            className={`register-role ${role === 'viewer' ? 'register-role--active' : ''}`}
-            onClick={() => { setRole('viewer'); clearError(); setLocalError('') }}
-          >
-            <div className="register-role__icon">
-              <Compass size={28} />
-            </div>
-            <div className="register-role__info">
-              <strong>Viajero</strong>
-              <span>Explorá y reservá travesías</span>
-            </div>
-            {role === 'viewer' && <Check size={18} className="register-role__check" />}
-          </button>
-
-          <button
-            type="button"
-            className={`register-role ${role === 'publisher' ? 'register-role--active' : ''}`}
-            onClick={() => { setRole('publisher'); clearError(); setLocalError('') }}
-          >
-            <div className="register-role__icon">
-              <Anchor size={28} />
-            </div>
-            <div className="register-role__info">
-              <strong>Capitán</strong>
-              <span>Publicá y gestioná travesías</span>
-            </div>
-            {role === 'publisher' && <Check size={18} className="register-role__check" />}
-          </button>
-        </div>
 
         {/* Error Messages */}
         {(error || localError) && (
@@ -122,11 +94,13 @@ export default function Register() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="register-form">
           <div className="input-group">
-            <label className="register-label">Nombre completo</label>
+            <label className="register-label">
+              {isCaptain ? 'Nombre completo (como capitán)' : 'Nombre completo'}
+            </label>
             <input
               type="text"
               className="input"
-              placeholder="Ej: Juan Pérez"
+              placeholder={isCaptain ? 'Ej: Cap. Juan Pérez' : 'Ej: Juan Pérez'}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
@@ -176,17 +150,32 @@ export default function Register() {
               <Loader size={18} className="spin" />
             ) : (
               <>
-                Crear mi cuenta
+                {isCaptain ? 'Crear cuenta de Capitán' : 'Crear mi cuenta'}
                 <ArrowRight size={18} />
               </>
             )}
           </button>
         </form>
 
+        {/* Footer links */}
         <p className="register-card__note">
           ¿Ya tenés cuenta?{' '}
           <Link to="/login" className="register-link">Iniciá sesión</Link>
         </p>
+
+        {!isCaptain && (
+          <Link to="/registro?rol=capitan" className="register-switch-cta">
+            <Anchor size={16} />
+            <span>¿Sos capitán? <strong>Registrate acá</strong></span>
+          </Link>
+        )}
+
+        {isCaptain && (
+          <Link to="/registro" className="register-switch-cta">
+            <Compass size={16} />
+            <span>¿Sos viajero? <strong>Registrate como viajero</strong></span>
+          </Link>
+        )}
       </div>
     </div>
   )
