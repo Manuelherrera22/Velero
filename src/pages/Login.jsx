@@ -242,6 +242,13 @@ export default function Login() {
         </button>
 
         <p className="login-card__note">
+          ¿No tenés cuenta?{' '}
+          <Link to="/registro" style={{ color: 'var(--color-accent-400)', fontWeight: 600, textDecoration: 'none' }}>
+            Registrate acá
+          </Link>
+        </p>
+
+        <p className="login-card__note" style={{ marginTop: 'var(--space-2)' }}>
           Al ingresar aceptas nuestros <a href="#">Términos y Condiciones</a> y <a href="#">Política de Privacidad</a>.
         </p>
       </div>

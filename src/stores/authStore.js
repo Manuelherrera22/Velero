@@ -78,6 +78,43 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
+  // Sign up with email + password + role
+  signUp: async (email, password, fullName, role = 'viewer') => {
+    set({ error: null })
+    try {
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName, role },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      if (authError) throw authError
+
+      // Create profile immediately
+      if (data.user) {
+        await supabase.from('profiles').upsert({
+          id: data.user.id,
+          full_name: fullName,
+          role,
+          updated_at: new Date().toISOString(),
+        })
+      }
+
+      return { success: true, data }
+    } catch (error) {
+      let msg = error.message
+      if (msg.includes('already registered') || msg.includes('already been registered')) {
+        msg = 'Este email ya está registrado. Intentá iniciar sesión.'
+      } else if (msg.includes('Password should be')) {
+        msg = 'La contraseña debe tener al menos 6 caracteres.'
+      }
+      set({ error: msg })
+      return { success: false, error: msg }
+    }
+  },
+
   // Sign in with email magic link
   signInWithEmail: async (email) => {
     set({ error: null })

@@ -6,6 +6,7 @@ import Search from './pages/Search'
 import TripDetail from './pages/TripDetail'
 import Checkout from './pages/Checkout'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import Profile from './pages/Profile'
 import MyTrips from './pages/MyTrips'
 import AuthCallback from './pages/AuthCallback'
@@ -35,6 +36,7 @@ function App() {
           <Route path="/travesia/:id" element={<TripDetail />} />
           <Route path="/checkout/:id" element={<Checkout />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/registro" element={<Register />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/qr" element={<QRLanding />} />
           <Route path="/review/:bookingId" element={<Review />} />

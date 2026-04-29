@@ -84,6 +84,16 @@
   color: var(--color-accent-300);
 }
 
+.header__link--captain {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-accent-300);
+  background: rgba(0, 180, 180, 0.08);
+  border: 1px solid rgba(0, 180, 180, 0.25);
+  font-weight: 600;
+}
+
 .header__toggle {
   display: none;
   background: none;

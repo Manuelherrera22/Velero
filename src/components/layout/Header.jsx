@@ -47,7 +47,14 @@ export default function Header() {
           </a>
 
           {user ? (
-            <div className="header__user-menu">
+            <>
+              {(profile?.role === 'publisher' || profile?.role === 'admin') && (
+                <Link to="/dashboard" className="header__link header__link--captain">
+                  <LayoutDashboard size={16} />
+                  Panel Capitán
+                </Link>
+              )}
+              <div className="header__user-menu">
               <button 
                 className="header__user-btn"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -79,6 +86,7 @@ export default function Header() {
                 </div>
               )}
             </div>
+            </>
           ) : (
             <Link to="/login" className="header__link header__link--cta">
               <User size={16} />

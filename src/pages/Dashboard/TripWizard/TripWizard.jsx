@@ -9,8 +9,6 @@ import Step2Map from './steps/Step2Map'
 import Step3Itinerary from './steps/Step3Itinerary'
 import Step4Photos from './steps/Step4Photos'
 import Step5Services from './steps/Step5Services'
-// (Skipping 6 & 7 as there are no direct implementations requested yet, 
-// they can reuse similar logic later, mapping straight from Step 5 to 8 for demo)
 import Step8Pricing from './steps/Step8Pricing'
 import Step9Dates from './steps/Step9Dates'
 import Step10Finalize from './steps/Step10Finalize'
