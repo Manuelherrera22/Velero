@@ -241,14 +241,28 @@ export default function Login() {
           {usePassword ? 'Usar enlace mágico' : '¿Tenés contraseña? Ingresá con ella'}
         </button>
 
-        <p className="login-card__note">
-          ¿No tenés cuenta?{' '}
-          <Link to="/registro" style={{ color: 'var(--color-accent-400)', fontWeight: 600, textDecoration: 'none' }}>
-            Registrate acá
-          </Link>
-        </p>
+        {/* Registration CTA */}
+        <div className="login-register-cta">
+          <p>¿No tenés cuenta?{' '}
+            <Link to="/registro" className="login-register-link">
+              Registrate acá
+            </Link>
+          </p>
+        </div>
 
-        <p className="login-card__note" style={{ marginTop: 'var(--space-2)' }}>
+        {/* Captain CTA */}
+        <Link to="/registro" className="login-captain-cta">
+          <div className="login-captain-cta__icon">
+            <Sailboat size={20} />
+          </div>
+          <div className="login-captain-cta__text">
+            <strong>¿Sos capitán?</strong>
+            <span>Registrate y publicá tu primera travesía</span>
+          </div>
+          <ArrowRight size={16} className="login-captain-cta__arrow" />
+        </Link>
+
+        <p className="login-card__note" style={{ marginTop: 'var(--space-4)' }}>
           Al ingresar aceptas nuestros <a href="#">Términos y Condiciones</a> y <a href="#">Política de Privacidad</a>.
         </p>
       </div>

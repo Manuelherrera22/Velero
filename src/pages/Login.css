@@ -107,3 +107,84 @@
 .login-password-toggle:hover {
   color: var(--color-accent-400);
 }
+
+/* Register CTA */
+.login-register-cta {
+  margin-top: var(--space-6);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.login-register-link {
+  color: var(--color-accent-400);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.login-register-link:hover {
+  color: var(--color-accent-300);
+  text-decoration: underline;
+}
+
+/* Captain CTA Card */
+.login-captain-cta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(0, 180, 180, 0.2);
+  background: rgba(0, 180, 180, 0.06);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.login-captain-cta:hover {
+  border-color: rgba(0, 180, 180, 0.4);
+  background: rgba(0, 180, 180, 0.12);
+  transform: translateY(-1px);
+}
+
+.login-captain-cta__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 180, 180, 0.15);
+  color: var(--color-accent-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.login-captain-cta__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.login-captain-cta__text strong {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-accent-300);
+}
+
+.login-captain-cta__text span {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.login-captain-cta__arrow {
+  color: var(--color-accent-400);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.login-captain-cta:hover .login-captain-cta__arrow {
+  transform: translateX(3px);
+}
