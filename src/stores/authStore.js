@@ -217,6 +217,10 @@ const useAuthStore = create((set, get) => ({
     return get().profile?.role === 'admin'
   },
 
+  get isAffiliate() {
+    return get().profile?.role === 'affiliate' || get().profile?.role === 'admin'
+  },
+
   // Clear error
   clearError: () => set({ error: null }),
 }))

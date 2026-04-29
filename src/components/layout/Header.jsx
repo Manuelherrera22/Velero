@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Sailboat, User, LogOut, LayoutDashboard, Ticket } from 'lucide-react'
+import { Menu, X, Sailboat, User, LogOut, LayoutDashboard, Ticket, Building2 } from 'lucide-react'
 import useAuthStore from '../../stores/authStore'
 import './Header.css'
 
@@ -52,6 +52,12 @@ export default function Header() {
                 <Link to="/dashboard" className="header__link header__link--captain">
                   <LayoutDashboard size={16} />
                   Panel Capitán
+                </Link>
+              )}
+              {(profile?.role === 'affiliate' || profile?.role === 'admin') && (
+                <Link to="/afiliado" className="header__link header__link--captain" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.2)' }}>
+                  <Building2 size={16} />
+                  Panel Afiliado
                 </Link>
               )}
               <div className="header__user-menu">

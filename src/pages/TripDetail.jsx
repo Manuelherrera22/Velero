@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { MapPin, Clock, Users, Star, Anchor, ArrowLeft, CalendarDays, Plus, Minus, Shield, ChevronRight, ChevronLeft, Compass, Loader, MessageCircle, Image } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import useTripStore from '../stores/tripStore'
@@ -16,7 +16,10 @@ const WHATSAPP_NUMBER = '5491136696696'
 export default function TripDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { currentTrip: trip, tripDates, tripAddons, loading, fetchTrip, clearCurrentTrip } = useTripStore()
+  
+  const qrCode = searchParams.get('qr')
 
   const [guests, setGuests] = useState(2)
   const [selectedDate, setSelectedDate] = useState(null)
@@ -364,7 +367,7 @@ export default function TripDetail() {
 
               {/* CTA Buttons */}
               <Link
-                to={`/checkout/${trip.id}?date=${selectedDate}&guests=${guests}&addons=${JSON.stringify(selectedAddons)}&total=${total}&mode=${bookingMode}`}
+                to={`/checkout/${trip.id}?date=${selectedDate}&guests=${guests}&addons=${JSON.stringify(selectedAddons)}&total=${total}&mode=${bookingMode}${qrCode ? `&qr=${qrCode}` : ''}`}
                 className={`btn btn--accent btn--lg booking-card__cta ${!selectedDate ? 'booking-card__cta--disabled' : ''}`}
               >
                 Reservar ahora

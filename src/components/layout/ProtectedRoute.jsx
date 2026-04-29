@@ -26,11 +26,16 @@ export default function ProtectedRoute({ children, requiredRole = 'viewer' }) {
     return <Navigate to="/login" replace />
   }
 
-  const roleHierarchy = { viewer: 1, publisher: 2, admin: 3 }
-  const userRoleLevel = roleHierarchy[profile?.role || 'viewer'] || 1
-  const requiredLevel = roleHierarchy[requiredRole] || 1
+  const hasAccess = () => {
+    const role = profile?.role || 'viewer'
+    if (role === 'admin') return true
+    if (requiredRole === 'publisher' && role === 'publisher') return true
+    if (requiredRole === 'affiliate' && role === 'affiliate') return true
+    if (requiredRole === 'viewer') return true
+    return false
+  }
 
-  if (userRoleLevel < requiredLevel) {
+  if (!hasAccess()) {
     return <Navigate to="/" replace />
   }
 

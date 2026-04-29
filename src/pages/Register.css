@@ -53,6 +53,13 @@
   box-shadow: 0 0 24px rgba(0, 180, 180, 0.2);
 }
 
+.register-role-badge--affiliate {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #f59e0b;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.15);
+}
+
 /* ── Switch CTA ── */
 .register-switch-cta {
   display: flex;

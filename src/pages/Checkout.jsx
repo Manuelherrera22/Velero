@@ -45,6 +45,7 @@ export default function Checkout() {
   const guests = parseInt(searchParams.get('guests')) || 2
   const selectedAddonsParam = searchParams.get('addons')
   const mode = searchParams.get('mode') || 'shared'
+  const qrCode = searchParams.get('qr')
   let selectedAddons = {}
   try { selectedAddons = JSON.parse(selectedAddonsParam || '{}') } catch {}
 
@@ -228,6 +229,24 @@ export default function Checkout() {
           quantity: selectedAddons[a.id] || 1,
         }))
 
+      // Calculate affiliate commission if QR code exists
+      let affiliateCommission = 0
+      if (qrCode) {
+        try {
+          const { data: qrData } = await supabase
+            .from('qr_codes')
+            .select('*, hotel:hotels!hotel_id(commission_percent)')
+            .eq('code', qrCode)
+            .single()
+            
+          if (qrData?.hotel?.commission_percent) {
+            affiliateCommission = total * (qrData.hotel.commission_percent / 100)
+          }
+        } catch (err) {
+          console.error("Error fetching QR commission", err)
+        }
+      }
+
       const bookingData = {
         trip_id: id,
         trip_date_id: dateId || null,
@@ -242,6 +261,8 @@ export default function Checkout() {
         total: advanceAmount,
         coupon_id: coupon?.id || null,
         status: 'pending',
+        qr_code: qrCode || null,
+        affiliate_commission: affiliateCommission,
         metadata: {
           selected_addons: addonsList,
           currency: trip?.currency || 'ARS',

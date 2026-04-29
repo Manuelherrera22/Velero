@@ -12,6 +12,7 @@ import MyTrips from './pages/MyTrips'
 import AuthCallback from './pages/AuthCallback'
 import Dashboard from './pages/Dashboard'
 import Admin from './pages/Admin'
+import AffiliateDashboard from './pages/Affiliate'
 import QRLanding from './pages/QRLanding'
 import Review from './pages/Review'
 import Header from './components/layout/Header'
@@ -58,6 +59,13 @@ function App() {
           <Route path="/dashboard/*" element={
             <ProtectedRoute requiredRole="publisher">
               <Dashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Affiliate panel */}
+          <Route path="/afiliado/*" element={
+            <ProtectedRoute requiredRole="affiliate">
+              <AffiliateDashboard />
             </ProtectedRoute>
           } />
 
