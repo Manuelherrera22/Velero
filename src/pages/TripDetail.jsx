@@ -120,20 +120,27 @@ export default function TripDetail() {
           <div className="trip-detail__info">
             {/* Image Carousel */}
             {getImageUrl() ? (
-              <div className="relative group mb-6 overflow-hidden" style={{ borderRadius: 'var(--radius-xl)', aspectRatio: '16/9' }}>
-                <img src={getImageUrl()} alt={trip.title} className="w-full h-full object-cover transition-opacity duration-300" />
+              <div className="trip-detail__carousel">
+                <img src={getImageUrl()} alt={trip.title} className="trip-detail__carousel-img" />
                 {trip.images?.length > 1 && (
                   <>
-                    <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
-                      <ChevronLeft size={24} />
+                    <button onClick={prevImage} className="trip-detail__carousel-btn trip-detail__carousel-btn--left">
+                      <ChevronLeft size={22} />
                     </button>
-                    <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
-                      <ChevronRight size={24} />
+                    <button onClick={nextImage} className="trip-detail__carousel-btn trip-detail__carousel-btn--right">
+                      <ChevronRight size={22} />
                     </button>
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 p-2 rounded-full bg-black/20 backdrop-blur-md">
+                    <div className="trip-detail__carousel-dots">
                       {trip.images.map((_, idx) => (
-                        <div key={idx} className={`w-2 h-2 rounded-full transition-all ${idx === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50'}`} />
+                        <button
+                          key={idx}
+                          className={`trip-detail__carousel-dot ${idx === currentImageIndex ? 'trip-detail__carousel-dot--active' : ''}`}
+                          onClick={() => setCurrentImageIndex(idx)}
+                        />
                       ))}
+                    </div>
+                    <div className="trip-detail__carousel-counter">
+                      {currentImageIndex + 1} / {trip.images.length}
                     </div>
                   </>
                 )}
