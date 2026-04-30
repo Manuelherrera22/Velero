@@ -13,7 +13,7 @@ const WhatsAppIcon = () => (
   </svg>
 )
 
-const WHATSAPP_NUMBER = '5491136696696'
+const WHATSAPP_NUMBER = '5491161789818'
 
 export default function Checkout() {
   const { id } = useParams()

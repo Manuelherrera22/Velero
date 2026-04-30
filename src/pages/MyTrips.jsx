@@ -11,7 +11,7 @@ const WhatsAppIcon = ({ size = 14 }) => (
   </svg>
 )
 
-const WHATSAPP_NUMBER = '5491136696696'
+const WHATSAPP_NUMBER = '5491161789818'
 
 const STATUS_MAP = {
   pending: { label: 'Pendiente', color: 'warning', icon: Clock },

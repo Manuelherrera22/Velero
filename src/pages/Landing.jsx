@@ -273,7 +273,7 @@ export default function Landing() {
                   <ArrowRight size={18} />
                 </Link>
                 <a 
-                  href="https://wa.me/5491136696696?text=Hola%20Kailu!%20Quiero%20agendar%20una%20reunión%20como%20capitán" 
+                  href="https://wa.me/5491161789818?text=Hola%20Kailu!%20Quiero%20agendar%20una%20reunión%20como%20capitán" 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn--ghost btn--lg"
