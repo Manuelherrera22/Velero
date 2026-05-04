@@ -201,13 +201,16 @@ const useAuthStore = create((set, get) => ({
   // Sign out
   signOut: async () => {
     try {
-      await supabase.auth.signOut()
+      // Intentar cerrar sesión en el servidor y forzar limpieza local
+      await supabase.auth.signOut({ scope: 'local' })
+      // También intentar cerrar la sesión global por las dudas, pero atrapando errores
+      await supabase.auth.signOut().catch(() => {})
     } catch (err) {
       console.error('Signout error:', err)
     } finally {
       set({ user: null, session: null, profile: null })
-      // Optional: force a hard reload or redirect if needed, but ProtectedRoute should handle it
-      window.location.href = '/login'
+      // Forzamos recarga y redirección a inicio
+      window.location.href = '/'
     }
   },
 
