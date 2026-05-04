@@ -155,6 +155,7 @@ export default function QRLanding() {
                     <Star size={14} fill="currentColor" /> —
                   </div>
                   <div className="card__price">
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontWeight: 'normal', marginRight: '4px' }}>Desde</span>
                     {formatPrice(trip.price_per_person, trip.currency)}
                     <span>/persona</span>
                   </div>

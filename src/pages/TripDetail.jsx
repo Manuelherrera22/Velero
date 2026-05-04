@@ -232,8 +232,33 @@ export default function TripDetail() {
           <div className="trip-detail__sidebar">
             <div className="booking-card glass">
               
+              {/* Mode Selector */}
+              {trip.allow_full_boat && (
+                <div className="booking-card__section mb-6">
+                  <label className="booking-card__label" style={{ marginBottom: '12px' }}>
+                    Tipo de experiencia
+                  </label>
+                  <div className="flex bg-secondary/20 p-1 rounded-xl">
+                    <button 
+                      className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-sm font-bold rounded-xl transition-all ${bookingMode === 'shared' ? 'bg-background shadow-sm text-foreground border border-border/30' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/30'}`}
+                      onClick={() => setBookingMode('shared')}
+                    >
+                      <span style={{ fontSize: '15px' }}>Compartido</span>
+                      <span className="text-xs font-normal opacity-70 mt-1" style={{ textAlign: 'center', lineHeight: '1.2' }}>Viajás con otras personas</span>
+                    </button>
+                    <button 
+                      className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-sm font-bold rounded-xl transition-all ${bookingMode === 'private' ? 'bg-primary text-primary-content shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/30'}`}
+                      onClick={() => setBookingMode('private')}
+                    >
+                      <span style={{ fontSize: '15px' }}>Velero privado</span>
+                      <span className="text-xs font-normal opacity-80 mt-1" style={{ textAlign: 'center', lineHeight: '1.2' }}>Reservás el velero completo</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Dynamic Price Header */}
-              <div className="booking-card__price mb-4 flex flex-col">
+              <div className="booking-card__price mb-6 flex flex-col border-b border-border/40 pb-6">
                 {trip.discount_percentage > 0 && (
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-muted-foreground line-through text-lg font-normal">
@@ -245,6 +270,7 @@ export default function TripDetail() {
                   </div>
                 )}
                 <div className="flex items-baseline gap-1">
+                  <span className="text-base font-medium text-muted-foreground mr-1">Desde</span>
                   {formatPrice(basePrice, trip.currency)}
                   <span className="text-sm font-normal text-muted-foreground">
                     {bookingMode === 'private' ? ' / navío' : ' / persona'}
@@ -252,29 +278,11 @@ export default function TripDetail() {
                 </div>
               </div>
 
-              {/* Mode Selector */}
-              {trip.allow_full_boat && (
-                <div className="flex bg-secondary/20 p-1 rounded-xl mb-6">
-                  <button 
-                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${bookingMode === 'shared' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                    onClick={() => setBookingMode('shared')}
-                  >
-                    Compartido
-                  </button>
-                  <button 
-                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${bookingMode === 'private' ? 'bg-primary text-primary-content shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-                    onClick={() => setBookingMode('private')}
-                  >
-                    Navío Exclusivo
-                  </button>
-                </div>
-              )}
-
 
               {/* Date Selection */}
               <div className="booking-card__section">
-                <label className="booking-card__label">
-                  <CalendarDays size={16} /> Fecha
+                <label className="booking-card__label" style={{ fontSize: '1.05rem', fontWeight: 700 }}>
+                  📅 Elegí día y horario
                 </label>
                 {tripDates.length > 0 ? (
                   <div className="booking-card__dates">
@@ -293,12 +301,15 @@ export default function TripDetail() {
                               return (
                                 <button
                                   key={d.id}
-                                  className={`booking-card__date ${selectedDate === d.id ? 'booking-card__date--selected' : ''}`}
+                                  className={`booking-card__date flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border transition-all ${selectedDate === d.id ? 'booking-card__date--selected border-primary bg-primary/10' : 'border-border/60 hover:border-primary/50'}`}
                                   onClick={() => setSelectedDate(d.id)}
                                 >
-                                  <span className="booking-card__date-time">{d.start_time?.slice(0, 5)}hs</span>
-                                  <span className="booking-card__date-price">{formatPrice(slotPrice, trip.currency)}</span>
-                                  <span className="booking-card__date-spots">{d.available_spots} disp.</span>
+                                  <span className="booking-card__date-time font-bold text-[15px]">{d.start_time?.slice(0, 5)} hs</span>
+                                  <span className="booking-card__date-price text-sm text-muted-foreground">{formatPrice(slotPrice, trip.currency)}</span>
+                                  <span className="booking-card__date-spots flex items-center gap-1.5 text-xs text-success mt-1">
+                                    <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+                                    {d.available_spots} disp.
+                                  </span>
                                 </button>
                               )
                             })}
@@ -312,9 +323,9 @@ export default function TripDetail() {
               </div>
 
               {/* Guests */}
-              <div className="booking-card__section">
-                <label className="booking-card__label">
-                  <Users size={16} /> Personas
+              <div className="booking-card__section border-t border-border/40 pt-6 mt-6">
+                <label className="booking-card__label" style={{ fontSize: '1.05rem', fontWeight: 700 }}>
+                  👥 Personas
                 </label>
                 <div className="booking-card__counter">
                   <button className="booking-card__counter-btn" disabled={bookingMode === 'private'} onClick={() => setGuests(Math.max(1, guests - 1))}>
@@ -325,12 +336,17 @@ export default function TripDetail() {
                     <Plus size={16} />
                   </button>
                 </div>
+                {bookingMode === 'shared' && (
+                  <p className="text-sm text-muted-foreground mt-4 text-center" style={{ lineHeight: '1.4' }}>
+                    ¿Venís solo? Podés reservar 1 lugar sin problema.
+                  </p>
+                )}
               </div>
 
               {/* Addons */}
               {tripAddons.length > 0 && (
-                <div className="booking-card__section">
-                  <label className="booking-card__label">Extras</label>
+                <div className="booking-card__section border-t border-border/40 pt-6 mt-6">
+                  <label className="booking-card__label mb-3" style={{ fontSize: '1.05rem', fontWeight: 700 }}>Mejorá tu experiencia (opcional)</label>
                   {tripAddons.map(addon => (
                     <button
                       key={addon.id}

@@ -226,41 +226,45 @@ export default function Login() {
           </button>
         </form>
 
-        {/* Toggle password/magic link */}
-        <button
-          className="btn btn--ghost login-password-toggle"
-          onClick={() => {
-            setUsePassword(!usePassword)
-            setMethod('email')
-            setPassword('')
-            setPasswordError('')
-            clearError()
-          }}
-        >
-          <Lock size={14} />
-          {usePassword ? 'Usar enlace mágico' : '¿Tenés contraseña? Ingresá con ella'}
-        </button>
+        <div className="login-divider"><span>Otras opciones</span></div>
 
-        {/* Registration CTA */}
-        <div className="login-register-cta">
-          <p>¿No tenés cuenta?{' '}
-            <Link to="/registro" className="login-register-link">
-              Registrate acá
-            </Link>
-          </p>
+        <div className="flex flex-col gap-3">
+          {/* Toggle password/magic link */}
+          <button
+            className="btn btn--ghost login-password-toggle w-full"
+            onClick={() => {
+              setUsePassword(!usePassword)
+              setMethod('email')
+              setPassword('')
+              setPasswordError('')
+              clearError()
+            }}
+          >
+            <Lock size={14} />
+            {usePassword ? 'Usar enlace mágico' : '¿Tenés contraseña? Ingresá con ella'}
+          </button>
+
+          {/* Registration CTA */}
+          <div className="login-register-cta text-center mb-1">
+            <p>¿No tenés cuenta?{' '}
+              <Link to="/registro" className="login-register-link font-bold">
+                Registrate acá
+              </Link>
+            </p>
+          </div>
+
+          {/* Captain CTA */}
+          <Link to="/registro?rol=capitan" className="login-captain-cta mt-2">
+            <div className="login-captain-cta__icon">
+              <Sailboat size={20} />
+            </div>
+            <div className="login-captain-cta__text">
+              <strong>¿Sos capitán?</strong>
+              <span>Registrate y publicá tu primera travesía</span>
+            </div>
+            <ArrowRight size={16} className="login-captain-cta__arrow" />
+          </Link>
         </div>
-
-        {/* Captain CTA */}
-        <Link to="/registro?rol=capitan" className="login-captain-cta">
-          <div className="login-captain-cta__icon">
-            <Sailboat size={20} />
-          </div>
-          <div className="login-captain-cta__text">
-            <strong>¿Sos capitán?</strong>
-            <span>Registrate y publicá tu primera travesía</span>
-          </div>
-          <ArrowRight size={16} className="login-captain-cta__arrow" />
-        </Link>
 
         <p className="login-card__note" style={{ marginTop: 'var(--space-4)' }}>
           Al ingresar aceptas nuestros <a href="#">Términos y Condiciones</a> y <a href="#">Política de Privacidad</a>.
