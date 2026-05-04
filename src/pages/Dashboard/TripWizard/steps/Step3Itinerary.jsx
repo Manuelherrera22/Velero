@@ -38,41 +38,43 @@ const Step3Itinerary = () => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="step-container">
       
-      <div className="space-y-2">
-        <h2 className="text-3xl font-bold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+      <div className="step-header">
+        <h2 className="step-title">
           Itinerario y Pensión
         </h2>
-        <p className="text-muted-foreground text-lg">
+        <p className="step-subtitle">
           Detalla qué harán los pasajeros y si tendrán comidas a bordo.
         </p>
       </div>
 
-      <div className="space-y-8">
+      <div className="step-form">
         
         {/* Duración (Días y Noches) */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+          <div className="form-group">
+            <label className="form-group__label">
               Días de navegación
             </label>
             <input
               type="number"
               min="1"
-              className="input input-bordered w-full text-lg font-bold"
+              className="input-control"
+              style={{ fontWeight: 'bold' }}
               value={formData.duration_days}
               onChange={(e) => updateFormData({ duration_days: parseInt(e.target.value) || 1 })}
             />
           </div>
-          <div className="space-y-3">
-            <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase">
+          <div className="form-group">
+            <label className="form-group__label">
               Noches a bordo
             </label>
             <input
               type="number"
               min="0"
-              className="input input-bordered w-full text-lg font-bold"
+              className="input-control"
+              style={{ fontWeight: 'bold' }}
               value={formData.duration_nights}
               onChange={(e) => updateFormData({ duration_nights: parseInt(e.target.value) || 0 })}
             />
@@ -80,24 +82,21 @@ const Step3Itinerary = () => {
         </div>
 
         {/* Tipo de Pensión */}
-        <div className="space-y-3 pt-6 border-t border-border/50">
-          <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase">
+        <div className="step-section">
+          <label className="form-group__label">
             Tipo de Pensión (Comidas)
           </label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--space-3)' }}>
             {PENSION_TYPES.map((type) => (
               <label 
                 key={type}
-                className={`flex items-center justify-center p-3 rounded-xl border text-sm font-semibold cursor-pointer transition-all ${
-                  formData.pension_type === type 
-                  ? 'bg-accent/10 border-accent text-accent' 
-                  : 'bg-secondary/20 border-border hover:border-accent/40'
-                }`}
+                className={`tag-btn ${formData.pension_type === type ? 'tag-btn--active' : ''}`}
+                style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}
               >
                 <input 
                   type="radio" 
                   name="pension" 
-                  className="sr-only"
+                  style={{ display: 'none' }}
                   checked={formData.pension_type === type}
                   onChange={() => updateFormData({ pension_type: type })}
                 />
@@ -108,35 +107,47 @@ const Step3Itinerary = () => {
         </div>
 
         {/* Itinerario Diario */}
-        <div className="space-y-4 pt-6 border-t border-border/50">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase">
+        <div className="step-section">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
+            <label className="form-group__label" style={{ marginBottom: 0 }}>
               Desglose día a día
             </label>
             <button 
               onClick={addDay}
-              className="btn btn-sm btn-outline text-xs"
+              className="btn btn--outline"
+              style={{ padding: '6px 12px', fontSize: '12px' }}
             >
-              <Plus className="w-4 h-4 mr-1" /> Agregar Día
+              <Plus size={16} style={{ marginRight: '4px' }} /> Agregar Día
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             {formData.itinerary.length === 0 && (
-              <div className="text-center p-6 border-2 border-dashed border-border/60 rounded-2xl">
-                <p className="text-muted-foreground mb-4">No has agregado descripciones por día.</p>
-                <button onClick={addDay} className="btn btn-primary btn-sm">Empezar itinerario</button>
+              <div style={{ textAlign: 'center', padding: 'var(--space-6)', border: '2px dashed var(--border-color)', borderRadius: 'var(--radius-xl)' }}>
+                <p className="step-subtitle" style={{ marginBottom: 'var(--space-4)' }}>No has agregado descripciones por día.</p>
+                <button onClick={addDay} className="btn btn--accent">Empezar itinerario</button>
               </div>
             )}
 
             {formData.itinerary.map((item, index) => (
-              <div key={index} className="flex gap-4 items-start group">
-                <div className="min-w-[60px] h-12 bg-accent/10 rounded-xl flex items-center justify-center font-bold text-accent">
+              <div key={index} style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
+                <div style={{ 
+                  minWidth: '60px', 
+                  height: '48px', 
+                  backgroundColor: 'rgba(0, 180, 180, 0.1)', 
+                  borderRadius: 'var(--radius-lg)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  fontWeight: 'bold', 
+                  color: 'var(--color-accent-500)' 
+                }}>
                   Día {item.day}
                 </div>
-                <div className="flex-1">
+                <div style={{ flex: 1 }}>
                   <textarea
-                    className="textarea textarea-bordered w-full min-h-[80px]"
+                    className="input-control"
+                    style={{ minHeight: '80px', resize: 'vertical' }}
                     placeholder={`Describe las actividades, paradas o paisajes del día ${item.day}...`}
                     value={item.description}
                     onChange={(e) => handleItineraryChange(index, e.target.value)}
@@ -144,10 +155,11 @@ const Step3Itinerary = () => {
                 </div>
                 <button 
                   onClick={() => removeDay(index)}
-                  className="btn btn-ghost btn-circle text-error/60 hover:text-error hover:bg-error/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="btn btn--ghost"
+                  style={{ color: 'var(--color-error-500)', padding: '8px' }}
                   title="Eliminar día"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 size={20} />
                 </button>
               </div>
             ))}

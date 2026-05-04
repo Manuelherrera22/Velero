@@ -24,48 +24,59 @@ const Step5Services = () => {
   const { formData, toggleService, updateFormData } = useTripWizardStore()
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="step-container">
       
-      <div className="space-y-2">
-        <h2 className="text-3xl font-bold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+      <div className="step-header">
+        <h2 className="step-title">
           Servicios y la Embarcación
         </h2>
-        <p className="text-muted-foreground text-lg">
+        <p className="step-subtitle">
           Detalla exactamente qué incluye el precio y vincula el transporte.
         </p>
       </div>
 
-      <div className="bg-secondary/10 border border-border/50 rounded-2xl p-6">
+      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-2xl)', padding: 'var(--space-6)' }}>
         {/* Table Header */}
-        <div className="grid grid-cols-12 gap-4 pb-4 border-b border-border/50 font-bold text-xs uppercase tracking-tight text-foreground/70">
-          <div className="col-span-8">Servicios</div>
-          <div className="col-span-2 text-center text-primary">Incluidos</div>
-          <div className="col-span-2 text-center text-error">Excluidos</div>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', 
+          gap: 'var(--space-4)', 
+          paddingBottom: 'var(--space-4)', 
+          borderBottom: '1px solid var(--border-color)', 
+          fontWeight: 'bold', 
+          fontSize: '12px', 
+          textTransform: 'uppercase', 
+          letterSpacing: '-0.025em', 
+          color: 'rgba(255, 255, 255, 0.7)' 
+        }}>
+          <div style={{ gridColumn: 'span 8 / span 8' }}>Servicios</div>
+          <div style={{ gridColumn: 'span 2 / span 2', textAlign: 'center', color: 'var(--color-primary-500)' }}>Incluidos</div>
+          <div style={{ gridColumn: 'span 2 / span 2', textAlign: 'center', color: 'var(--color-error-500)' }}>Excluidos</div>
         </div>
 
         {/* Matrix rows */}
-        <div className="max-h-[300px] overflow-y-auto pt-4 space-y-4 pr-2 custom-scrollbar">
+        <div style={{ maxHeight: '300px', overflowY: 'auto', paddingTop: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', paddingRight: 'var(--space-2)' }} className="custom-scrollbar">
           {AVAILABLE_SERVICES.map((service) => {
             const isIncluded = formData.included_services.includes(service)
             const isExcluded = formData.excluded_services.includes(service)
 
             return (
-              <div key={service} className="grid grid-cols-12 gap-4 items-center group">
-                <div className="col-span-8 font-medium text-foreground/90 group-hover:text-foreground transition-colors">
+              <div key={service} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 'var(--space-4)', alignItems: 'center' }} className="service-row-hover">
+                <div style={{ gridColumn: 'span 8 / span 8', fontWeight: 500, color: 'rgba(255, 255, 255, 0.9)', transition: 'color 0.2s ease' }} className="service-label">
                   {service}
                 </div>
-                <div className="col-span-2 flex justify-center">
+                <div style={{ gridColumn: 'span 2 / span 2', display: 'flex', justifyContent: 'center' }}>
                   <input 
                     type="checkbox" 
-                    className="checkbox checkbox-primary checkbox-sm rounded-md"
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--color-primary-500)', borderRadius: '4px' }}
                     checked={isIncluded}
                     onChange={() => toggleService('included_services', service)}
                   />
                 </div>
-                <div className="col-span-2 flex justify-center">
+                <div style={{ gridColumn: 'span 2 / span 2', display: 'flex', justifyContent: 'center' }}>
                   <input 
                     type="checkbox" 
-                    className="checkbox checkbox-error checkbox-sm rounded-md"
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--color-error-500)', borderRadius: '4px' }}
                     checked={isExcluded}
                     onChange={() => toggleService('excluded_services', service)}
                   />
@@ -77,18 +88,19 @@ const Step5Services = () => {
       </div>
 
       {/* Boat Selection */}
-      <div className="space-y-4 pt-6 border-t border-border/50">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase">
+      <div className="step-section">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+          <label className="form-group__label" style={{ marginBottom: 0 }}>
             Embarcación *
           </label>
-          <div className="tooltip" data-tip="El barco físico donde se realizará esta travesía">
-            <HelpCircle className="w-4 h-4 text-muted-foreground" />
+          <div title="El barco físico donde se realizará esta travesía" style={{ cursor: 'help' }}>
+            <HelpCircle size={16} color="var(--text-muted)" />
           </div>
         </div>
 
         <select 
-          className="select select-bordered w-full h-14 text-lg font-medium"
+          className="input-control"
+          style={{ fontWeight: 500 }}
           value={formData.boat_id || ''}
           onChange={(e) => updateFormData({ boat_id: e.target.value })}
         >
@@ -96,20 +108,34 @@ const Step5Services = () => {
           {MOCK_BOATS.map(b => (
             <option key={b.id} value={b.id}>{b.name}</option>
           ))}
-          <option value="NEW" className="font-bold text-accent">
+          <option value="NEW" style={{ fontWeight: 'bold', color: 'var(--color-accent-500)' }}>
             ✨ Agregar nueva embarcación
           </option>
         </select>
 
         {formData.boat_id === 'NEW' && (
-          <div className="animate-in slide-in-from-top-2 p-6 bg-accent/5 border border-accent/20 rounded-2xl mt-4">
-            <h4 className="font-bold text-accent mb-2 flex items-center gap-2"><Anchor className="w-5 h-5"/> Crear Embarcación</h4>
-            <p className="text-sm text-muted-foreground mb-4">Guarda la travesía temporalmente para agregar el barco nuevo en una pestaña externa, o completa el mini-formulario aquí (Coming Soon).</p>
-            <button className="btn btn-sm btn-accent w-full">Configurar barco ahora</button>
+          <div style={{ 
+            padding: 'var(--space-6)', 
+            backgroundColor: 'rgba(0, 180, 180, 0.05)', 
+            border: '1px solid rgba(0, 180, 180, 0.2)', 
+            borderRadius: 'var(--radius-2xl)', 
+            marginTop: 'var(--space-4)',
+            animation: 'fadeIn 0.3s ease-out'
+          }}>
+            <h4 style={{ fontWeight: 'bold', color: 'var(--color-accent-500)', marginBottom: 'var(--space-2)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <Anchor size={20}/> Crear Embarcación
+            </h4>
+            <p className="step-subtitle" style={{ marginBottom: 'var(--space-4)' }}>Guarda la travesía temporalmente para agregar el barco nuevo en una pestaña externa, o completa el mini-formulario aquí (Coming Soon).</p>
+            <button className="btn btn--accent" style={{ width: '100%' }}>Configurar barco ahora</button>
           </div>
         )}
 
       </div>
+      <style>{`
+        .service-row-hover:hover .service-label {
+          color: white !important;
+        }
+      `}</style>
     </div>
   )
 }

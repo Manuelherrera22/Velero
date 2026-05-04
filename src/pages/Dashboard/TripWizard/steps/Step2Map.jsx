@@ -9,54 +9,93 @@ const Step2Map = () => {
   const { formData, updateFormData } = useTripWizardStore()
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="step-container">
       
-      <div className="space-y-2">
-        <h2 className="text-3xl font-bold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+      <div className="step-header">
+        <h2 className="step-title">
           Marquemos el rumbo
         </h2>
-        <p className="text-muted-foreground text-lg">
+        <p className="step-subtitle">
           Muestra en el mapa interactivo desde dónde zarparán los pasajeros y la zona de navegación.
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="step-form">
         
         {/* Ubicación Genérica */}
-        <div className="space-y-3">
-          <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase">
+        <div className="form-group">
+          <label className="form-group__label">
             Ciudad o Región *
           </label>
-          <div className="relative">
-            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <div className="input-with-icon">
+            <MapPin className="input-icon" size={20} />
             <input
               type="text"
-              className="input input-bordered w-full h-14 pl-12 text-lg"
+              className="input-control"
+              style={{ paddingLeft: '44px' }}
               placeholder="Ej: Buenos Aires, Río de la Plata"
               value={formData.location}
               onChange={(e) => updateFormData({ location: e.target.value })}
             />
           </div>
-          <p className="text-xs text-muted-foreground">Esta será la información pública general antes de reservar.</p>
+          <p className="step-subtitle" style={{ fontSize: '12px', marginTop: '4px' }}>Esta será la información pública general antes de reservar.</p>
         </div>
 
         {/* Mapa interactivo (Mockup) */}
-        <div className="space-y-3 pt-6 border-t border-border/50">
-          <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase">
+        <div className="step-section">
+          <label className="form-group__label">
             Ubicación exacta de embarque (Privado)
           </label>
-          <p className="text-sm text-muted-foreground mb-4">Haz clic en el mapa para marcar el muelle o puerto. Esta ubicación exacta solo se compartirá con quienes realicen la reserva.</p>
+          <p className="step-subtitle" style={{ fontSize: '14px', marginBottom: '16px' }}>Haz clic en el mapa para marcar el muelle o puerto. Esta ubicación exacta solo se compartirá con quienes realicen la reserva.</p>
           
-          <div className="w-full h-[350px] bg-secondary/30 rounded-2xl border-2 border-border/50 relative overflow-hidden flex items-center justify-center group cursor-pointer hover:border-accent/40 transition-colors">
+          <div style={{
+            width: '100%',
+            height: '350px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: 'var(--radius-2xl)',
+            border: '2px solid var(--border-color)',
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'border-color 0.3s ease'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(0, 180, 180, 0.4)'}
+          onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+          >
             
             {/* Visual placeholder for Map */}
-            <div className="absolute inset-0 opacity-20 bg-[url('https://maps.wikimedia.org/osm-intl/12/1392/2483.png')] bg-cover bg-center"></div>
+            <div style={{
+              position: 'absolute',
+              inset: '0',
+              opacity: '0.2',
+              backgroundImage: "url('https://maps.wikimedia.org/osm-intl/12/1392/2483.png')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}></div>
             
-            <div className="z-10 flex flex-col items-center gap-3">
-              <div className="p-4 bg-background/80 backdrop-blur rounded-full shadow-lg text-primary group-hover:text-accent transition-colors group-hover:scale-110 duration-300">
-                <Navigation className="w-8 h-8" />
+            <div style={{ zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                padding: '16px',
+                backgroundColor: 'rgba(10, 15, 26, 0.8)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '50%',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                color: 'var(--color-primary-500)',
+                transition: 'all 0.3s ease'
+              }}>
+                <Navigation size={32} />
               </div>
-              <span className="font-semibold text-foreground/80 bg-background/50 px-3 py-1 rounded backdrop-blur">
+              <span style={{
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                backgroundColor: 'rgba(10, 15, 26, 0.5)',
+                padding: '4px 12px',
+                borderRadius: '4px',
+                backdropFilter: 'blur(4px)'
+              }}>
                 Hacer clic para marcar el PIN
               </span>
             </div>

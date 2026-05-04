@@ -29,27 +29,27 @@ const Step4Photos = () => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="step-container">
       
-      <div className="flex justify-between items-start">
-        <div className="space-y-2 max-w-xl">
-          <h2 className="text-3xl font-bold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div className="step-header" style={{ maxWidth: '36rem' }}>
+          <h2 className="step-title">
             Sube fotos increíbles
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="step-subtitle">
             Atrae a más pasajeros subiendo al menos 5 fotos que representen la experiencia de paisajes, actividades y la embarcación.
           </p>
         </div>
-        <div className="text-center">
-          <button className="btn btn-outline btn-primary rounded-full">
-            <UploadCloud className="w-5 h-5 mr-2" />
+        <div style={{ textAlign: 'center' }}>
+          <button className="btn btn--outline" style={{ borderRadius: '9999px' }}>
+            <UploadCloud size={20} style={{ marginRight: '8px' }} />
             Cargar imágenes
           </button>
-          <p className="text-sm font-semibold text-muted-foreground mt-2">({getTotalPhotos()} fotos)</p>
+          <p className="step-subtitle" style={{ fontSize: '14px', marginTop: '8px', fontWeight: 600 }}>({getTotalPhotos()} fotos)</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-4)' }}>
         
         {PHOTO_CATEGORIES.map((category) => {
           const isPortada = category.id === 'portada'
@@ -61,38 +61,100 @@ const Step4Photos = () => {
           return (
             <div 
               key={category.id} 
-              className={`relative bg-secondary/20 rounded-2xl border-2 border-dashed ${urls.length > 0 ? 'border-primary/50' : 'border-border/60 hover:border-accent/40'} min-h-[160px] flex items-center justify-center overflow-hidden group transition-colors`}
+              style={{
+                position: 'relative',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 'var(--radius-2xl)',
+                border: `2px dashed ${urls.length > 0 ? 'rgba(0, 180, 180, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+                minHeight: '160px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                transition: 'border-color 0.3s ease'
+              }}
+              onMouseOver={(e) => { if(urls.length === 0) e.currentTarget.style.borderColor = 'rgba(0, 180, 180, 0.4)' }}
+              onMouseOut={(e) => { if(urls.length === 0) e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)' }}
             >
               {/* Category Badge */}
-              <div className="absolute top-3 left-3 bg-primary text-primary-content text-xs font-bold px-3 py-1 rounded-full shadow-sm z-10 w-fit">
+              <div style={{
+                position: 'absolute',
+                top: '12px',
+                left: '12px',
+                backgroundColor: 'var(--color-primary-500)',
+                color: 'white',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                padding: '4px 12px',
+                borderRadius: '9999px',
+                zIndex: 10
+              }}>
                 {category.label}
               </div>
 
               {/* Upload Trigger / Edit */}
               <button 
                 onClick={() => handleSimulatedUpload(category.id)}
-                className="absolute top-3 right-3 bg-background text-foreground p-2 rounded-full shadow border hover:text-accent z-10"
+                style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '12px',
+                  backgroundColor: 'var(--bg-primary)',
+                  color: 'var(--text-primary)',
+                  padding: '8px',
+                  borderRadius: '50%',
+                  border: '1px solid var(--border-color)',
+                  zIndex: 10,
+                  cursor: 'pointer',
+                  transition: 'color 0.3s ease'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.color = 'var(--color-accent-500)'}
+                onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
                 title="Cargar foto en esta categoría"
               >
-                <ImageIcon className="w-4 h-4" />
+                <ImageIcon size={16} />
               </button>
 
               {/* Render Images wrapper */}
-              <div className="absolute inset-0 flex">
+              <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
                 {urls.length === 0 ? (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/50 opacity-40">
-                    <ImageIcon className="w-16 h-16" />
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255, 255, 255, 0.1)' }}>
+                    <ImageIcon size={64} />
                   </div>
                 ) : (
-                  <div className={`w-full flex ${urls.length > 1 ? 'overflow-x-auto snap-x' : ''}`}>
+                  <div style={{ width: '100%', display: 'flex', overflowX: urls.length > 1 ? 'auto' : 'visible', scrollSnapType: urls.length > 1 ? 'x mandatory' : 'none' }}>
                     {urls.map((url, i) => (
-                      <div key={i} className={`relative flex-shrink-0 ${isPortada || urls.length === 1 ? 'w-full' : 'w-4/5'} h-full snap-center group/img`}>
-                        <img src={url} alt={category.label} className="w-full h-full object-cover" />
+                      <div 
+                        key={i} 
+                        style={{
+                          position: 'relative',
+                          flexShrink: 0,
+                          width: (isPortada || urls.length === 1) ? '100%' : '80%',
+                          height: '100%',
+                          scrollSnapAlign: 'center'
+                        }}
+                        className="photo-card-hover"
+                      >
+                        <img src={url} alt={category.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         <button 
                           onClick={() => removePhoto(category.id, url)}
-                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover/img:opacity-100 transition-opacity drop-shadow-md hover:bg-red-600"
+                          className="photo-remove-btn"
+                          style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            backgroundColor: 'var(--color-error-500)',
+                            color: 'white',
+                            padding: '8px',
+                            borderRadius: '50%',
+                            border: 'none',
+                            cursor: 'pointer',
+                            opacity: 0,
+                            transition: 'opacity 0.3s ease'
+                          }}
                         >
-                          <X className="w-5 h-5" />
+                          <X size={20} />
                         </button>
                       </div>
                     ))}
@@ -104,7 +166,11 @@ const Step4Photos = () => {
           )
         })}
       </div>
-
+      <style>{`
+        .photo-card-hover:hover .photo-remove-btn {
+          opacity: 1 !important;
+        }
+      `}</style>
     </div>
   )
 }

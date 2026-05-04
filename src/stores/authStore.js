@@ -200,8 +200,15 @@ const useAuthStore = create((set, get) => ({
 
   // Sign out
   signOut: async () => {
-    await supabase.auth.signOut()
-    set({ user: null, session: null, profile: null })
+    try {
+      await supabase.auth.signOut()
+    } catch (err) {
+      console.error('Signout error:', err)
+    } finally {
+      set({ user: null, session: null, profile: null })
+      // Optional: force a hard reload or redirect if needed, but ProtectedRoute should handle it
+      window.location.href = '/login'
+    }
   },
 
   // Computed

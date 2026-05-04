@@ -1,0 +1,487 @@
+/* TripWizard.css — Redesigned layout with proper sidebar and form controls */
+
+/* ==============================
+   MAIN LAYOUT
+   ============================== */
+.wizard-layout {
+  display: flex;
+  height: calc(100vh - 64px);
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+/* ==============================
+   SIDEBAR
+   ============================== */
+.wizard-sidebar {
+  width: 260px;
+  min-width: 260px;
+  border-right: 1px solid var(--border-color, rgba(255,255,255,0.08));
+  background-color: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) var(--space-4);
+  overflow-y: auto;
+  gap: var(--space-4);
+}
+
+.wizard-sidebar__icon {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, var(--color-accent-500), var(--color-accent-700));
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(0, 180, 180, 0.25);
+  flex-shrink: 0;
+}
+
+.wizard-sidebar__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  background: linear-gradient(to right, var(--color-primary-400, #2E7AEF), var(--color-accent-400, #26C6C6));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wizard-sidebar__progress-wrapper {
+  width: 100%;
+  max-width: 200px;
+}
+
+.wizard-sidebar__progress-bar {
+  height: 8px;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+
+.wizard-sidebar__progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent-500), var(--color-primary-500, #1059CB));
+  transition: width 0.7s ease-out;
+  border-radius: 9999px;
+}
+
+.wizard-sidebar__progress-text {
+  text-align: center;
+  font-weight: 600;
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--text-secondary, #94A3B8);
+}
+
+/* Steps list — flows naturally below the icon/title */
+.wizard-sidebar__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 0 var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.wizard-sidebar__step-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg, 0.75rem);
+  transition: background-color 0.2s ease;
+}
+
+.wizard-sidebar__step-item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.wizard-sidebar__step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+}
+
+.wizard-sidebar__step-dot--active {
+  background-color: var(--color-accent-500, #00B4B4);
+  transform: scale(1.4);
+  box-shadow: 0 0 8px rgba(0, 180, 180, 0.5);
+}
+
+.wizard-sidebar__step-dot--completed {
+  background-color: var(--color-primary-500, #1059CB);
+}
+
+.wizard-sidebar__step-label {
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--text-secondary, #94A3B8);
+  transition: all 0.2s ease;
+}
+
+.wizard-sidebar__step-label--active {
+  font-weight: 700;
+  color: var(--text-primary, #FFFFFF);
+}
+
+/* ==============================
+   CONTENT AREA
+   ============================== */
+.wizard-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  position: relative;
+  height: 100%;
+  min-width: 0;
+}
+
+.wizard-content__scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-10) var(--space-8);
+  scroll-behavior: smooth;
+}
+
+.wizard-content__inner {
+  max-width: 700px;
+  margin: 0 auto;
+  width: 100%;
+  animation: fadeInRight 0.4s ease-out forwards;
+}
+
+/* ==============================
+   FOOTER NAVIGATION
+   ============================== */
+.wizard-footer {
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: var(--space-4) var(--space-8);
+  background-color: rgba(10, 15, 26, 0.85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ==============================
+   COMMON STEP STYLES
+   ============================== */
+.step-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.step-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.step-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(to bottom right, var(--color-primary-400, #2E7AEF), var(--color-accent-400, #26C6C6));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.step-subtitle {
+  color: var(--text-secondary, #94A3B8);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.step-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.step-section {
+  padding-top: var(--space-6);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ==============================
+   FORM CONTROLS (Missing classes)
+   ============================== */
+
+/* --- Form Group --- */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.form-group__label {
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: var(--space-1);
+}
+
+/* --- Input Control (the core input class for TripWizard) --- */
+.input-control {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg, 0.75rem);
+  color: var(--text-primary, #FFFFFF);
+  transition: all 200ms ease;
+  outline: none;
+  width: 100%;
+  height: 48px;
+}
+
+.input-control:focus {
+  border-color: var(--color-accent-500, #00B4B4);
+  box-shadow: 0 0 0 3px rgba(0, 180, 180, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.input-control::placeholder {
+  color: var(--text-tertiary, #64748B);
+}
+
+.input-control:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Select dropdown options */
+select.input-control option {
+  background-color: var(--bg-primary, #0A1628);
+  color: var(--text-primary, #FFFFFF);
+}
+
+/* Textarea overrides */
+textarea.input-control {
+  height: auto;
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* --- Input with Icon wrapper --- */
+.input-with-icon {
+  position: relative;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary, #94A3B8);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ==============================
+   RADIO CARDS
+   ============================== */
+.radio-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .radio-card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.radio-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  padding: var(--space-6);
+  border-radius: var(--radius-xl, 1rem);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.radio-card:hover {
+  border-color: rgba(0, 180, 180, 0.4);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.radio-card--active {
+  border-color: var(--color-accent-500, #00B4B4);
+  background-color: rgba(0, 180, 180, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 180, 180, 0.1);
+}
+
+.radio-card__title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: var(--space-1);
+}
+
+.radio-card__desc {
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--text-secondary, #94A3B8);
+  line-height: 1.5;
+}
+
+.radio-card__indicator {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.radio-card--active .radio-card__indicator {
+  border-color: var(--color-accent-500, #00B4B4);
+  background-color: var(--color-accent-500, #00B4B4);
+}
+
+.radio-card__indicator-dot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--bg-primary, #0A1628);
+  border-radius: 50%;
+}
+
+/* ==============================
+   TAGS
+   ============================== */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.tag-btn {
+  padding: var(--space-2) var(--space-4);
+  border-radius: 9999px;
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary, #94A3B8);
+  cursor: pointer;
+}
+
+.tag-btn:hover {
+  border-color: rgba(0, 180, 180, 0.5);
+  background-color: rgba(0, 180, 180, 0.05);
+}
+
+.tag-btn--active {
+  background-color: var(--color-accent-500, #00B4B4);
+  color: white;
+  border-color: var(--color-accent-500, #00B4B4);
+}
+
+.custom-tag {
+  padding: 4px 12px;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary, #FFFFFF);
+  font-size: var(--text-sm, 0.875rem);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-tag__remove {
+  margin-left: 8px;
+  color: var(--text-secondary, #94A3B8);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+}
+
+.custom-tag__remove:hover {
+  color: white;
+}
+
+/* ==============================
+   CUSTOM SCROLLBAR
+   ============================== */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ==============================
+   RESPONSIVE
+   ============================== */
+@media (max-width: 768px) {
+  .wizard-sidebar {
+    display: none;
+  }
+
+  .wizard-content__scroll {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .wizard-footer {
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+/* ==============================
+   ANIMATIONS
+   ============================== */
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

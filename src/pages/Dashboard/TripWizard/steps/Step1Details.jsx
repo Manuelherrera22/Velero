@@ -9,26 +9,26 @@ const Step1Details = () => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="step-container">
       
-      <div className="space-y-2">
-        <h2 className="text-3xl font-bold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+      <div className="step-header">
+        <h2 className="step-title">
           Cuentános sobre tu travesía
         </h2>
-        <p className="text-muted-foreground text-lg">
+        <p className="step-subtitle">
           Empecemos con lo básico. Un buen título y descripción ayudarán a los viajeros a enamorarse de tu propuesta.
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="step-form">
         {/* Título */}
-        <div className="space-y-3">
-          <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase">
+        <div className="form-group">
+          <label className="form-group__label">
             Título de la travesía *
           </label>
           <input
             type="text"
-            className="input input-bordered w-full h-14 text-lg"
+            className="input-control"
             placeholder="Ej: Navegación de atardecer por el Río de la Plata"
             value={formData.title}
             onChange={(e) => updateFormData({ title: e.target.value })}
@@ -37,12 +37,13 @@ const Step1Details = () => {
         </div>
 
         {/* Descripción */}
-        <div className="space-y-3">
-          <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase">
+        <div className="form-group">
+          <label className="form-group__label">
             Descripción promocional *
           </label>
           <textarea
-            className="textarea textarea-bordered w-full text-base min-h-[160px]"
+            className="input-control"
+            style={{ minHeight: '160px', resize: 'vertical' }}
             placeholder="Describe la experiencia general, qué la hace única, los paisajes y emociones..."
             value={formData.description}
             onChange={(e) => updateFormData({ description: e.target.value })}
@@ -50,73 +51,47 @@ const Step1Details = () => {
         </div>
 
         {/* Rol del organizador */}
-        <div className="space-y-4 pt-4 border-t border-border/50">
-          <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase block">
+        <div className="step-section">
+          <label className="form-group__label">
             ¿Cuál será tu rol en esta travesía?
           </label>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="radio-card-grid">
             {/* Opción Capitán */}
-            <label 
-              className={`relative flex cursor-pointer flex-col p-6 rounded-2xl border-2 transition-all duration-300 ${
-                formData.role_in_activity === 'capitan' 
-                ? 'border-accent bg-accent/5 shadow-md scale-[1.02]' 
-                : 'border-border/60 hover:border-accent/50 hover:bg-secondary/20'
-              }`}
+            <div 
+              className={`radio-card ${formData.role_in_activity === 'capitan' ? 'radio-card--active' : ''}`}
+              onClick={() => handleRoleChange('capitan')}
             >
-              <input 
-                type="radio" 
-                name="role_in_activity"
-                value="capitan"
-                checked={formData.role_in_activity === 'capitan'}
-                onChange={() => handleRoleChange('capitan')}
-                className="sr-only"
-              />
-              <span className="font-bold text-lg mb-1">Capitán</span>
-              <span className="text-sm text-muted-foreground">Seré yo quien navegue la embarcación durante toda la experiencia.</span>
+              <h3 className="radio-card__title">Capitán</h3>
+              <p className="radio-card__desc">Seré yo quien navegue la embarcación durante toda la experiencia.</p>
               
-              <div className={`absolute top-4 right-4 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                formData.role_in_activity === 'capitan' ? 'border-accent bg-accent' : 'border-muted-foreground/30'
-              }`}>
-                {formData.role_in_activity === 'capitan' && <div className="w-2.5 h-2.5 bg-accent-content rounded-full" />}
+              <div className="radio-card__indicator">
+                {formData.role_in_activity === 'capitan' && <div className="radio-card__indicator-dot" />}
               </div>
-            </label>
+            </div>
 
             {/* Opción Coordinador */}
-            <label 
-              className={`relative flex cursor-pointer flex-col p-6 rounded-2xl border-2 transition-all duration-300 ${
-                formData.role_in_activity === 'coordinador' 
-                ? 'border-accent bg-accent/5 shadow-md scale-[1.02]' 
-                : 'border-border/60 hover:border-accent/50 hover:bg-secondary/20'
-              }`}
+            <div 
+              className={`radio-card ${formData.role_in_activity === 'coordinador' ? 'radio-card--active' : ''}`}
+              onClick={() => handleRoleChange('coordinador')}
             >
-              <input 
-                type="radio" 
-                name="role_in_activity"
-                value="coordinador"
-                checked={formData.role_in_activity === 'coordinador'}
-                onChange={() => handleRoleChange('coordinador')}
-                className="sr-only"
-              />
-              <span className="font-bold text-lg mb-1">Coordinador</span>
-              <span className="text-sm text-muted-foreground">Organizo la actividad pero otra persona certificada patroneará el barco.</span>
+              <h3 className="radio-card__title">Coordinador</h3>
+              <p className="radio-card__desc">Organizo la actividad pero otra persona certificada patroneará el barco.</p>
               
-              <div className={`absolute top-4 right-4 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                formData.role_in_activity === 'coordinador' ? 'border-accent bg-accent' : 'border-muted-foreground/30'
-              }`}>
-                {formData.role_in_activity === 'coordinador' && <div className="w-2.5 h-2.5 bg-accent-content rounded-full" />}
+              <div className="radio-card__indicator">
+                {formData.role_in_activity === 'coordinador' && <div className="radio-card__indicator-dot" />}
               </div>
-            </label>
+            </div>
           </div>
         </div>
 
         {/* Tags */}
-        <div className="space-y-4 pt-4 border-t border-border/50">
-          <label className="text-sm font-bold tracking-tight text-foreground/80 uppercase block">
+        <div className="step-section">
+          <label className="form-group__label">
             Categorías y Etiquetas
           </label>
-          <p className="text-sm text-muted-foreground mb-2">Seleccioná los tags que describen tu travesía o escribí los tuyos presionando Enter.</p>
-          <div className="flex flex-wrap gap-2 mb-3">
+          <p className="step-subtitle" style={{ fontSize: '14px', marginBottom: '8px' }}>Seleccioná los tags que describen tu travesía o escribí los tuyos presionando Enter.</p>
+          <div className="tags-container">
             {['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].map(tag => (
               <button
                 key={tag}
@@ -129,21 +104,19 @@ const Step1Details = () => {
                       : [...currentTags, tag] 
                   })
                 }}
-                className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
-                  (formData.tags || []).includes(tag)
-                    ? 'bg-primary text-primary-content border-primary'
-                    : 'bg-secondary/20 border-border/50 text-foreground/80 hover:border-primary/50'
-                } border`}
+                className={`tag-btn ${
+                  (formData.tags || []).includes(tag) ? 'tag-btn--active' : ''
+                }`}
               >
                 {tag}
               </button>
             ))}
           </div>
-          <div className="relative">
+          <div className="form-group" style={{ marginTop: '8px' }}>
             <input
               type="text"
               placeholder="Escribir nuevo tag y presionar Enter..."
-              className="input input-bordered w-full"
+              className="input-control"
               onKeyDown={(e) => {
                 const currentTags = formData.tags || [];
                 if (e.key === 'Enter' && e.target.value.trim() !== '') {
@@ -160,13 +133,13 @@ const Step1Details = () => {
           
           {/* Custom Tags rendering */}
           {formData.tags?.filter(t => !['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].includes(t)).length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="tags-container" style={{ marginTop: '12px' }}>
               {formData.tags.filter(t => !['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].includes(t)).map(tag => (
-                <span key={tag} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-full flex items-center border border-border">
+                <span key={tag} className="custom-tag">
                   {tag}
                   <button 
                     type="button" 
-                    className="ml-2 text-muted-foreground hover:text-foreground"
+                    className="custom-tag__remove"
                     onClick={() => updateFormData({ tags: formData.tags.filter(t => t !== tag) })}
                   >
                     ×

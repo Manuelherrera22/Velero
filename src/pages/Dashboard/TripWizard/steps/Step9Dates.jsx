@@ -41,43 +41,45 @@ const Step9Dates = () => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="step-container">
       
-      <div className="space-y-2">
-        <h2 className="text-3xl font-bold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+      <div className="step-header">
+        <h2 className="step-title">
           Agregar fechas a la travesía
         </h2>
-        <p className="text-muted-foreground text-lg">
+        <p className="step-subtitle">
           Planifica en el calendario cuándo saldrás y, si lo deseas, ajusta precios especiales por fecha.
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="step-form">
         
         {/* Date Ingestion Matrix */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-4)' }}>
           
           {/* Salida */}
-          <div className="space-y-3 bg-secondary/20 p-4 rounded-xl border border-border/50">
-            <label className="flex items-center gap-2 text-sm font-bold tracking-tight text-foreground/80 uppercase">
+          <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)' }}>
+            <label className="form-group__label" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
               Fecha y hora de salida
-              <Info className="w-4 h-4 text-muted-foreground" />
+              <Info size={16} color="var(--text-muted)" />
             </label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+              <div className="input-with-icon" style={{ flex: 1 }}>
+                <Calendar className="input-icon" size={16} />
                 <input 
                   type="date"
-                  className="input input-bordered w-full pl-10"
+                  className="input-control"
+                  style={{ paddingLeft: '36px' }}
                   value={newDate.departure_date}
                   onChange={(e) => setNewDate({ ...newDate, departure_date: e.target.value })}
                 />
               </div>
-              <div className="relative w-32">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <div className="input-with-icon" style={{ width: '130px' }}>
+                <Clock className="input-icon" size={16} />
                 <input 
                   type="time"
-                  className="input input-bordered w-full pl-10"
+                  className="input-control"
+                  style={{ paddingLeft: '36px' }}
                   value={newDate.departure_time}
                   onChange={(e) => setNewDate({ ...newDate, departure_time: e.target.value })}
                 />
@@ -86,26 +88,28 @@ const Step9Dates = () => {
           </div>
 
           {/* Llegada */}
-          <div className="space-y-3 bg-secondary/20 p-4 rounded-xl border border-border/50">
-            <label className="flex items-center gap-2 text-sm font-bold tracking-tight text-foreground/80 uppercase">
+          <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)' }}>
+            <label className="form-group__label" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
               Fecha y hora de llegada
-              <Info className="w-4 h-4 text-muted-foreground" />
+              <Info size={16} color="var(--text-muted)" />
             </label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+              <div className="input-with-icon" style={{ flex: 1 }}>
+                <Calendar className="input-icon" size={16} />
                 <input 
                   type="date"
-                  className="input input-bordered w-full pl-10"
+                  className="input-control"
+                  style={{ paddingLeft: '36px' }}
                   value={newDate.arrival_date}
                   onChange={(e) => setNewDate({ ...newDate, arrival_date: e.target.value })}
                 />
               </div>
-              <div className="relative w-32">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <div className="input-with-icon" style={{ width: '130px' }}>
+                <Clock className="input-icon" size={16} />
                 <input 
                   type="time"
-                  className="input input-bordered w-full pl-10"
+                  className="input-control"
+                  style={{ paddingLeft: '36px' }}
                   value={newDate.arrival_time}
                   onChange={(e) => setNewDate({ ...newDate, arrival_time: e.target.value })}
                 />
@@ -116,30 +120,33 @@ const Step9Dates = () => {
         </div>
 
         {/* Dynamic Pricing and Submit for Date */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end pt-2">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Precio por Pasajero (Opcional)</label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-4)', alignItems: 'flex-end', paddingTop: 'var(--space-2)' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-group__label" style={{ fontSize: '12px' }}>Precio por Pasajero (Opcional)</label>
             <input 
               type="number"
-              className="input input-bordered w-full font-bold text-lg"
+              className="input-control"
+              style={{ fontWeight: 'bold', fontSize: '18px' }}
               value={newDate.price_per_person}
               onChange={(e) => setNewDate({ ...newDate, price_per_person: parseFloat(e.target.value) || 0 })}
             />
           </div>
           
-          <div className="space-y-2">
-            <label className={`text-xs font-bold text-muted-foreground uppercase ${!formData.allow_full_boat && 'opacity-50'}`}>Precio Barco Entero</label>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-group__label" style={{ fontSize: '12px', opacity: formData.allow_full_boat ? 1 : 0.5 }}>Precio Barco Entero</label>
             <input 
               type="number"
               disabled={!formData.allow_full_boat}
-              className="input input-bordered w-full font-bold text-lg disabled:opacity-50"
+              className="input-control"
+              style={{ fontWeight: 'bold', fontSize: '18px', opacity: formData.allow_full_boat ? 1 : 0.5 }}
               value={newDate.full_boat_price}
               onChange={(e) => setNewDate({ ...newDate, full_boat_price: parseFloat(e.target.value) || 0 })}
             />
           </div>
 
           <button 
-            className="btn btn-primary h-12"
+            className="btn btn--accent"
+            style={{ height: '48px', padding: '0 var(--space-4)' }}
             onClick={handleAddDate}
             disabled={!newDate.departure_date || !newDate.arrival_date}
           >
@@ -148,41 +155,54 @@ const Step9Dates = () => {
         </div>
 
         {/* Table of added dates */}
-        <div className="bg-secondary/10 border border-border/50 rounded-2xl p-6 mt-8">
-          <h3 className="font-bold text-lg mb-4 text-foreground/80 border-b border-border/50 pb-2">Fechas añadidas</h3>
+        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-2xl)', padding: 'var(--space-6)', marginTop: 'var(--space-8)' }}>
+          <h3 style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: 'var(--space-4)', color: 'rgba(255, 255, 255, 0.8)', borderBottom: '1px solid var(--border-color)', paddingBottom: 'var(--space-2)' }}>Fechas añadidas</h3>
           
           {formData.custom_dates.length === 0 ? (
-            <p className="text-center text-muted-foreground/60 py-8">
+            <p style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.4)', padding: 'var(--space-8) 0' }}>
               Aún no creaste fechas para esta travesía.
             </p>
           ) : (
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
               {formData.custom_dates.map(date => (
-                <div key={date.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-background border border-border/50 rounded-xl group hover:border-accent/40 transition-colors">
-                  <div className="space-y-1 md:w-2/3">
-                    <p className="font-bold text-foreground">
+                <div key={date.id} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)', transition: 'border-color 0.3s ease' }} className="date-row-hover">
+                  <div style={{ flex: '1 1 300px', marginBottom: 'var(--space-4)' }} className="date-info-container">
+                    <p style={{ fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: 'var(--space-1)' }}>
                       Del {date.departure_date} al {date.arrival_date}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
                       Salida: {date.departure_time || '--:--'} | Llegada: {date.arrival_time || '--:--'}
                     </p>
                   </div>
-                  <div className="flex items-center gap-6 mt-4 md:mt-0">
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground font-bold uppercase">Pasajero</p>
-                      <p className="font-bold text-primary">€ {date.price_per_person}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-6)' }}>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>Pasajero</p>
+                      <p style={{ fontWeight: 'bold', color: 'var(--color-primary-500)' }}>€ {date.price_per_person}</p>
                     </div>
                     {formData.allow_full_boat && (
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground font-bold uppercase">Barco</p>
-                        <p className="font-bold text-accent">€ {date.full_boat_price}</p>
+                      <div style={{ textAlign: 'right' }}>
+                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>Barco</p>
+                        <p style={{ fontWeight: 'bold', color: 'var(--color-accent-500)' }}>€ {date.full_boat_price}</p>
                       </div>
                     )}
                     <button 
                       onClick={() => handleRemoveDate(date.id)}
-                      className="btn btn-ghost btn-circle text-error/60 hover:text-error hover:bg-error/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="date-remove-btn"
+                      style={{
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: 'rgba(239, 68, 68, 0.6)',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        opacity: 0,
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
                     >
-                      <Trash2 className="w-5 h-5"/>
+                      <Trash2 size={20}/>
                     </button>
                   </div>
                 </div>
@@ -192,6 +212,23 @@ const Step9Dates = () => {
         </div>
 
       </div>
+      <style>{`
+        .date-row-hover:hover {
+          border-color: rgba(0, 180, 180, 0.4) !important;
+        }
+        .date-row-hover:hover .date-remove-btn {
+          opacity: 1 !important;
+        }
+        .date-remove-btn:hover {
+          color: var(--color-error-500) !important;
+          background-color: rgba(239, 68, 68, 0.1) !important;
+        }
+        @media (min-width: 768px) {
+          .date-info-container {
+            margin-bottom: 0 !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
