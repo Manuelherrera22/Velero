@@ -128,22 +128,7 @@ export default function Landing() {
             </a>
           </div>
 
-          <div className="hero__stats animate-fade-in" style={{ animationDelay: '0.7s' }}>
-            <div className="hero__stat">
-              <span className="hero__stat-number">50+</span>
-              <span className="hero__stat-label">Travesías Disponibles</span>
-            </div>
-            <div className="hero__stat-divider" />
-            <div className="hero__stat">
-              <span className="hero__stat-number">20+</span>
-              <span className="hero__stat-label">Capitanes Verificados</span>
-            </div>
-            <div className="hero__stat-divider" />
-            <div className="hero__stat">
-              <span className="hero__stat-number">4.9</span>
-              <span className="hero__stat-label">Calificación Promedio</span>
-            </div>
-          </div>
+
         </div>
 
         <div className="hero__scroll-indicator">

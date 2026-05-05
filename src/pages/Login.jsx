@@ -147,7 +147,7 @@ export default function Login() {
         <p className="login-card__subtitle">
           {usePassword
             ? 'Ingresa con tu email y contraseña.'
-            : 'Ingresa con tu email o teléfono. Sin contraseñas, sin complicaciones.'}
+            : 'Ingresa con tu email. Sin contraseñas, sin complicaciones.'}
         </p>
 
         {error && <div className="login-error">{error}</div>}
