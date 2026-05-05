@@ -238,20 +238,22 @@ export default function TripDetail() {
                   <label className="booking-card__label" style={{ marginBottom: '12px' }}>
                     Tipo de experiencia
                   </label>
-                  <div className="flex bg-secondary/20 p-1 rounded-xl">
+                  <div className="booking-card__mode-selector" style={{ display: 'flex', background: 'rgba(0, 0, 0, 0.2)', padding: '4px', borderRadius: 'var(--radius-xl)' }}>
                     <button 
-                      className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-sm font-bold rounded-xl transition-all ${bookingMode === 'shared' ? 'bg-background shadow-sm text-foreground border border-border/30' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/30'}`}
+                      className={`mode-btn ${bookingMode === 'shared' ? 'mode-btn--active' : ''}`}
+                      style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', fontSize: 'var(--text-sm)', fontWeight: 'bold', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'shared' ? 'var(--color-primary-500)' : 'transparent', color: bookingMode === 'shared' ? 'white' : 'var(--text-secondary)', border: 'none', cursor: 'pointer' }}
                       onClick={() => setBookingMode('shared')}
                     >
                       <span style={{ fontSize: '15px' }}>Compartido</span>
-                      <span className="text-xs font-normal opacity-70 mt-1" style={{ textAlign: 'center', lineHeight: '1.2' }}>Viajás con otras personas</span>
+                      <span className="mode-btn__tooltip text-xs font-normal opacity-70" style={{ textAlign: 'center', lineHeight: '1.2' }}>Viajás con otras personas</span>
                     </button>
                     <button 
-                      className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-sm font-bold rounded-xl transition-all ${bookingMode === 'private' ? 'bg-primary text-primary-content shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/30'}`}
+                      className={`mode-btn ${bookingMode === 'private' ? 'mode-btn--active' : ''}`}
+                      style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', fontSize: 'var(--text-sm)', fontWeight: 'bold', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'private' ? 'var(--color-primary-500)' : 'transparent', color: bookingMode === 'private' ? 'white' : 'var(--text-secondary)', border: 'none', cursor: 'pointer' }}
                       onClick={() => setBookingMode('private')}
                     >
                       <span style={{ fontSize: '15px' }}>Velero privado</span>
-                      <span className="text-xs font-normal opacity-80 mt-1" style={{ textAlign: 'center', lineHeight: '1.2' }}>Reservás el velero completo</span>
+                      <span className="mode-btn__tooltip text-xs font-normal opacity-80" style={{ textAlign: 'center', lineHeight: '1.2' }}>Reservás el velero completo</span>
                     </button>
                   </div>
                 </div>

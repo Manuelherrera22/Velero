@@ -56,7 +56,7 @@ const Step5Services = () => {
 
         {/* Matrix rows */}
         <div style={{ maxHeight: '300px', overflowY: 'auto', paddingTop: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', paddingRight: 'var(--space-2)' }} className="custom-scrollbar">
-          {AVAILABLE_SERVICES.map((service) => {
+          {[...new Set([...AVAILABLE_SERVICES, ...formData.included_services, ...formData.excluded_services])].map((service) => {
             const isIncluded = formData.included_services.includes(service)
             const isExcluded = formData.excluded_services.includes(service)
 
@@ -84,6 +84,44 @@ const Step5Services = () => {
               </div>
             )
           })}
+          {/* Custom Services Row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 'var(--space-4)', alignItems: 'center', marginTop: 'var(--space-4)' }}>
+            <div style={{ gridColumn: 'span 8 / span 8', display: 'flex', gap: 'var(--space-2)' }}>
+              <input 
+                type="text" 
+                id="custom_service_input"
+                placeholder="Agregar servicio personalizado..." 
+                className="input-control" 
+                style={{ flex: 1, padding: 'var(--space-2)', fontSize: '13px' }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (e.target.value.trim()) {
+                      toggleService('included_services', e.target.value.trim());
+                      e.target.value = '';
+                    }
+                  }
+                }}
+              />
+              <button 
+                type="button"
+                className="btn btn--ghost" 
+                style={{ padding: 'var(--space-2)' }}
+                onClick={(e) => {
+                  const input = document.getElementById('custom_service_input');
+                  if (input && input.value.trim()) {
+                    toggleService('included_services', input.value.trim());
+                    input.value = '';
+                  }
+                }}
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <div style={{ gridColumn: 'span 4 / span 4', fontSize: '11px', color: 'var(--text-muted)' }}>
+              Escribí y presioná enter para agregar.
+            </div>
+          </div>
         </div>
       </div>
 

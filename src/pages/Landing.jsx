@@ -80,8 +80,18 @@ export default function Landing() {
       {/* ══════════════════ HERO ══════════════════ */}
       <section className="hero">
         <div className="hero__bg">
-          <div className="hero__gradient" />
-          <div className="hero__particles">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="hero__video" 
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.35, zIndex: 0 }}
+          >
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-sailing-a-yacht-on-the-ocean-11756-large.mp4" type="video/mp4" />
+          </video>
+          <div className="hero__gradient" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(4,21,55,0.7) 0%, var(--bg-primary) 100%)', zIndex: 1 }} />
+          <div className="hero__particles" style={{ zIndex: 2 }}>
             {[...Array(5)].map((_, i) => (
               <div key={i} className="hero__particle" style={{
                 '--delay': `${i * 1.2}s`,

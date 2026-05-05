@@ -256,6 +256,15 @@ ul, ol { list-style: none; }
   padding-top: var(--header-height);
 }
 
+/* --- Utilities --- */
+.glass {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+}
+
 /* ============================================
    UI COMPONENTS
    ============================================ */

@@ -38,7 +38,7 @@ const Step8Pricing = () => {
               </div>
             </label>
             <div className="input-with-icon">
-              <span className="input-icon" style={{ fontWeight: 'bold' }}>€</span>
+              <span className="input-icon" style={{ fontWeight: 'bold' }}>$</span>
               <input
                 type="number"
                 min="0"
@@ -71,7 +71,7 @@ const Step8Pricing = () => {
               </div>
             </label>
             <div className="input-with-icon">
-              <span className="input-icon" style={{ fontWeight: 'bold' }}>€</span>
+              <span className="input-icon" style={{ fontWeight: 'bold' }}>$</span>
               <input
                 type="number"
                 min="0"

@@ -121,7 +121,7 @@ export default function Login() {
           </div>
           <h1 className="login-card__title">¡Revisa tu email!</h1>
           <p className="login-card__subtitle">
-            Te enviamos un enlace mágico a <strong>{value}</strong>. Haz click para ingresar.
+            Te enviamos un link de acceso a <strong>{value}</strong>. Haz click en él para ingresar.
           </p>
           <button onClick={() => { setSent(false); clearError() }} className="btn btn--ghost" style={{ width: '100%' }}>
             Volver a intentar
@@ -219,7 +219,7 @@ export default function Login() {
               <Loader size={18} className="spin" />
             ) : (
               <>
-                {usePassword ? 'Iniciar sesión' : method === 'email' ? 'Enviar enlace mágico' : 'Enviar código'}
+                {usePassword ? 'Iniciar sesión' : method === 'email' ? 'Enviar link de acceso' : 'Enviar código'}
                 <ArrowRight size={18} />
               </>
             )}
@@ -241,7 +241,7 @@ export default function Login() {
             }}
           >
             <Lock size={14} />
-            {usePassword ? 'Usar enlace mágico' : '¿Tenés contraseña? Ingresá con ella'}
+            {usePassword ? 'Ingresar con link de acceso' : '¿Tenés contraseña? Ingresá con ella'}
           </button>
 
           {/* Registration CTA */}
@@ -263,6 +263,15 @@ export default function Login() {
               <span>Registrate y publicá tu primera travesía</span>
             </div>
             <ArrowRight size={16} className="login-captain-cta__arrow" />
+          </Link>
+
+          {/* Affiliate CTA */}
+          <Link to="/registro?rol=afiliado" className="login-captain-cta" style={{ background: 'rgba(16, 185, 129, 0.05)', borderColor: 'rgba(16, 185, 129, 0.15)' }}>
+            <div className="login-captain-cta__text" style={{ paddingLeft: '8px' }}>
+              <strong>¿Querés ser afiliado?</strong>
+              <span>Recomendá travesías y ganá comisiones</span>
+            </div>
+            <ArrowRight size={16} className="login-captain-cta__arrow" style={{ color: 'var(--color-success)' }} />
           </Link>
         </div>
 
