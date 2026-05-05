@@ -150,8 +150,8 @@ export default function Login() {
             : 'Ingresa con tu email. Sin contraseñas, sin complicaciones.'}
         </p>
 
-        {error && <div className="login-error">{error}</div>}
-        {passwordError && <div className="login-error">{passwordError}</div>}
+        {error && <div className="login-error" style={{ background: '#FEE2E2', color: '#B91C1C', padding: '12px', borderRadius: '8px', marginBottom: '16px', border: '1px solid #FCA5A5', fontSize: '0.9rem', fontWeight: 500 }}>{error}</div>}
+        {passwordError && <div className="login-error" style={{ background: '#FEE2E2', color: '#B91C1C', padding: '12px', borderRadius: '8px', marginBottom: '16px', border: '1px solid #FCA5A5', fontSize: '0.9rem', fontWeight: 500 }}>{passwordError}</div>}
 
         {/* Method Toggle */}
         {!usePassword && (
@@ -212,7 +212,20 @@ export default function Login() {
             </div>
           )}
 
-          <button type="submit" className="btn btn--accent btn--lg login-card__submit" disabled={loading}>
+          {usePassword && (
+            <div style={{ textAlign: 'right', marginTop: '8px' }}>
+              <button 
+                type="button" 
+                className="btn btn--ghost btn--sm" 
+                onClick={() => alert("La recuperación de contraseña requiere configurar una página dedicada. Por ahora, podés volver a ingresar usando el 'Link de acceso'.")} 
+                style={{ padding: 0, height: 'auto', fontSize: '0.85rem', color: 'var(--text-tertiary)' }}
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+          )}
+
+          <button type="submit" className="btn btn--accent btn--lg login-card__submit" disabled={loading} style={{ marginTop: 'var(--space-4)' }}>
             {loading ? (
               <Loader size={18} className="spin" />
             ) : (
