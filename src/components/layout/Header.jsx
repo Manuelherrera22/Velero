@@ -31,8 +31,7 @@ export default function Header() {
     <header className={`header ${scrolled ? 'header--scrolled' : ''}`}>
       <div className="container header__inner">
         <Link to="/" className="header__logo" aria-label="Kailu Home">
-          <Sailboat size={28} strokeWidth={2.2} />
-          <span className="header__logo-text">Kailu</span>
+          <img src="/logo-kailu.jpg" alt="Kailu" style={{ height: '36px', width: 'auto', borderRadius: '4px' }} />
         </Link>
 
         <nav className={`header__nav ${menuOpen ? 'header__nav--open' : ''}`}>
