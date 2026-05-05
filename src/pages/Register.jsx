@@ -230,7 +230,7 @@ export default function Register() {
         {/* Footer links */}
         <p className="register-card__note">
           ¿Ya tenés cuenta?{' '}
-          <Link to="/login" className="register-link">Iniciá sesión</Link>
+          <Link to={`/login${role !== 'viewer' ? '?method=password' : ''}`} className="register-link">Iniciá sesión</Link>
         </p>
 
         {/* Switch CTAs */}

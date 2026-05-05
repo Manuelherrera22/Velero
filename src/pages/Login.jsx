@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Mail, Phone, ArrowRight, Sailboat, Sparkles, Loader, Lock, Eye, EyeOff } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import supabase from '../lib/supabase'
@@ -13,8 +13,11 @@ export default function Login() {
   const [otpStep, setOtpStep] = useState(false)
   const [otp, setOtp] = useState('')
 
+  const [searchParams] = useSearchParams()
+  const defaultToPassword = searchParams.get('method') === 'password'
+
   // Password login
-  const [usePassword, setUsePassword] = useState(false)
+  const [usePassword, setUsePassword] = useState(defaultToPassword)
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
