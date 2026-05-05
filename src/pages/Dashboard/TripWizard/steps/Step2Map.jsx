@@ -53,7 +53,7 @@ const Step2Map = () => {
             height: '350px',
             backgroundColor: 'rgba(255, 255, 255, 0.05)',
             borderRadius: 'var(--radius-2xl)',
-            border: '2px solid var(--border-color)',
+            border: formData.coordinates ? '2px solid var(--color-accent-400)' : '2px solid var(--border-color)',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
@@ -62,41 +62,44 @@ const Step2Map = () => {
             cursor: 'pointer',
             transition: 'border-color 0.3s ease'
           }}
-          onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(0, 180, 180, 0.4)'}
-          onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+          onMouseOver={(e) => { if (!formData.coordinates) e.currentTarget.style.borderColor = 'rgba(0, 180, 180, 0.4)' }}
+          onMouseOut={(e) => { if (!formData.coordinates) e.currentTarget.style.borderColor = 'var(--border-color)' }}
+          onClick={() => updateFormData({ coordinates: { lat: -34.6037, lng: -58.3816 } })}
           >
             
             {/* Visual placeholder for Map */}
             <div style={{
               position: 'absolute',
               inset: '0',
-              opacity: '0.2',
+              opacity: formData.coordinates ? '0.4' : '0.2',
               backgroundImage: "url('https://maps.wikimedia.org/osm-intl/12/1392/2483.png')",
               backgroundSize: 'cover',
-              backgroundPosition: 'center'
+              backgroundPosition: 'center',
+              transition: 'opacity 0.3s ease'
             }}></div>
             
             <div style={{ zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
               <div style={{
                 padding: '16px',
-                backgroundColor: 'rgba(10, 15, 26, 0.8)',
+                backgroundColor: formData.coordinates ? 'var(--color-accent-400)' : 'rgba(10, 15, 26, 0.8)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '50%',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                color: 'var(--color-primary-500)',
+                boxShadow: formData.coordinates ? '0 0 25px rgba(0, 180, 180, 0.5)' : '0 10px 25px rgba(0,0,0,0.5)',
+                color: formData.coordinates ? '#fff' : 'var(--color-primary-500)',
                 transition: 'all 0.3s ease'
               }}>
-                <Navigation size={32} />
+                <MapPin size={32} />
               </div>
               <span style={{
                 fontWeight: 600,
-                color: 'var(--text-primary)',
-                backgroundColor: 'rgba(10, 15, 26, 0.5)',
-                padding: '4px 12px',
+                color: formData.coordinates ? '#fff' : 'var(--text-primary)',
+                backgroundColor: formData.coordinates ? 'var(--color-accent-600)' : 'rgba(10, 15, 26, 0.5)',
+                padding: '6px 16px',
                 borderRadius: '4px',
-                backdropFilter: 'blur(4px)'
+                backdropFilter: 'blur(4px)',
+                transition: 'all 0.3s ease'
               }}>
-                Hacer clic para marcar el PIN
+                {formData.coordinates ? 'PIN Marcado Exitosamente' : 'Hacer clic para marcar el PIN'}
               </span>
             </div>
 
