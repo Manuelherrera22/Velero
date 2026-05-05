@@ -10,6 +10,7 @@ export default function Search() {
   const [activeTag, setActiveTag] = useState('Todos')
 
   useEffect(() => {
+    window.scrollTo(0, 0)
     fetchTags()
     fetchTrips()
   }, [])

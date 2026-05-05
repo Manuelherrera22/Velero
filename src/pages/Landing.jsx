@@ -105,7 +105,7 @@ export default function Landing() {
         <div className="container hero__content">
           <div className="hero__badge animate-fade-in">
             <Waves size={14} />
-            <span>Experiencias Náuticas Auténticas</span>
+            <span>Experiencias Auténticas</span>
           </div>
 
           <h1 className="hero__title animate-slide-up">
@@ -148,53 +148,6 @@ export default function Landing() {
 
         <div className="hero__scroll-indicator">
           <div className="hero__scroll-line" />
-        </div>
-      </section>
-
-      {/* ══════════════════ BENEFICIOS ══════════════════ */}
-      <section className="section" id="beneficios" ref={addRevealRef}>
-        <div className="container reveal" ref={addRevealRef}>
-          <p className="section__label">¿Por qué Kailu?</p>
-          <h2 className="section__title">
-            Cada travesía está pensada para ofrecer algo más que un paseo
-          </h2>
-          <div className="divider" />
-
-          <div className="benefits-grid stagger-children">
-            {BENEFITS.map((benefit, i) => (
-              <div key={i} className="benefit-card glass">
-                <div className="benefit-card__icon">
-                  <benefit.icon size={24} />
-                </div>
-                <h3 className="benefit-card__title">{benefit.title}</h3>
-                <p className="benefit-card__desc">{benefit.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════ CÓMO FUNCIONA ══════════════════ */}
-      <section className="section section--dark" id="como-funciona">
-        <div className="container reveal" ref={addRevealRef}>
-          <p className="section__label">Simple y Rápido</p>
-          <h2 className="section__title">
-            De la pantalla al agua en 3 pasos
-          </h2>
-          <div className="divider" />
-
-          <div className="steps-row stagger-children">
-            {STEPS.map((step, i) => (
-              <div key={i} className="step-card">
-                <span className="step-card__num">{step.num}</span>
-                <h3 className="step-card__title">{step.title}</h3>
-                <p className="step-card__desc">{step.desc}</p>
-                {i < STEPS.length - 1 && (
-                  <ChevronRight size={20} className="step-card__arrow" />
-                )}
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -264,40 +217,49 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══════════════════ CTA CAPITANES ══════════════════ */}
-      <section className="section captain-cta">
+      {/* ══════════════════ CÓMO FUNCIONA ══════════════════ */}
+      <section className="section section--dark" id="como-funciona">
         <div className="container reveal" ref={addRevealRef}>
-          <div className="captain-cta__card glass">
-            <div className="captain-cta__content">
-              <p className="section__label">Para Capitanes</p>
-              <h2 className="captain-cta__title">
-                Comparte tu pasión,<br />conecta con tripulantes
-              </h2>
-              <ul className="captain-cta__list">
-                <li><Anchor size={16} /> Publica tus travesías y gestiona reservas</li>
-                <li><Users size={16} /> Llega a viajeros de todo el mundo</li>
-                <li><Shield size={16} /> Navega con el respaldo de la plataforma</li>
-              </ul>
-              <div className="captain-cta__actions">
-                <Link to="/login" className="btn btn--primary btn--lg">
-                  Publicar Travesía
-                  <ArrowRight size={18} />
-                </Link>
-                <a 
-                  href="https://wa.me/5491161789818?text=Hola%20Kailu!%20Quiero%20agendar%20una%20reunión%20como%20capitán" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn--ghost btn--lg"
-                >
-                  Agendar Demo
-                </a>
+          <p className="section__label">Simple y Rápido</p>
+          <h2 className="section__title">
+            De la pantalla al agua en 3 pasos
+          </h2>
+          <div className="divider" />
+
+          <div className="steps-row stagger-children">
+            {STEPS.map((step, i) => (
+              <div key={i} className="step-card">
+                <span className="step-card__num">{step.num}</span>
+                <h3 className="step-card__title">{step.title}</h3>
+                <p className="step-card__desc">{step.desc}</p>
+                {i < STEPS.length - 1 && (
+                  <ChevronRight size={20} className="step-card__arrow" />
+                )}
               </div>
-            </div>
-            <div className="captain-cta__visual">
-              <div className="captain-cta__compass animate-float">
-                <Compass size={120} strokeWidth={0.8} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════ BENEFICIOS ══════════════════ */}
+      <section className="section" id="beneficios" ref={addRevealRef}>
+        <div className="container reveal" ref={addRevealRef}>
+          <p className="section__label">¿Por qué Kailu?</p>
+          <h2 className="section__title">
+            Cada travesía está pensada para ofrecer algo más que un paseo
+          </h2>
+          <div className="divider" />
+
+          <div className="benefits-grid stagger-children">
+            {BENEFITS.map((benefit, i) => (
+              <div key={i} className="benefit-card glass">
+                <div className="benefit-card__icon">
+                  <benefit.icon size={24} />
+                </div>
+                <h3 className="benefit-card__title">{benefit.title}</h3>
+                <p className="benefit-card__desc">{benefit.description}</p>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -332,6 +294,44 @@ export default function Landing() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════ CTA CAPITANES ══════════════════ */}
+      <section className="section captain-cta">
+        <div className="container reveal" ref={addRevealRef}>
+          <div className="captain-cta__card glass">
+            <div className="captain-cta__content">
+              <p className="section__label">Para Capitanes</p>
+              <h2 className="captain-cta__title">
+                Comparte tu pasión,<br />conecta con tripulantes
+              </h2>
+              <ul className="captain-cta__list">
+                <li><Anchor size={16} /> Publica tus travesías y gestiona reservas</li>
+                <li><Users size={16} /> Llega a viajeros de todo el mundo</li>
+                <li><Shield size={16} /> Navega con el respaldo de la plataforma</li>
+              </ul>
+              <div className="captain-cta__actions">
+                <Link to="/login" className="btn btn--primary btn--lg">
+                  Publicar Travesía
+                  <ArrowRight size={18} />
+                </Link>
+                <a 
+                  href="https://wa.me/5491161789818?text=Hola%20Kailu!%20Quiero%20agendar%20una%20reunión%20como%20capitán" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn--ghost btn--lg"
+                >
+                  Agendar Demo
+                </a>
+              </div>
+            </div>
+            <div className="captain-cta__visual">
+              <div className="captain-cta__compass animate-float">
+                <Compass size={120} strokeWidth={0.8} />
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -238,22 +238,22 @@ export default function TripDetail() {
                   <label className="booking-card__label" style={{ marginBottom: '12px' }}>
                     Tipo de experiencia
                   </label>
-                  <div className="booking-card__mode-selector" style={{ display: 'flex', background: 'rgba(0, 0, 0, 0.2)', padding: '4px', borderRadius: 'var(--radius-xl)' }}>
+                  <div className="booking-card__mode-selector" style={{ display: 'flex', gap: 'var(--space-2)' }}>
                     <button 
                       className={`mode-btn ${bookingMode === 'shared' ? 'mode-btn--active' : ''}`}
-                      style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', fontSize: 'var(--text-sm)', fontWeight: 'bold', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'shared' ? 'var(--color-primary-500)' : 'transparent', color: bookingMode === 'shared' ? 'white' : 'var(--text-secondary)', border: 'none', cursor: 'pointer' }}
+                      style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'shared' ? 'var(--color-primary-500)' : 'var(--color-neutral-100)', color: bookingMode === 'shared' ? 'white' : 'var(--text-secondary)', border: bookingMode === 'shared' ? '1px solid var(--color-primary-600)' : '1px solid var(--color-neutral-200)', cursor: 'pointer' }}
                       onClick={() => setBookingMode('shared')}
                     >
-                      <span style={{ fontSize: '15px' }}>Compartido</span>
-                      <span className="mode-btn__tooltip text-xs font-normal opacity-70" style={{ textAlign: 'center', lineHeight: '1.2' }}>Viajás con otras personas</span>
+                      <span style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '4px' }}>Compartido</span>
+                      <span style={{ fontSize: '11px', fontWeight: 'normal', opacity: bookingMode === 'shared' ? 0.9 : 0.6, textAlign: 'center', lineHeight: '1.2' }}>Viajás con otras personas</span>
                     </button>
                     <button 
                       className={`mode-btn ${bookingMode === 'private' ? 'mode-btn--active' : ''}`}
-                      style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', fontSize: 'var(--text-sm)', fontWeight: 'bold', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'private' ? 'var(--color-primary-500)' : 'transparent', color: bookingMode === 'private' ? 'white' : 'var(--text-secondary)', border: 'none', cursor: 'pointer' }}
+                      style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'private' ? 'var(--color-primary-500)' : 'var(--color-neutral-100)', color: bookingMode === 'private' ? 'white' : 'var(--text-secondary)', border: bookingMode === 'private' ? '1px solid var(--color-primary-600)' : '1px solid var(--color-neutral-200)', cursor: 'pointer' }}
                       onClick={() => setBookingMode('private')}
                     >
-                      <span style={{ fontSize: '15px' }}>Velero privado</span>
-                      <span className="mode-btn__tooltip text-xs font-normal opacity-80" style={{ textAlign: 'center', lineHeight: '1.2' }}>Reservás el velero completo</span>
+                      <span style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '4px' }}>Velero privado</span>
+                      <span style={{ fontSize: '11px', fontWeight: 'normal', opacity: bookingMode === 'private' ? 0.9 : 0.6, textAlign: 'center', lineHeight: '1.2' }}>Reservás el velero completo</span>
                     </button>
                   </div>
                 </div>
@@ -287,7 +287,7 @@ export default function TripDetail() {
                   📅 Elegí día y horario
                 </label>
                 {tripDates.length > 0 ? (
-                  <div className="booking-card__dates">
+                  <div className="booking-card__dates custom-scrollbar" style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '8px' }}>
                     {Object.entries(datesByDay).map(([dayKey, slots]) => (
                       <div key={dayKey} className="booking-card__day-group">
                         <div className="booking-card__day-label">
@@ -339,7 +339,7 @@ export default function TripDetail() {
                   </button>
                 </div>
                 {bookingMode === 'shared' && (
-                  <p className="text-sm text-muted-foreground mt-4 text-center" style={{ lineHeight: '1.4' }}>
+                  <p className="text-sm text-muted-foreground text-center" style={{ lineHeight: '1.4', marginTop: '24px' }}>
                     ¿Venís solo? Podés reservar 1 lugar sin problema.
                   </p>
                 )}

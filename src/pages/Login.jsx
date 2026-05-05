@@ -119,10 +119,15 @@ export default function Login() {
           <div className="login-sent__icon">
             <Sparkles size={48} />
           </div>
-          <h1 className="login-card__title">¡Revisa tu email!</h1>
-          <p className="login-card__subtitle">
-            Te enviamos un link de acceso a <strong>{value}</strong>. Haz click en él para ingresar.
+          <h1 className="login-card__title" style={{ color: 'var(--color-primary-500)' }}>✨ Revisa tu bandeja de entrada</h1>
+          <p className="login-card__subtitle" style={{ fontSize: '1.1rem', color: 'var(--text-primary)', marginTop: '16px' }}>
+            Te hemos enviado un link de acceso seguro a <strong>{value}</strong>.
           </p>
+          <div style={{ padding: '16px', background: 'var(--color-primary-50)', border: '1px solid var(--color-primary-100)', borderRadius: 'var(--radius-lg)', margin: '20px 0', textAlign: 'center' }}>
+            <p style={{ margin: 0, fontWeight: 500, color: 'var(--color-primary-800)' }}>
+              Por favor, cierra o minimiza esta ventana, abre tu aplicación de correo electrónico y haz clic en el enlace para entrar automáticamente a tu cuenta.
+            </p>
+          </div>
           <button onClick={() => { setSent(false); clearError() }} className="btn btn--ghost" style={{ width: '100%' }}>
             Volver a intentar
           </button>
@@ -150,18 +155,11 @@ export default function Login() {
 
         {/* Method Toggle */}
         {!usePassword && (
-          <div className="login-toggle">
+          <div className="login-toggle" style={{ gridTemplateColumns: '1fr' }}>
             <button
-              className={`login-toggle__btn ${method === 'email' ? 'login-toggle__btn--active' : ''}`}
-              onClick={() => { setMethod('email'); setValue(''); clearError() }}
+              className={`login-toggle__btn login-toggle__btn--active`}
             >
-              <Mail size={16} /> Email
-            </button>
-            <button
-              className={`login-toggle__btn ${method === 'phone' ? 'login-toggle__btn--active' : ''}`}
-              onClick={() => { setMethod('phone'); setValue(''); clearError() }}
-            >
-              <Phone size={16} /> Teléfono
+              <Mail size={16} /> Ingresar con Email
             </button>
           </div>
         )}
