@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, MoreVertical, Ship, AlertCircle } from 'lucide-react'
+import { Plus, MoreVertical, Ship, AlertCircle, X } from 'lucide-react'
 import useBoatStore from '../../stores/boatStore'
 import './Dashboard.css'
 
 export default function MyBoats() {
-  const { boats, loading, fetchMyBoats, deleteBoat } = useBoatStore()
+  const { boats, loading, fetchMyBoats, deleteBoat, createBoat } = useBoatStore()
   
   const [boatToDelete, setBoatToDelete] = useState(null)
   const [activeMenuId, setActiveMenuId] = useState(null)
+  const [isCreating, setIsCreating] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [newBoat, setNewBoat] = useState({ name: '', type: 'Velero', length_m: '' })
 
   useEffect(() => { 
     fetchMyBoats() 
@@ -35,6 +38,20 @@ export default function MyBoats() {
     setActiveMenuId(null)
   }
 
+  const handleCreate = async () => {
+    if (!newBoat.name || !newBoat.type) return
+    setCreating(true)
+    const data = { ...newBoat, length_m: newBoat.length_m ? parseFloat(newBoat.length_m) : null }
+    const result = await createBoat(data)
+    setCreating(false)
+    if (result.success) {
+      setIsCreating(false)
+      setNewBoat({ name: '', type: 'Velero', length_m: '' })
+    } else {
+      alert("Error al crear: " + result.error)
+    }
+  }
+
   return (
     <div className="dash-page">
       
@@ -53,6 +70,7 @@ export default function MyBoats() {
           <button 
             className="btn btn--accent"
             style={{ padding: '12px 24px', fontSize: '0.95rem', borderRadius: 'var(--radius-xl)' }}
+            onClick={() => setIsCreating(true)}
           >
             <Plus size={18} /> Agregar embarcación
           </button>
@@ -75,6 +93,7 @@ export default function MyBoats() {
             <button 
               className="btn btn--outline"
               style={{ borderRadius: '9999px', padding: '12px 32px', marginTop: '8px' }}
+              onClick={() => setIsCreating(true)}
             >
               Crear mi embarcación
             </button>
@@ -186,6 +205,67 @@ export default function MyBoats() {
               </button>
             </div>
             
+          </div>
+        </div>
+      )}
+
+      {/* Create Boat Modal */}
+      {isCreating && (
+        <div className="dash-modal-overlay">
+          <div className="dash-modal animate-fade-in" style={{ textAlign: 'left', padding: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h3 className="dash-modal__title" style={{ margin: 0 }}>Agregar Embarcación</h3>
+              <button onClick={() => setIsCreating(false)} className="btn btn--ghost btn--sm" style={{ padding: '8px' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="input-group">
+              <label>Alias / Nombre de la embarcación *</label>
+              <input 
+                className="input" 
+                placeholder="Ej: Velero Santa María" 
+                value={newBoat.name} 
+                onChange={(e) => setNewBoat(p => ({ ...p, name: e.target.value }))} 
+                autoFocus 
+              />
+            </div>
+
+            <div className="form-row" style={{ marginTop: '16px' }}>
+              <div className="input-group">
+                <label>Tipo *</label>
+                <select 
+                  className="input" 
+                  value={newBoat.type} 
+                  onChange={(e) => setNewBoat(p => ({ ...p, type: e.target.value }))}
+                >
+                  <option value="Velero">Velero</option>
+                  <option value="Catamarán">Catamarán</option>
+                  <option value="Lancha">Lancha</option>
+                  <option value="Yate">Yate</option>
+                </select>
+              </div>
+              <div className="input-group">
+                <label>Eslora (metros)</label>
+                <input 
+                  className="input" 
+                  type="number" 
+                  min="1" 
+                  placeholder="Ej: 12" 
+                  value={newBoat.length_m} 
+                  onChange={(e) => setNewBoat(p => ({ ...p, length_m: e.target.value }))} 
+                />
+              </div>
+            </div>
+
+            <div className="dash-modal__actions" style={{ marginTop: '32px', gridTemplateColumns: '1fr 1fr' }}>
+              <button onClick={() => setIsCreating(false)} className="btn btn--ghost">
+                Cancelar
+              </button>
+              <button onClick={handleCreate} className="btn btn--accent" disabled={!newBoat.name || !newBoat.type || creating}>
+                {creating ? 'Guardando...' : 'Guardar Embarcación'}
+              </button>
+            </div>
           </div>
         </div>
       )}
