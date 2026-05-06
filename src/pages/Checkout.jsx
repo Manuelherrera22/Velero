@@ -49,21 +49,14 @@ export default function Checkout() {
   let selectedAddons = {}
   try { selectedAddons = JSON.parse(selectedAddonsParam || '{}') } catch {}
 
-  // Passengers list (for multi-guest ID collection)
+  // Passengers list
   const [passengers, setPassengers] = useState([
     { name: '', nationality: 'AR', idType: 'dni', idNumber: '' }
   ])
 
-  // Sync passengers count with URL guests
-  useEffect(() => {
-    setPassengers(prev => {
-      if (prev.length === guests) return prev
-      if (prev.length < guests) {
-        return [...prev, ...Array(guests - prev.length).fill(null).map(() => ({ name: '', nationality: 'AR', idType: 'dni', idNumber: '' }))]
-      }
-      return prev.slice(0, guests)
-    })
-  }, [guests])
+  // Optional popup warning before payment
+  const [showPassengerWarning, setShowPassengerWarning] = useState(false)
+  const [hasSeenPassengerWarning, setHasSeenPassengerWarning] = useState(false)
 
   const updatePassenger = (idx, field, value) => {
     setPassengers(prev => prev.map((p, i) => {
@@ -185,9 +178,17 @@ export default function Checkout() {
       setError('Debes aceptar los Términos y Condiciones para continuar.')
       return
     }
-    // Validate all passengers have IDs
-    for (let i = 0; i < passengers.length; i++) {
-      const p = passengers[i]
+    // Validate passengers
+    let validPassengers = [...passengers]
+    
+    // Auto-fill first passenger with contact data if empty
+    if (!validPassengers[0].name.trim()) {
+      validPassengers[0] = { ...validPassengers[0], name: formData.name }
+    }
+    setPassengers(validPassengers) // Update state just in case
+
+    for (let i = 0; i < validPassengers.length; i++) {
+      const p = validPassengers[i]
       if (!p.name.trim()) {
         setError(`Completá el nombre del pasajero ${i + 1}.`)
         return
@@ -197,10 +198,7 @@ export default function Checkout() {
         return
       }
     }
-    // Auto-fill first passenger with contact data if empty
-    if (!passengers[0].name) {
-      updatePassenger(0, 'name', formData.name)
-    }
+
     // Go to email confirmation step
     setStep(2)
   }
@@ -215,6 +213,13 @@ export default function Checkout() {
   }
 
   const handleCreateBooking = async () => {
+    // If they haven't seen the warning and they have fewer passengers than they could bring
+    const maxPax = mode === 'private' ? (trip?.max_capacity || 6) : guests
+    if (!hasSeenPassengerWarning && passengers.length < maxPax) {
+      setShowPassengerWarning(true)
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -545,15 +550,31 @@ export default function Checkout() {
 
                 <div className="input-group">
                   <label htmlFor="checkout-phone"><Phone size={14} /> Teléfono *</label>
-                  <input
-                    id="checkout-phone"
-                    type="tel"
-                    className="input"
-                    placeholder="+54 11 1234 5678"
-                    value={formData.phone}
-                    onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
-                    required
-                  />
+                  <div className="phone-input-wrapper" style={{ display: 'flex', gap: '8px' }}>
+                    <select 
+                      className="input" 
+                      style={{ width: '100px', padding: '0.75rem 0.5rem' }}
+                      defaultValue="+54"
+                    >
+                      <option value="+54">🇦🇷 +54</option>
+                      <option value="+55">🇧🇷 +55</option>
+                      <option value="+56">🇨🇱 +56</option>
+                      <option value="+598">🇺🇾 +598</option>
+                      <option value="+595">🇵🇾 +595</option>
+                      <option value="+1">🇺🇸 +1</option>
+                      <option value="+34">🇪🇸 +34</option>
+                    </select>
+                    <input
+                      id="checkout-phone"
+                      type="tel"
+                      className="input"
+                      placeholder="11 1234 5678"
+                      value={formData.phone}
+                      onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
+                      required
+                      style={{ flex: 1, backgroundColor: formData.phone ? 'var(--bg-primary)' : '#f9fafa', border: formData.phone ? '1px solid var(--border-color)' : '1px solid #d1d5db' }}
+                    />
+                  </div>
                   <p className="checkout-form__subtitle" style={{ marginTop: '8px', marginBottom: 0 }}>
                     Necesario para contactarte ante cambios climáticos o de fuerza mayor.
                   </p>
@@ -563,13 +584,22 @@ export default function Checkout() {
                 <div className="checkout-passengers">
                   <h3><FileText size={16} /> Identificación de pasajeros</h3>
                   <p className="checkout-passengers__hint">
-                    Por regulación marítima y seguro obligatorio, cada pasajero debe presentar identificación.
+                    Ingresa los datos de todas las personas que te van a acompañar. Esto es necesario para el acceso al club náutico.
                   </p>
 
                   {passengers.map((pax, idx) => (
                     <div key={idx} className="checkout-passenger-card glass">
-                      <div className="checkout-passenger-card__header">
+                      <div className="checkout-passenger-card__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span>Pasajero {idx + 1} {idx === 0 ? '(titular)' : ''}</span>
+                        {idx > 0 && (
+                          <button 
+                            className="btn btn--ghost btn--sm" 
+                            onClick={(e) => { e.preventDefault(); setPassengers(prev => prev.filter((_, i) => i !== idx)) }}
+                            style={{ color: 'var(--color-error)' }}
+                          >
+                            <Trash2 size={14} /> Eliminar
+                          </button>
+                        )}
                       </div>
 
                       <div className="checkout-passenger-card__fields">
@@ -629,6 +659,20 @@ export default function Checkout() {
                       </div>
                     </div>
                   ))}
+
+                  {passengers.length < (mode === 'private' ? (trip?.max_capacity || 6) : guests) && (
+                    <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                      <button 
+                        className="btn btn--ghost" 
+                        onClick={(e) => { e.preventDefault(); setPassengers(prev => [...prev, { name: '', nationality: 'AR', idType: 'dni', idNumber: '' }]) }}
+                      >
+                        <Plus size={16} /> Agregar pasajeros
+                      </button>
+                      <p className="checkout-form__subtitle" style={{ marginTop: '8px' }}>
+                        Agrega un pasajero por cada persona que te acompañe
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Coupon */}
@@ -836,6 +880,28 @@ export default function Checkout() {
               )}
             </div>
           </div>
+          {/* Passenger Warning Modal */}
+          {showPassengerWarning && (
+            <div className="modal-backdrop">
+              <div className="modal-content animate-fade-in" style={{ textAlign: 'center', padding: 'var(--space-8)' }}>
+                <AlertCircle size={48} color="var(--color-warning)" style={{ margin: '0 auto var(--space-4)' }} />
+                <h3 style={{ marginBottom: 'var(--space-2)' }}>Faltan pasajeros</h3>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-6)' }}>
+                  ⚠️ Asegúrate de haber cargado a todos los pasajeros antes de continuar.
+                </p>
+                <button 
+                  className="btn btn--primary" 
+                  onClick={() => {
+                    setShowPassengerWarning(false);
+                    setHasSeenPassengerWarning(true);
+                  }}
+                  style={{ width: '100%' }}
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

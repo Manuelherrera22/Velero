@@ -164,6 +164,7 @@ export default function TripDetail() {
             <div className="trip-detail__meta">
               <span><MapPin size={16} /> {trip.location}</span>
               <span><Users size={16} /> Hasta {trip.capacity} personas</span>
+              {trip.min_passengers > 1 && <span><Users size={16} /> Mínimo {trip.min_passengers} personas</span>}
               {trip.boat?.cabins > 0 && <span>🛏 {trip.boat.cabins} Camarotes</span>}
               {trip.boat?.bathrooms > 0 && <span>🚿 {trip.boat.bathrooms} Baños</span>}
             </div>
@@ -338,7 +339,7 @@ export default function TripDetail() {
                     <Plus size={16} />
                   </button>
                 </div>
-                {bookingMode === 'shared' && (
+                {bookingMode === 'shared' && (!trip.min_passengers || trip.min_passengers <= 1) && (
                   <p className="text-sm text-muted-foreground text-center" style={{ lineHeight: '1.4', marginTop: '24px' }}>
                     ¿Venís solo? Podés reservar 1 lugar sin problema.
                   </p>
