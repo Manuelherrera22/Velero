@@ -579,7 +579,7 @@ export default function Checkout() {
                       value={formData.phone}
                       onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
                       required
-                      style={{ flex: 1, backgroundColor: formData.phone ? 'var(--bg-primary)' : '#f9fafa', border: formData.phone ? '1px solid var(--border-color)' : '1px solid #d1d5db' }}
+                      style={{ flex: 1 }}
                     />
                   </div>
                   <p className="checkout-form__subtitle" style={{ marginTop: '8px', marginBottom: 0 }}>
