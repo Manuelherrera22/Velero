@@ -66,12 +66,14 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--color-accent-400);
-  background: rgba(11, 171, 195, 0.1);
-  border: 1px solid rgba(11, 171, 195, 0.2);
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: var(--space-2) var(--space-5);
   border-radius: var(--radius-full);
   margin-bottom: var(--space-8);
+  backdrop-filter: blur(4px);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 .hero__title {
@@ -80,10 +82,12 @@
   letter-spacing: -0.03em;
   line-height: 1.05;
   margin-bottom: var(--space-6);
+  color: white;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.4);
 }
 
 .hero__title--accent {
-  background: linear-gradient(135deg, var(--color-accent-400), var(--color-primary-300));
+  background: linear-gradient(135deg, #fff, #bcebf3);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -91,10 +95,11 @@
 
 .hero__subtitle {
   font-size: var(--text-xl);
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.9);
   max-width: 600px;
   line-height: var(--leading-relaxed);
   margin-bottom: var(--space-10);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.4);
 }
 
 .hero__actions {

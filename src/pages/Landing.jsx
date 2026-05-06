@@ -80,28 +80,23 @@ export default function Landing() {
       {/* ══════════════════ HERO ══════════════════ */}
       <section className="hero">
         <div className="hero__bg">
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline 
+          <div 
             className="hero__video"
-            poster="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2094&auto=format&fit=crop"
             style={{ 
               position: 'absolute', 
               top: 0, 
               left: 0, 
               width: '100%', 
               height: '100%', 
-              objectFit: 'cover', 
-              opacity: 0.8, 
+              backgroundImage: 'url("https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?q=80&w=2000&auto=format&fit=crop")',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              opacity: 1, 
               zIndex: 0,
               animation: 'panZoom 30s infinite alternate linear'
             }}
-          >
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-yacht-sailing-in-the-sea-11756-large.mp4" type="video/mp4" />
-          </video>
-          <div className="hero__gradient" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(255, 252, 245, 0.3) 0%, var(--bg-primary) 100%)', zIndex: 1 }} />
+          />
+          <div className="hero__gradient" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 100%)', zIndex: 1 }} />
           <div className="hero__particles" style={{ zIndex: 2 }}>
             {[...Array(5)].map((_, i) => (
               <div key={i} className="hero__particle" style={{
@@ -134,7 +129,7 @@ export default function Landing() {
               Explorar Travesías
               <ArrowRight size={18} />
             </Link>
-            <a href="#como-funciona" className="btn btn--ghost btn--lg">
+            <a href="#como-funciona" className="btn btn--ghost btn--lg" style={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.1)' }}>
               ¿Cómo funciona?
             </a>
           </div>
