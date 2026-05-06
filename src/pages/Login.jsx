@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Mail, Phone, ArrowRight, Sailboat, Sparkles, Loader, Lock, Eye, EyeOff } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
@@ -21,6 +21,13 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
+
+  // Sync state if URL changes while component is mounted
+  useEffect(() => {
+    if (searchParams.get('method') === 'password') {
+      setUsePassword(true)
+    }
+  }, [searchParams])
 
   const { signInWithEmail, signInWithPhone, verifyPhoneOtp, error, clearError } = useAuthStore()
 
