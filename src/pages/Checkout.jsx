@@ -222,6 +222,7 @@ export default function Checkout() {
 
     setLoading(true)
     setError(null)
+    let isRedirecting = false
 
     try {
       // Build addon list
@@ -287,19 +288,17 @@ export default function Checkout() {
       if (result.success) {
         setBooking(result.data)
 
-        // 1. Send magic link so user can access their dashboard
+        // 1. Send magic link so user can access their dashboard (Fire and forget to not block MP)
         if (!user) {
-          try {
-            await supabase.auth.signInWithOtp({
-              email: formData.email,
-              options: {
-                emailRedirectTo: `${window.location.origin}/auth/callback`,
-                data: { full_name: formData.name },
-              },
-            })
-          } catch (magicErr) {
+          supabase.auth.signInWithOtp({
+            email: formData.email,
+            options: {
+              emailRedirectTo: `${window.location.origin}/auth/callback`,
+              data: { full_name: formData.name },
+            },
+          }).catch(magicErr => {
             console.warn('Magic link failed (non-blocking):', magicErr)
-          }
+          })
         }
 
         // 2. Create Mercado Pago Preference
@@ -316,19 +315,25 @@ export default function Checkout() {
             })
           })
           
-          if (!mpResponse.ok) throw new Error('Error creating MP preference')
+          if (!mpResponse.ok) {
+            const errText = await mpResponse.text()
+            throw new Error(`Error ${mpResponse.status}: ${errText}`)
+          }
+          
           const mpData = await mpResponse.json()
           
           // Redirect to Mercado Pago!
           if (mpData.init_point) {
+            isRedirecting = true
             window.location.href = mpData.init_point
-            return // Detener ejecución porque el usuario sale de la página
+            // Do not call setLoading(false) here, so the spinner remains while browser navigates
+            return 
           } else {
-            throw new Error('No init_point received')
+            throw new Error('No init_point received from Mercado Pago')
           }
         } catch (mpError) {
           console.error('MP Error:', mpError)
-          setError('Error al conectar con Mercado Pago. Verifica tus credenciales.')
+          setError(`No pudimos redirigirte al pago: ${mpError.message}. Intenta nuevamente.`)
           setLoading(false)
           return
         }
@@ -339,7 +344,9 @@ export default function Checkout() {
       console.error('Booking flow error:', err)
       setError(`Error inesperado: ${err.message || err}`)
     } finally {
-      setLoading(false)
+      if (!isRedirecting) {
+        setLoading(false)
+      }
     }
   }
 
