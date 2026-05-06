@@ -327,13 +327,13 @@
 }
 
 .booking-card__date:hover {
-  border-color: rgba(0, 180, 180, 0.3);
-  background: rgba(0, 180, 180, 0.05);
+  border-color: rgba(11, 171, 195, 0.3);
+  background: rgba(11, 171, 195, 0.05);
 }
 
 .booking-card__date--selected {
   border-color: var(--color-accent-500);
-  background: rgba(0, 180, 180, 0.1);
+  background: rgba(11, 171, 195, 0.1);
 }
 
 .booking-card__date-day { font-weight: 600; }
@@ -341,7 +341,7 @@
 .booking-card__date-spots {
   font-size: var(--text-xs);
   color: var(--color-accent-400);
-  background: rgba(0, 180, 180, 0.1);
+  background: rgba(11, 171, 195, 0.1);
   padding: 2px 8px;
   border-radius: var(--radius-full);
 }
@@ -424,7 +424,7 @@
 
 .booking-card__counter-btn:hover {
   border-color: var(--color-accent-500);
-  background: rgba(0, 180, 180, 0.1);
+  background: rgba(11, 171, 195, 0.1);
 }
 
 .booking-card__counter-value {
@@ -455,12 +455,12 @@
 }
 
 .booking-card__addon:hover {
-  border-color: rgba(0, 180, 180, 0.3);
+  border-color: rgba(11, 171, 195, 0.3);
 }
 
 .booking-card__addon--selected {
   border-color: var(--color-accent-500);
-  background: rgba(0, 180, 180, 0.08);
+  background: rgba(11, 171, 195, 0.08);
 }
 
 .booking-card__addon strong {

@@ -36,7 +36,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(0, 180, 180, 0.25);
+  box-shadow: 0 6px 20px rgba(11, 171, 195, 0.25);
   flex-shrink: 0;
 }
 
@@ -113,7 +113,7 @@
 .wizard-sidebar__step-dot--active {
   background-color: var(--color-accent-500, #00B4B4);
   transform: scale(1.4);
-  box-shadow: 0 0 8px rgba(0, 180, 180, 0.5);
+  box-shadow: 0 0 8px rgba(11, 171, 195, 0.5);
 }
 
 .wizard-sidebar__step-dot--completed {
@@ -254,7 +254,7 @@
 
 .input-control:focus {
   border-color: var(--color-accent-500, #00B4B4);
-  box-shadow: 0 0 0 3px rgba(0, 180, 180, 0.15);
+  box-shadow: 0 0 0 3px rgba(11, 171, 195, 0.15);
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -324,14 +324,14 @@ textarea.input-control {
 }
 
 .radio-card:hover {
-  border-color: rgba(0, 180, 180, 0.4);
+  border-color: rgba(11, 171, 195, 0.4);
   background-color: rgba(255, 255, 255, 0.02);
 }
 
 .radio-card--active {
   border-color: var(--color-accent-500, #00B4B4);
-  background-color: rgba(0, 180, 180, 0.06);
-  box-shadow: 0 4px 12px rgba(0, 180, 180, 0.1);
+  background-color: rgba(11, 171, 195, 0.06);
+  box-shadow: 0 4px 12px rgba(11, 171, 195, 0.1);
 }
 
 .radio-card__title {
@@ -395,8 +395,8 @@ textarea.input-control {
 }
 
 .tag-btn:hover {
-  border-color: rgba(0, 180, 180, 0.5);
-  background-color: rgba(0, 180, 180, 0.05);
+  border-color: rgba(11, 171, 195, 0.5);
+  background-color: rgba(11, 171, 195, 0.05);
 }
 
 .tag-btn--active {

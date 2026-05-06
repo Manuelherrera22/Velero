@@ -22,7 +22,7 @@
 .coupon-card__code {
   font-family: monospace;
   font-size: var(--text-sm);
-  background: rgba(0, 180, 180, 0.1);
+  background: rgba(11, 171, 195, 0.1);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-md);
   color: var(--color-accent-300);

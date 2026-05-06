@@ -35,7 +35,7 @@
 
 .review-card__existing {
   font-size: var(--text-sm);
-  background: rgba(0, 180, 180, 0.08);
+  background: rgba(11, 171, 195, 0.08);
   color: var(--color-accent-400);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);

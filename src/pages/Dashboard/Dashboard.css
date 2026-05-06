@@ -61,7 +61,7 @@
 }
 
 .dashboard__nav-item--active {
-  background: linear-gradient(135deg, rgba(0, 180, 180, 0.12), rgba(16, 89, 203, 0.08));
+  background: linear-gradient(135deg, rgba(11, 171, 195, 0.12), rgba(16, 89, 203, 0.08));
   color: var(--color-accent-400, #26C6C6);
   font-weight: 600;
 }
@@ -269,7 +269,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 180, 180, 0.2);
+  box-shadow: 0 4px 12px rgba(11, 171, 195, 0.2);
 }
 
 .dash-pane__title {

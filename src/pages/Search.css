@@ -73,15 +73,15 @@
 }
 
 .search-tag:hover {
-  border-color: rgba(0, 180, 180, 0.3);
+  border-color: rgba(11, 171, 195, 0.3);
   color: var(--color-accent-400);
-  background: rgba(0, 180, 180, 0.08);
+  background: rgba(11, 171, 195, 0.08);
 }
 
 .search-tag--active {
   border-color: var(--color-accent-500);
   color: var(--color-accent-400);
-  background: rgba(0, 180, 180, 0.12);
+  background: rgba(11, 171, 195, 0.12);
 }
 
 /* Results */

@@ -55,7 +55,7 @@
 }
 
 .my-trips__tab--active {
-  background: rgba(0, 180, 180, 0.12);
+  background: rgba(11, 171, 195, 0.12);
   color: var(--color-accent-400);
 }
 
@@ -100,7 +100,7 @@
 
 .boarding-pass:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 180, 180, 0.08);
+  box-shadow: 0 8px 32px rgba(11, 171, 195, 0.08);
 }
 
 /* Main section */
@@ -188,7 +188,7 @@
   justify-content: center;
   gap: var(--space-1);
   padding: var(--space-6);
-  background: rgba(0, 180, 180, 0.05);
+  background: rgba(11, 171, 195, 0.05);
   border-left: 2px dashed rgba(255, 255, 255, 0.06);
   text-align: center;
 }
