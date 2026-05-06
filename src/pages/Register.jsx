@@ -111,7 +111,7 @@ export default function Register() {
           </div>
           <h1 className="register-card__title">¡Cuenta creada!</h1>
           <p className="register-card__subtitle">{config.successMsg}</p>
-          <Link to="/login" className="btn btn--accent btn--lg register-card__submit">
+          <Link to="/login?method=password" className="btn btn--accent btn--lg register-card__submit">
             Ir a Iniciar Sesión
             <ArrowRight size={18} />
           </Link>
