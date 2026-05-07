@@ -288,19 +288,6 @@ export default function Checkout() {
       if (result.success) {
         setBooking(result.data)
 
-        // 1. Send magic link so user can access their dashboard (Fire and forget to not block MP)
-        if (!user) {
-          supabase.auth.signInWithOtp({
-            email: formData.email,
-            options: {
-              emailRedirectTo: `${window.location.origin}/auth/callback`,
-              data: { full_name: formData.name },
-            },
-          }).catch(magicErr => {
-            console.warn('Magic link failed (non-blocking):', magicErr)
-          })
-        }
-
         // 2. Create Mercado Pago Preference
         try {
           const mpResponse = await fetch('/api/create-preference', {
@@ -448,14 +435,6 @@ export default function Checkout() {
               >
                 <WhatsAppIcon /> Enviar código por WhatsApp
               </a>
-            </div>
-
-            <div className="checkout-success__magic-link">
-              <Mail size={16} />
-              <p>
-                Enviamos un <strong>link mágico</strong> a <strong>{formData.email}</strong>. 
-                Hacé click en el link del email para acceder a tu perfil y ver tus reservas.
-              </p>
             </div>
 
             <p className="checkout-success__note">
@@ -892,10 +871,16 @@ export default function Checkout() {
             <div className="modal-backdrop">
               <div className="modal-content animate-fade-in" style={{ textAlign: 'center', padding: 'var(--space-8)' }}>
                 <AlertCircle size={48} color="var(--color-warning)" style={{ margin: '0 auto var(--space-4)' }} />
-                <h3 style={{ marginBottom: 'var(--space-2)' }}>Faltan pasajeros</h3>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-6)' }}>
-                  ⚠️ Asegúrate de haber cargado a todos los pasajeros antes de continuar.
-                </p>
+                <h3 style={{ marginBottom: 'var(--space-2)' }}>Verifica los pasajeros</h3>
+                <div style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-6)', textAlign: 'left' }}>
+                  <p style={{ marginBottom: 'var(--space-3)' }}>Revisá que estén cargadas todas las personas que van a navegar:</p>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, marginBottom: 'var(--space-4)', fontSize: '0.95rem' }}>
+                    {passengers.map((p, i) => (
+                      <li key={i} style={{ marginBottom: '4px' }}>• {p.name || `Pasajero ${i+1}`}</li>
+                    ))}
+                  </ul>
+                  <p>Si viajan más personas, volvé e ingresalas antes de avanzar al pago.</p>
+                </div>
                 <button 
                   className="btn btn--primary" 
                   onClick={() => {

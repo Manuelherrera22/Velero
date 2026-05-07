@@ -21,6 +21,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
+  const [forgotPass, setForgotPass] = useState(false)
 
   // Sync state if URL changes while component is mounted
   useEffect(() => {
@@ -30,6 +31,26 @@ export default function Login() {
   }, [searchParams])
 
   const { signInWithEmail, signInWithPhone, verifyPhoneOtp, error, clearError } = useAuthStore()
+
+  const handleResetPassword = async () => {
+    if (!value) {
+      setPasswordError('Ingresá tu email primero.')
+      return
+    }
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(value, {
+        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      })
+      if (error) throw error
+      alert('¡Enlace enviado! Revisá tu bandeja de entrada o spam.')
+      setForgotPass(false)
+    } catch (err) {
+      setPasswordError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -222,12 +243,16 @@ export default function Login() {
             </div>
           )}
 
-          {usePassword && (
+          {usePassword && !forgotPass && (
             <div style={{ textAlign: 'right', marginTop: '8px' }}>
               <button 
                 type="button" 
                 className="btn btn--ghost btn--sm" 
-                onClick={() => alert("La recuperación de contraseña requiere configurar una página dedicada. Por ahora, podés volver a ingresar usando el 'Link de acceso'.")} 
+                onClick={() => {
+                  setForgotPass(true)
+                  clearError()
+                  setPasswordError('')
+                }} 
                 style={{ padding: 0, height: 'auto', fontSize: '0.85rem', color: 'var(--text-tertiary)' }}
               >
                 ¿Olvidaste tu contraseña?
@@ -235,16 +260,44 @@ export default function Login() {
             </div>
           )}
 
-          <button type="submit" className="btn btn--accent btn--lg login-card__submit" disabled={loading} style={{ marginTop: 'var(--space-4)' }}>
-            {loading ? (
-              <Loader size={18} className="spin" />
-            ) : (
-              <>
-                {usePassword ? 'Iniciar sesión' : method === 'email' ? 'Enviar link de acceso' : 'Enviar código'}
-                <ArrowRight size={18} />
-              </>
-            )}
-          </button>
+          {forgotPass && (
+            <div style={{ marginTop: '16px', background: 'var(--color-primary-50)', padding: '12px', borderRadius: '8px', border: '1px solid var(--color-primary-100)' }}>
+              <p style={{ fontSize: '0.9rem', color: 'var(--color-primary-800)', marginBottom: '12px' }}>
+                Te enviaremos un enlace a <strong>{value || 'tu email'}</strong> para restablecer tu contraseña.
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn--accent btn--sm" 
+                  onClick={handleResetPassword}
+                  disabled={loading || !value}
+                  style={{ flex: 1 }}
+                >
+                  {loading ? <Loader size={16} className="spin" /> : 'Enviar enlace'}
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn--ghost btn--sm" 
+                  onClick={() => setForgotPass(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!forgotPass && (
+            <button type="submit" className="btn btn--accent btn--lg login-card__submit" disabled={loading} style={{ marginTop: 'var(--space-4)' }}>
+              {loading ? (
+                <Loader size={18} className="spin" />
+              ) : (
+                <>
+                  {usePassword ? 'Iniciar sesión' : method === 'email' ? 'Enviar link de acceso' : 'Enviar código'}
+                  <ArrowRight size={18} />
+                </>
+              )}
+            </button>
+          )}
         </form>
 
         <div className="login-divider"><span>Otras opciones</span></div>

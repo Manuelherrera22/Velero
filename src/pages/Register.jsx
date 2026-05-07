@@ -53,6 +53,7 @@ export default function Register() {
 
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [businessName, setBusinessName] = useState('')
   const [businessLocation, setBusinessLocation] = useState('')
@@ -81,14 +82,21 @@ export default function Register() {
 
     setLoading(true)
     try {
+      // Pasamos también el teléfono a la función signUp o actualizamos el perfil luego
       const result = await signUp(email, password, fullName.trim(), role)
       if (result.success) {
+        // Guardar el teléfono en el perfil
+        if (result.data?.user && phone.trim()) {
+          await supabase.from('profiles').update({ phone: phone.trim() }).eq('id', result.data.user.id)
+        }
+
         // If affiliate, create the hotel/business record
         if (role === 'affiliate' && result.data?.user) {
           await supabase.from('hotels').insert({
             name: businessName.trim(),
             location: businessLocation.trim() || null,
             contact_email: email,
+            contact_phone: phone.trim() || null,
             commission_percent: 10,
             owner_id: result.data.user.id,
             business_type: 'hotel',
@@ -188,6 +196,19 @@ export default function Register() {
               required
             />
           </div>
+
+          {role === 'affiliate' && (
+            <div className="input-group">
+              <label className="register-label">Teléfono (opcional)</label>
+              <input
+                type="tel"
+                className="input"
+                placeholder="+54 11 1234 5678"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+          )}
 
           <div className="input-group">
             <label className="register-label">Contraseña</label>

@@ -92,6 +92,11 @@ const useAuthStore = create((set, get) => ({
       })
       if (authError) throw authError
 
+      // Detect fake success (user already exists)
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        throw new Error('already registered')
+      }
+
       // Create profile immediately
       if (data.user) {
         await supabase.from('profiles').upsert({
@@ -106,7 +111,7 @@ const useAuthStore = create((set, get) => ({
     } catch (error) {
       let msg = error.message
       if (msg.includes('already registered') || msg.includes('already been registered')) {
-        msg = 'Este email ya está registrado. Intentá iniciar sesión.'
+        msg = 'Este email ya está registrado. Si querés cambiar tu rol, hacelo desde tu Perfil.'
       } else if (msg.includes('Password should be')) {
         msg = 'La contraseña debe tener al menos 6 caracteres.'
       }
@@ -200,17 +205,14 @@ const useAuthStore = create((set, get) => ({
 
   // Sign out
   signOut: async () => {
+    // Clear state immediately to avoid UI freezing
+    set({ user: null, session: null, profile: null })
     try {
-      // Intentar cerrar sesión en el servidor y forzar limpieza local
-      await supabase.auth.signOut({ scope: 'local' })
-      // También intentar cerrar la sesión global por las dudas, pero atrapando errores
-      await supabase.auth.signOut().catch(() => {})
+      // Fire and forget server-side signout
+      supabase.auth.signOut({ scope: 'local' })
+      supabase.auth.signOut().catch(() => {})
     } catch (err) {
       console.error('Signout error:', err)
-    } finally {
-      set({ user: null, session: null, profile: null })
-      // Forzamos recarga y redirección a inicio
-      window.location.href = '/'
     }
   },
 

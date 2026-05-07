@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X, Sailboat, User, LogOut, LayoutDashboard, Ticket, Building2 } from 'lucide-react'
 import useAuthStore from '../../stores/authStore'
 import './Header.css'
@@ -9,6 +9,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
   const { user, profile, signOut } = useAuthStore()
 
   useEffect(() => {
@@ -23,8 +24,9 @@ export default function Header() {
   }, [location])
 
   const handleSignOut = async () => {
-    await signOut()
     setUserMenuOpen(false)
+    await signOut()
+    navigate('/', { replace: true })
   }
 
   return (

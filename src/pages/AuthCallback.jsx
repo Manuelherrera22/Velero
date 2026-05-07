@@ -34,9 +34,18 @@ export default function AuthCallback() {
             return
           }
 
-          // Success — redirect to Mis Viajes
+          // Check if this is a password recovery link
+          const isRecovery = new URLSearchParams(window.location.search).get('type') === 'recovery'
+
+          // Success — redirect
           setStatus('¡Listo! Redirigiendo...')
-          setTimeout(() => navigate('/mis-viajes', { replace: true }), 500)
+          setTimeout(() => {
+            if (isRecovery) {
+              navigate('/perfil?recover=true', { replace: true })
+            } else {
+              navigate('/mis-viajes', { replace: true })
+            }
+          }, 500)
           return
         }
 

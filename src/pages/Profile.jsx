@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { User, Mail, Phone, MapPin, Sailboat, Shield, LogOut, Edit3, Save, Loader, Lock, CheckCircle, Eye, EyeOff } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import supabase from '../lib/supabase'
@@ -16,8 +16,9 @@ export default function Profile() {
     location: profile?.location || '',
   })
 
+  const [searchParams] = useSearchParams()
   // Password state
-  const [showPasswordSection, setShowPasswordSection] = useState(false)
+  const [showPasswordSection, setShowPasswordSection] = useState(searchParams.get('recover') === 'true')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
