@@ -78,7 +78,7 @@ export default function AffiliateHome() {
   return (
     <div>
       <div className="dashboard__header">
-        <h1 className="dashboard__title">Resumen de Afiliado</h1>
+        <h1 className="dashboard__title">Resumen de Aliado Kailu</h1>
       </div>
 
       <div className="metrics-grid">

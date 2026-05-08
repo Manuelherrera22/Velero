@@ -379,9 +379,21 @@ export default function TripDetail() {
                   </div>
                 )}
                 <div className="booking-card__total">
-                  <span>Total</span>
+                  <span>Total de la experiencia</span>
                   <span>{formatPrice(total, trip.currency)}</span>
                 </div>
+                {trip?.requires_full_payment === false && (
+                  <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--border-color)' }}>
+                    <div className="booking-card__line" style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>
+                      <span>Reserva con anticipo ({((trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20) * 100).toFixed(0)}%)</span>
+                      <span>{formatPrice(total * (trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20), trip.currency)}</span>
+                    </div>
+                    <div className="booking-card__line" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
+                      <span>Saldo a abonar al capitán</span>
+                      <span>{formatPrice(total - (total * (trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20)), trip.currency)}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* CTA Buttons */}

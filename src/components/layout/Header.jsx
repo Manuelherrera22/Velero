@@ -33,7 +33,7 @@ export default function Header() {
     <header className={`header ${scrolled ? 'header--scrolled' : ''}`}>
       <div className="container header__inner">
         <Link to="/" className="header__logo" aria-label="Kailu Home">
-          <img src="/logo-kailu.jpg" alt="Kailu" style={{ height: '36px', width: 'auto', borderRadius: '4px' }} />
+          <img src="/logo-kailu.jpg" alt="Kailu" style={{ height: '48px', width: 'auto', borderRadius: '4px' }} />
         </Link>
 
         <nav className={`header__nav ${menuOpen ? 'header__nav--open' : ''}`}>
@@ -58,7 +58,7 @@ export default function Header() {
               {(profile?.role === 'affiliate' || profile?.role === 'admin') && (
                 <Link to="/afiliado" className="header__link header__link--captain" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.2)' }}>
                   <Building2 size={16} />
-                  Panel Afiliado
+                  Panel Aliado Kailu
                 </Link>
               )}
               <div className="header__user-menu">

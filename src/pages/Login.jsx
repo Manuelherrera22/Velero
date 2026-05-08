@@ -30,7 +30,14 @@ export default function Login() {
     }
   }, [searchParams])
 
-  const { signInWithEmail, signInWithPhone, verifyPhoneOtp, error, clearError } = useAuthStore()
+  const { signInWithEmail, signInWithPhone, verifyPhoneOtp, error, clearError, isAuthenticated } = useAuthStore()
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      window.location.href = '/mis-viajes'
+    }
+  }, [isAuthenticated])
 
   const handleResetPassword = async () => {
     if (!value) {
@@ -184,16 +191,7 @@ export default function Login() {
         {error && <div className="login-error" style={{ background: '#FEE2E2', color: '#B91C1C', padding: '12px', borderRadius: '8px', marginBottom: '16px', border: '1px solid #FCA5A5', fontSize: '0.9rem', fontWeight: 500 }}>{error}</div>}
         {passwordError && <div className="login-error" style={{ background: '#FEE2E2', color: '#B91C1C', padding: '12px', borderRadius: '8px', marginBottom: '16px', border: '1px solid #FCA5A5', fontSize: '0.9rem', fontWeight: 500 }}>{passwordError}</div>}
 
-        {/* Method Toggle */}
-        {!usePassword && (
-          <div className="login-toggle" style={{ gridTemplateColumns: '1fr' }}>
-            <button
-              className={`login-toggle__btn login-toggle__btn--active`}
-            >
-              <Mail size={16} /> Ingresar con Email
-            </button>
-          </div>
-        )}
+        {/* Removed confusing static toggle button */}
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
@@ -342,7 +340,7 @@ export default function Login() {
           {/* Affiliate CTA */}
           <Link to="/registro?rol=afiliado" className="login-captain-cta" style={{ background: 'rgba(16, 185, 129, 0.05)', borderColor: 'rgba(16, 185, 129, 0.15)' }}>
             <div className="login-captain-cta__text" style={{ paddingLeft: '8px' }}>
-              <strong>¿Querés ser afiliado?</strong>
+              <strong>¿Querés ser Aliado Kailu?</strong>
               <span>Recomendá travesías y ganá comisiones</span>
             </div>
             <ArrowRight size={16} className="login-captain-cta__arrow" style={{ color: 'var(--color-success)' }} />

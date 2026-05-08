@@ -35,27 +35,40 @@ export default function AuthCallback() {
           }
 
           // Check if this is a password recovery link
-          const isRecovery = new URLSearchParams(window.location.search).get('type') === 'recovery'
+          const isRecovery = new URLSearchParams(window.location.search).get('type') === 'recovery' || hashParams.get('type') === 'recovery'
+          const isSignup = hashParams.get('type') === 'signup'
 
           // Success — redirect
-          setStatus('¡Listo! Redirigiendo...')
+          if (isSignup) {
+            setStatus('¡Email validado correctamente! Iniciando sesión...')
+          } else {
+            setStatus('¡Listo! Redirigiendo...')
+          }
+          
           setTimeout(() => {
             if (isRecovery) {
               navigate('/perfil?recover=true', { replace: true })
             } else {
               navigate('/mis-viajes', { replace: true })
             }
-          }, 500)
+          }, 1500)
           return
         }
 
         // No hash tokens — try getting existing session
-        const { data: { session } } = await supabase.auth.getSession()
+        // Supabase client might have already consumed the hash and set the session
+        const { data: { session }, error } = await supabase.auth.getSession()
 
         if (session) {
-          navigate('/mis-viajes', { replace: true })
+          setStatus('¡Sesión activa! Redirigiendo...')
+          setTimeout(() => {
+            navigate('/mis-viajes', { replace: true })
+          }, 1000)
         } else {
-          navigate('/login', { replace: true })
+          setStatus('Redirigiendo a inicio de sesión...')
+          setTimeout(() => {
+            navigate('/login', { replace: true })
+          }, 1000)
         }
       } catch (err) {
         console.error('Auth callback exception:', err)
@@ -64,7 +77,7 @@ export default function AuthCallback() {
     }
 
     // Small delay to ensure the hash is available
-    setTimeout(handleCallback, 100)
+    setTimeout(handleCallback, 500)
   }, [navigate])
 
   return (

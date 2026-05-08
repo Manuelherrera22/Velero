@@ -124,7 +124,35 @@ export default function Profile() {
             <div className="profile-field">
               <label><Phone size={14} /> Teléfono</label>
               {editing ? (
-                <input className="input" value={formData.phone} onChange={(e) => updateField('phone', e.target.value)} placeholder="+54 11 1234 5678" />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <select
+                    className="input"
+                    style={{ width: '110px', padding: '0.75rem 0.5rem' }}
+                    value={formData.phone.match(/^\+\d+/)?.[0] || '+54'}
+                    onChange={(e) => {
+                      const currentNumber = formData.phone.replace(/^\+\d+\s*/, '')
+                      updateField('phone', e.target.value + ' ' + currentNumber)
+                    }}
+                  >
+                    <option value="+54">🇦🇷 +54</option>
+                    <option value="+55">🇧🇷 +55</option>
+                    <option value="+56">🇨🇱 +56</option>
+                    <option value="+598">🇺🇾 +598</option>
+                    <option value="+595">🇵🇾 +595</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+34">🇪🇸 +34</option>
+                  </select>
+                  <input
+                    className="input"
+                    style={{ flex: 1 }}
+                    value={formData.phone.replace(/^\+\d+\s*/, '')}
+                    onChange={(e) => {
+                      const prefix = formData.phone.match(/^\+\d+/)?.[0] || '+54'
+                      updateField('phone', prefix + ' ' + e.target.value)
+                    }}
+                    placeholder="11 1234 5678"
+                  />
+                </div>
               ) : (
                 <p>{profile?.phone || '—'}</p>
               )}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Sailboat, Compass, Anchor, Building2, ArrowRight, Eye, EyeOff, Loader, Check } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
@@ -13,7 +13,7 @@ const ROLE_CONFIG = {
     nameLabel: 'Nombre completo',
     namePlaceholder: 'Ej: Juan Pérez',
     buttonText: 'Crear mi cuenta',
-    successMsg: 'Tu cuenta está lista. Revisá tu email para confirmar y empezá a explorar travesías.',
+    successMsg: '¡Casi listo! Enviamos un link a tu email para validar tu cuenta. Debés confirmarlo para empezar a explorar.',
     badgeClass: '',
   },
   publisher: {
@@ -23,17 +23,17 @@ const ROLE_CONFIG = {
     nameLabel: 'Nombre completo (como capitán)',
     namePlaceholder: 'Ej: Cap. Juan Pérez',
     buttonText: 'Crear cuenta de Capitán',
-    successMsg: 'Tu cuenta de capitán está lista. Revisá tu email para confirmar y luego accedé a tu panel para crear tu primera travesía.',
+    successMsg: '¡Casi listo! Enviamos un link a tu email. Debés validarlo para acceder a tu panel de capitán.',
     badgeClass: 'register-role-badge--captain',
   },
   affiliate: {
     icon: Building2,
-    title: 'Registro de Afiliado',
+    title: 'Registro de Aliado Kailu',
     subtitle: 'Registrá tu hotel o agencia para recomendar travesías y ganar comisiones.',
     nameLabel: 'Nombre del responsable',
     namePlaceholder: 'Ej: María García',
-    buttonText: 'Crear cuenta de Afiliado',
-    successMsg: 'Tu cuenta de afiliado está lista. Revisá tu email para confirmar y accedé a tu panel para configurar tu negocio y generar códigos QR.',
+    buttonText: 'Crear cuenta de Aliado',
+    successMsg: '¡Casi listo! Enviamos un link a tu email. Debés validarlo para acceder a tu panel de aliado.',
     badgeClass: 'register-role-badge--affiliate',
   },
 }
@@ -41,7 +41,14 @@ const ROLE_CONFIG = {
 export default function Register() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { signUp, error, clearError } = useAuthStore()
+  const { signUp, error, clearError, isAuthenticated } = useAuthStore()
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      window.location.href = '/mis-viajes'
+    }
+  }, [isAuthenticated])
 
   // Auto-detect role from URL
   const rolParam = searchParams.get('rol')
@@ -117,12 +124,12 @@ export default function Register() {
           <div className="register-success-icon">
             <Check size={48} />
           </div>
-          <h1 className="register-card__title">¡Cuenta creada!</h1>
+          <h1 className="register-card__title">¡Validá tu email!</h1>
           <p className="register-card__subtitle">{config.successMsg}</p>
-          <Link to="/login?method=password" className="btn btn--accent btn--lg register-card__submit">
-            Ir a Iniciar Sesión
+          <a href="mailto:" target="_blank" rel="noopener noreferrer" className="btn btn--accent btn--lg register-card__submit">
+            Revisar mi correo
             <ArrowRight size={18} />
-          </Link>
+          </a>
         </div>
       </div>
     )
@@ -197,16 +204,39 @@ export default function Register() {
             />
           </div>
 
-          {role === 'affiliate' && (
+          {(role === 'affiliate' || role === 'publisher') && (
             <div className="input-group">
               <label className="register-label">Teléfono (opcional)</label>
-              <input
-                type="tel"
-                className="input"
-                placeholder="+54 11 1234 5678"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select
+                  className="input"
+                  style={{ width: '100px', padding: '0.75rem 0.5rem' }}
+                  value={phone.match(/^\+\d+/)?.[0] || '+54'}
+                  onChange={(e) => {
+                    const currentNumber = phone.replace(/^\+\d+\s*/, '')
+                    setPhone(e.target.value + ' ' + currentNumber)
+                  }}
+                >
+                  <option value="+54">🇦🇷 +54</option>
+                  <option value="+55">🇧🇷 +55</option>
+                  <option value="+56">🇨🇱 +56</option>
+                  <option value="+598">🇺🇾 +598</option>
+                  <option value="+595">🇵🇾 +595</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+34">🇪🇸 +34</option>
+                </select>
+                <input
+                  type="tel"
+                  className="input"
+                  style={{ flex: 1 }}
+                  placeholder="11 1234 5678"
+                  value={phone.replace(/^\+\d+\s*/, '')}
+                  onChange={(e) => {
+                    const prefix = phone.match(/^\+\d+/)?.[0] || '+54'
+                    setPhone(prefix + ' ' + e.target.value)
+                  }}
+                />
+              </div>
             </div>
           )}
 
@@ -263,7 +293,7 @@ export default function Register() {
             </Link>
             <Link to="/registro?rol=afiliado" className="register-switch-cta">
               <Building2 size={16} />
-              <span>¿Tenés un hotel o agencia? <strong>Registrate como afiliado</strong></span>
+              <span>¿Tenés un hotel o agencia? <strong>Registrate como Aliado Kailu</strong></span>
             </Link>
           </>
         )}

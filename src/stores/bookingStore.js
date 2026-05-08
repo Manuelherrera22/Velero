@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import supabase from '../lib/supabase'
+import useAuthStore from './authStore'
 
 const useBookingStore = create((set, get) => ({
   bookings: [],
@@ -48,7 +49,7 @@ const useBookingStore = create((set, get) => ({
   fetchMyBookings: async () => {
     set({ loading: true, error: null })
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = useAuthStore.getState().user
       if (!user) throw new Error('No autenticado')
 
       const { data, error } = await supabase
@@ -74,7 +75,7 @@ const useBookingStore = create((set, get) => ({
   fetchCaptainBookings: async () => {
     set({ loading: true, error: null })
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = useAuthStore.getState().user
       if (!user) throw new Error('No autenticado')
 
       // First get captain's trip IDs
