@@ -58,6 +58,28 @@ export default function Checkout() {
   const [showPassengerWarning, setShowPassengerWarning] = useState(false)
   const [hasSeenPassengerWarning, setHasSeenPassengerWarning] = useState(false)
 
+  // Load from sessionStorage if returning from failure
+  useEffect(() => {
+    const savedState = sessionStorage.getItem(`checkout_${id}`)
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState)
+        if (parsed.passengers && parsed.passengers.length > 0) setPassengers(parsed.passengers)
+        if (parsed.formData && parsed.formData.name) setFormData(parsed.formData)
+        if (parsed.selectedAddons) setSelectedAddons(parsed.selectedAddons)
+      } catch (err) {
+        console.error('Error parsing session storage', err)
+      }
+    }
+  }, [id])
+
+  // Save to sessionStorage on change
+  useEffect(() => {
+    if (passengers.length > 0 || formData.name) {
+      sessionStorage.setItem(`checkout_${id}`, JSON.stringify({ passengers, formData, selectedAddons }))
+    }
+  }, [passengers, formData, selectedAddons, id])
+
   const updatePassenger = (idx, field, value) => {
     setPassengers(prev => prev.map((p, i) => {
       if (i !== idx) return p
@@ -199,6 +221,12 @@ export default function Checkout() {
       }
     }
 
+    const expectedPax = mode === 'private' ? validPassengers.length : guests;
+    if (mode === 'shared' && validPassengers.length < guests) {
+      setError(`Ingresá los datos de las personas que faltan. (Total plazas reservadas: ${guests})`)
+      return
+    }
+
     // Go to email confirmation step
     setStep(2)
   }
@@ -213,13 +241,6 @@ export default function Checkout() {
   }
 
   const handleCreateBooking = async () => {
-    // If they haven't seen the warning and they have fewer passengers than they could bring
-    const maxPax = mode === 'private' ? (trip?.max_capacity || 6) : guests
-    if (!hasSeenPassengerWarning && passengers.length < maxPax) {
-      setShowPassengerWarning(true)
-      return
-    }
-
     setLoading(true)
     setError(null)
     let isRedirecting = false
@@ -295,6 +316,7 @@ export default function Checkout() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               bookingId: result.data.id,
+              tripId: id,
               title: trip.title,
               price: advanceAmount, // Monto exacto a cobrar online (Anticipo + Tasa)
               email: formData.email,

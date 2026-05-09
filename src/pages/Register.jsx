@@ -97,18 +97,7 @@ export default function Register() {
           await supabase.from('profiles').update({ phone: phone.trim() }).eq('id', result.data.user.id)
         }
 
-        // If affiliate, create the hotel/business record
-        if (role === 'affiliate' && result.data?.user) {
-          await supabase.from('hotels').insert({
-            name: businessName.trim(),
-            location: businessLocation.trim() || null,
-            contact_email: email,
-            contact_phone: phone.trim() || null,
-            commission_percent: 10,
-            owner_id: result.data.user.id,
-            business_type: 'hotel',
-          })
-        }
+        // El hotel y la comisión los configura manualmente el Admin de Kailu desde el dashboard.
         setSuccess(true)
       }
     } finally {
@@ -126,10 +115,10 @@ export default function Register() {
           </div>
           <h1 className="register-card__title">¡Validá tu email!</h1>
           <p className="register-card__subtitle">{config.successMsg}</p>
-          <a href="mailto:" target="_blank" rel="noopener noreferrer" className="btn btn--accent btn--lg register-card__submit">
-            Revisar mi correo
+          <Link to="/" className="btn btn--accent btn--lg register-card__submit">
+            Volver al inicio
             <ArrowRight size={18} />
-          </a>
+          </Link>
         </div>
       </div>
     )
@@ -206,7 +195,7 @@ export default function Register() {
 
           {(role === 'affiliate' || role === 'publisher') && (
             <div className="input-group">
-              <label className="register-label">Teléfono (opcional)</label>
+              <label className="register-label">Teléfono {role === 'publisher' ? '*' : '(opcional)'}</label>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <select
                   className="input"
@@ -222,8 +211,18 @@ export default function Register() {
                   <option value="+56">🇨🇱 +56</option>
                   <option value="+598">🇺🇾 +598</option>
                   <option value="+595">🇵🇾 +595</option>
+                  <option value="+591">🇧🇴 +591</option>
+                  <option value="+593">🇪🇨 +593</option>
+                  <option value="+51">🇵🇪 +51</option>
+                  <option value="+57">🇨🇴 +57</option>
+                  <option value="+58">🇻🇪 +58</option>
+                  <option value="+52">🇲🇽 +52</option>
                   <option value="+1">🇺🇸 +1</option>
                   <option value="+34">🇪🇸 +34</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+39">🇮🇹 +39</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+49">🇩🇪 +49</option>
                 </select>
                 <input
                   type="tel"
@@ -235,6 +234,7 @@ export default function Register() {
                     const prefix = phone.match(/^\+\d+/)?.[0] || '+54'
                     setPhone(prefix + ' ' + e.target.value)
                   }}
+                  required={role === 'publisher'}
                 />
               </div>
             </div>

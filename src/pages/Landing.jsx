@@ -63,6 +63,16 @@ export default function Landing() {
     return () => observer.disconnect()
   }, [])
 
+  useEffect(() => {
+    if (window.location.hash) {
+      setTimeout(() => {
+        const id = window.location.hash.replace('#', '')
+        const el = document.getElementById(id)
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }, [window.location.hash])
+
   const addRevealRef = (el) => {
     if (el && !revealRefs.current.includes(el)) {
       revealRefs.current.push(el)

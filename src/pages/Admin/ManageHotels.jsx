@@ -8,11 +8,20 @@ export default function ManageHotels() {
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
+  const [affiliates, setAffiliates] = useState([])
   const [form, setForm] = useState({
-    name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10,
+    name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10, owner_id: ''
   })
 
-  useEffect(() => { fetchHotels() }, [])
+  useEffect(() => { 
+    fetchHotels() 
+    fetchAffiliates()
+  }, [])
+
+  const fetchAffiliates = async () => {
+    const { data } = await supabase.from('profiles').select('id, full_name, email').eq('role', 'affiliate')
+    setAffiliates(data || [])
+  }
 
   const fetchHotels = async () => {
     setLoading(true)
@@ -33,10 +42,11 @@ export default function ManageHotels() {
       contact_email: form.contact_email || null,
       contact_phone: form.contact_phone || null,
       commission_percent: parseFloat(form.commission_percent) || 10,
+      owner_id: form.owner_id || null,
     })
     setSaving(false)
     setShowForm(false)
-    setForm({ name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10 })
+    setForm({ name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10, owner_id: '' })
     fetchHotels()
   }
 
@@ -96,6 +106,20 @@ export default function ManageHotels() {
             <div className="input-group">
               <label>Comisión (%)</label>
               <input className="input" type="number" min={0} max={100} value={form.commission_percent} onChange={(e) => updateField('commission_percent', e.target.value)} />
+            </div>
+          </div>
+
+          <div className="form-row" style={{ marginBottom: '16px' }}>
+            <div className="input-group" style={{ width: '100%' }}>
+              <label>Usuario Aliado (Opcional, para que puedan ver sus métricas)</label>
+              <select className="input" value={form.owner_id} onChange={(e) => updateField('owner_id', e.target.value)}>
+                <option value="">-- Seleccionar usuario registrado --</option>
+                {affiliates.map(aff => (
+                  <option key={aff.id} value={aff.id}>
+                    {aff.full_name} ({aff.email})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

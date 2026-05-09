@@ -97,21 +97,13 @@ const useAuthStore = create((set, get) => ({
         throw new Error('already registered')
       }
 
-      // Create profile immediately
-      if (data.user) {
-        await supabase.from('profiles').upsert({
-          id: data.user.id,
-          full_name: fullName,
-          role,
-          updated_at: new Date().toISOString(),
-        })
-      }
+      // El perfil se crea automáticamente en Supabase mediante el trigger on_auth_user_created
 
       return { success: true, data }
     } catch (error) {
       let msg = error.message
       if (msg.includes('already registered') || msg.includes('already been registered')) {
-        msg = 'Este email ya está registrado. Si querés cambiar tu rol, hacelo desde tu Perfil.'
+        msg = 'Este email ya está registrado. Por favor, iniciá sesión.'
       } else if (msg.includes('Password should be')) {
         msg = 'La contraseña debe tener al menos 6 caracteres.'
       }
@@ -186,11 +178,11 @@ const useAuthStore = create((set, get) => ({
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
+        .update({
           ...updates,
           updated_at: new Date().toISOString(),
         })
+        .eq('id', user.id)
         .select()
         .single()
 

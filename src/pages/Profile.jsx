@@ -30,9 +30,13 @@ export default function Profile() {
 
   const handleSave = async () => {
     setSaving(true)
-    await updateProfile(formData)
+    const result = await updateProfile(formData)
     setSaving(false)
-    setEditing(false)
+    if (!result.success) {
+      alert('Hubo un error al guardar: ' + result.error)
+    } else {
+      setEditing(false)
+    }
   }
 
   const updateField = (field, value) => {
@@ -139,8 +143,18 @@ export default function Profile() {
                     <option value="+56">🇨🇱 +56</option>
                     <option value="+598">🇺🇾 +598</option>
                     <option value="+595">🇵🇾 +595</option>
+                    <option value="+591">🇧🇴 +591</option>
+                    <option value="+593">🇪🇨 +593</option>
+                    <option value="+51">🇵🇪 +51</option>
+                    <option value="+57">🇨🇴 +57</option>
+                    <option value="+58">🇻🇪 +58</option>
+                    <option value="+52">🇲🇽 +52</option>
                     <option value="+1">🇺🇸 +1</option>
                     <option value="+34">🇪🇸 +34</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+39">🇮🇹 +39</option>
+                    <option value="+33">🇫🇷 +33</option>
+                    <option value="+49">🇩🇪 +49</option>
                   </select>
                   <input
                     className="input"
@@ -170,7 +184,7 @@ export default function Profile() {
             <div className="profile-field">
               <label><Sailboat size={14} /> Bio</label>
               {editing ? (
-                <textarea className="input" rows={3} value={formData.bio} onChange={(e) => updateField('bio', e.target.value)} placeholder="Contanos sobre vos..." />
+                <textarea className="input" rows={3} value={formData.bio} onChange={(e) => updateField('bio', e.target.value)} placeholder="Contanos tu experiencia navegando..." />
               ) : (
                 <p>{profile?.bio || '—'}</p>
               )}

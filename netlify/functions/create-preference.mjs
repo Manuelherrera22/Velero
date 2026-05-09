@@ -6,7 +6,7 @@ export async function handler(event) {
   }
 
   try {
-    const { bookingId, title, price, email, name } = JSON.parse(event.body)
+    const { bookingId, tripId, title, price, email, name } = JSON.parse(event.body)
     
     const unitPrice = Number(price)
 
@@ -36,7 +36,7 @@ export async function handler(event) {
         // Redirige a una página de éxito (usaremos la página principal o el dashboard por ahora)
         success: `${origin}/mis-viajes?payment=success`,
         pending: `${origin}/mis-viajes?payment=pending`,
-        failure: `${origin}/checkout/${bookingId.split('-')[0]}?error=payment_failed`, // Simplified failure route
+        failure: `${origin}/checkout/${tripId || bookingId}?error=payment_failed`,
       },
       auto_return: 'approved',
       external_reference: bookingId,

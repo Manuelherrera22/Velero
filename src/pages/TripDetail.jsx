@@ -17,7 +17,7 @@ export default function TripDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { currentTrip: trip, tripDates, tripAddons, loading, fetchTrip, clearCurrentTrip } = useTripStore()
+  const { currentTrip: trip, tripDates, tripAddons, isLoadingTrip: loading, fetchTrip, clearCurrentTrip } = useTripStore()
   
   const qrCode = searchParams.get('qr')
 
@@ -163,8 +163,8 @@ export default function TripDetail() {
 
             <div className="trip-detail__meta">
               <span><MapPin size={16} /> {trip.location}</span>
+              <span><Users size={16} /> Mínimo {trip.min_passengers || 1} {trip.min_passengers === 1 ? 'persona' : 'personas'}</span>
               <span><Users size={16} /> Hasta {trip.capacity} personas</span>
-              {trip.min_passengers > 1 && <span><Users size={16} /> Mínimo {trip.min_passengers} personas</span>}
               {trip.boat?.cabins > 0 && <span>🛏 {trip.boat.cabins} Camarotes</span>}
               {trip.boat?.bathrooms > 0 && <span>🚿 {trip.boat.bathrooms} Baños</span>}
             </div>

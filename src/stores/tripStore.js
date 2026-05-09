@@ -10,11 +10,13 @@ const useTripStore = create((set, get) => ({
   tripAddons: [],
   tags: [],
   loading: false,
+  isLoadingTrips: false,
+  isLoadingTrip: false,
   error: null,
 
   // ── Fetch published trips (public) ──
   fetchTrips: async (filters = {}) => {
-    set({ loading: true, error: null })
+    set({ isLoadingTrips: true, error: null })
     try {
       let query = supabase
         .from('trips')
@@ -46,13 +48,13 @@ const useTripStore = create((set, get) => ({
         query = query.limit(filters.limit)
       }
 
-      const { data, error } = await query
+      const { data, error } = await query.abortSignal(AbortSignal.timeout(15000))
 
       if (error) throw error
-      set({ trips: data || [], loading: false })
+      set({ trips: data || [], isLoadingTrips: false })
       return data || []
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isLoadingTrips: false })
       return []
     }
   },
@@ -80,7 +82,7 @@ const useTripStore = create((set, get) => ({
 
   // ── Fetch single trip with all details ──
   fetchTrip: async (tripId) => {
-    set({ loading: true, error: null })
+    set({ isLoadingTrip: true, error: null })
     try {
       // Fetch trip
       const { data: trip, error: tripError } = await supabase
@@ -92,6 +94,7 @@ const useTripStore = create((set, get) => ({
         `)
         .eq('id', tripId)
         .single()
+        .abortSignal(AbortSignal.timeout(15000))
 
       if (tripError) throw tripError
 
@@ -103,6 +106,7 @@ const useTripStore = create((set, get) => ({
         .eq('is_active', true)
         .gte('date', new Date().toISOString().split('T')[0])
         .order('date', { ascending: true })
+        .abortSignal(AbortSignal.timeout(15000))
 
       // Fetch addons
       const { data: addons } = await supabase
@@ -110,6 +114,7 @@ const useTripStore = create((set, get) => ({
         .select('*')
         .eq('trip_id', tripId)
         .eq('is_active', true)
+        .abortSignal(AbortSignal.timeout(15000))
 
       // Fetch reviews
       const { data: reviews } = await supabase
@@ -131,13 +136,13 @@ const useTripStore = create((set, get) => ({
         currentTrip: { ...trip, avgRating, reviewCount: reviews?.length || 0 },
         tripDates: dates || [],
         tripAddons: addons || [],
-        loading: false,
+        isLoadingTrip: false,
       })
 
       return { trip: { ...trip, avgRating, reviewCount: reviews?.length || 0 }, dates, addons, reviews }
     } catch (error) {
       console.error('Error en fetchTrip:', error)
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isLoadingTrip: false })
       return null
     }
   },

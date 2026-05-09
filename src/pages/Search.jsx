@@ -5,7 +5,7 @@ import useTripStore from '../stores/tripStore'
 import './Search.css'
 
 export default function Search() {
-  const { trips, tags, loading, fetchTrips, fetchTags } = useTripStore()
+  const { trips, tags, isLoadingTrips: loading, fetchTrips, fetchTags } = useTripStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTag, setActiveTag] = useState('Todos')
 
