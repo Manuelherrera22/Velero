@@ -470,11 +470,42 @@
 }
 
 /* ── FAQ Accordion ── */
+.faq-tabs {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.faq-tab {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.faq-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.faq-tab--active {
+  background: var(--color-accent-500);
+  border-color: var(--color-accent-500);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
 .faq-accordion {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  margin-top: var(--space-10);
   max-width: 800px;
   margin-inline: auto;
 }

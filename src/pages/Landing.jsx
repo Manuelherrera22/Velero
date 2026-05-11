@@ -34,56 +34,152 @@ const STEPS = [
   { num: '03', title: 'Navega', desc: 'Vive una experiencia única en el agua con capitanes expertos.' },
 ]
 
-const FAQS = [
-  {
-    question: '¿Qué es Kailu?',
-    answer: <p>Kailu es una plataforma que conecta personas con experiencias vinculadas a la navegación, la naturaleza y el encuentro con otras personas. A través de Kailu puedes descubrir y reservar actividades organizadas por capitanes, anfitriones y organizadores independientes, además de experiencias creadas o coordinadas directamente por Kailu.</p>
+const FAQS = {
+  generales: {
+    title: 'Generales',
+    items: [
+      {
+        question: '¿Qué es Kailu?',
+        answer: <p>Kailu es una plataforma que conecta personas con experiencias vinculadas a la navegación, la naturaleza y el encuentro con otras personas. A través de Kailu puedes descubrir y reservar actividades organizadas por capitanes, anfitriones y organizadores independientes, además de experiencias creadas o coordinadas directamente por Kailu.</p>
+      },
+      {
+        question: '¿Cuál es el objetivo de Kailu?',
+        answer: <p>Kailu busca facilitar el acceso a experiencias auténticas, ayudando a los capitanes y organizadores a dar visibilidad a sus propuestas y permitiendo que más personas puedan descubrir, reservar y vivir actividades únicas de manera simple y segura.</p>
+      },
+      {
+        question: '¿Quiénes pueden utilizar Kailu?',
+        answer: (
+          <>
+            <p>En Kailu existen distintos tipos de usuarios dentro de la plataforma:</p>
+            <ul style={{ paddingLeft: '20px', marginTop: '8px' }}>
+              <li><strong>Participantes</strong>, que reservan experiencias;</li>
+              <li><strong>Capitanes u Organizadores</strong>, que publican actividades;</li>
+              <li>y <strong>Aliados Kailu</strong>, que ayudan a difundir propuestas y ganan comisiones.</li>
+            </ul>
+          </>
+        )
+      },
+      {
+        question: '¿Es necesario registrarme para reservar?',
+        answer: (
+          <>
+            <p>No. No es necesario crear una cuenta en Kailu para realizar una reserva.</p>
+            <p>Durante el proceso de contratación solicitaremos un correo electrónico y un número de teléfono para validar la reserva, enviar la confirmación correspondiente y poder contactarte en caso de ser necesario.</p>
+          </>
+        )
+      },
+      {
+        question: '¿Puedo crear un usuario en Kailu?',
+        answer: (
+          <>
+            <p>Sí. Los Capitanes u Organizadores y Aliados Kailu necesitarán crear un usuario para poder publicar experiencias, gestionar propuestas o participar de las funcionalidades específicas de la plataforma.</p>
+            <p>Si deseas participar en actividades publicadas en Kailu, también podrás crear una cuenta para gestionar tus reservas y acceder a futuras funcionalidades.</p>
+          </>
+        )
+      },
+      {
+        question: '¿Necesito experiencia previa para participar?',
+        answer: <p>No. Muchas experiencias están pensadas para personas sin experiencia previa. En cada actividad encontrarás información específica sobre requisitos o experiencia recomendada.</p>
+      },
+      {
+        question: '¿Cómo puedo contactar a Kailu?',
+        answer: <p>Puedes escribirnos en cualquier momento a: <strong>soporte@kailu.travel</strong>. También podrás encontrar novedades y contenidos en nuestros canales oficiales.</p>
+      }
+    ]
   },
-  {
-    question: '¿Es necesario registrarme para reservar?',
-    answer: (
-      <>
-        <p>No. No es necesario crear una cuenta en Kailu para realizar una reserva.</p>
-        <p>Durante el proceso de contratación solicitaremos un correo electrónico y un número de teléfono para validar la reserva, enviar la confirmación correspondiente y poder contactarte en caso de ser necesario para la correcta coordinación de la experiencia.</p>
-      </>
-    )
+  participantes: {
+    title: 'Para Participantes',
+    items: [
+      {
+        question: '¿Cómo puedo reservar una experiencia?',
+        answer: <p>Solo debes seleccionar la actividad que te interese, elegir la fecha disponible y seguir el proceso de reserva indicado en la plataforma.</p>
+      },
+      {
+        question: '¿Cómo funcionan los pagos?',
+        answer: (
+          <>
+            <p>Dependiendo de la experiencia, algunas reservas podrán abonarse completamente online y otras podrán requerir un anticipo para confirmar la plaza y el pago del saldo restante directamente al Capitán u Organizador.</p>
+            <p>Las condiciones de pago se informarán antes de confirmar la reserva.</p>
+          </>
+        )
+      },
+      {
+        question: '¿Qué incluye el precio de una experiencia?',
+        answer: <p>Cada publicación detalla los servicios incluidos, horarios, duración y cualquier condición particular definida por el Capitán u Organizador.</p>
+      },
+      {
+        question: '¿Puedo cancelar una reserva?',
+        answer: <p>Sí. Las condiciones de cancelación y devolución pueden variar según la experiencia contratada. Te recomendamos revisar las condiciones particulares de cada actividad antes de reservar.</p>
+      },
+      {
+        question: '¿Qué ocurre si una actividad se cancela por mal clima?',
+        answer: <p>En casos de mal clima, razones de seguridad o fuerza mayor, las partes podrán acordar una reprogramación o, cuando el participante no pueda asistir en la nueva fecha propuesta, se realizará la devolución de los importes abonados.</p>
+      },
+      {
+        question: '¿Cómo me comunico con el Capitán u Organizador?',
+        answer: <p>Dependiendo de la modalidad disponible, Kailu podrá ofrecer herramientas de comunicación entre usuarios o actuar como intermediario para facilitar el contacto y la coordinación de la experiencia.</p>
+      },
+      {
+        question: '¿Qué información debo proporcionar al reservar?',
+        answer: <p>Para algunas actividades podremos solicitar datos como nombre, documento de identidad, información de contacto o datos relevantes para la seguridad y correcta organización.</p>
+      }
+    ]
   },
-  {
-    question: '¿Quiénes pueden utilizar Kailu?',
-    answer: (
-      <>
-        <p>En Kailu existen distintos tipos de usuarios dentro de la plataforma:</p>
-        <ul style={{ paddingLeft: '20px', marginTop: '8px' }}>
-          <li><strong>Participantes</strong>, que reservan experiencias;</li>
-          <li><strong>Capitanes u Organizadores</strong>, que publican actividades;</li>
-          <li>y <strong>Aliados Kailu</strong>, que ayudan a difundir propuestas y ganan comisiones.</li>
-        </ul>
-      </>
-    )
-  },
-  {
-    question: '¿Cómo funcionan los pagos?',
-    answer: (
-      <>
-        <p>Dependiendo de la experiencia, algunas reservas podrán abonarse completamente online y otras podrán requerir un anticipo para confirmar la plaza y el pago del saldo restante directamente al Capitán u Organizador.</p>
-        <p>Las condiciones de pago se informarán antes de confirmar la reserva.</p>
-      </>
-    )
-  },
-  {
-    question: '¿Puedo cancelar una reserva?',
-    answer: <p>Sí. Las condiciones de cancelación y devolución pueden variar según la experiencia contratada. Te recomendamos revisar las condiciones particulares de cada actividad antes de reservar.</p>
-  },
-  {
-    question: '¿Cómo me comunico con el Capitán u Organizador?',
-    answer: <p>Kailu te brindará los datos de contacto del Capitán u Organizador una vez confirmada la reserva para facilitar la coordinación de la experiencia.</p>
+  capitanes: {
+    title: 'Para Capitanes u Organizadores',
+    items: [
+      {
+        question: '¿Cómo puedo publicar una experiencia en Kailu?',
+        answer: <p>Debes registrarte en la plataforma y completar la información solicitada sobre la actividad, embarcación o experiencia que deseas ofrecer.</p>
+      },
+      {
+        question: '¿Qué modalidades de pago puedo ofrecer?',
+        answer: <p>Dependiendo del tipo de experiencia, podrás optar por: cobro total online, o reserva mediante anticipo online y saldo restante abonado directamente por el participante al Capitán u Organizador.</p>
+      },
+      {
+        question: '¿Cuándo recibo el dinero de una reserva?',
+        answer: (
+          <>
+            <p>Si el cobro lo realiza Kailu en su totalidad, recibes el importe dentro de las 48 hs posteriores a la concreción de la experiencia.</p>
+            <p>Si la modalidad elegida es con anticipo, recibes el pago restante del participante al momento previo al inicio de la experiencia.</p>
+          </>
+        )
+      },
+      {
+        question: '¿Qué ocurre si un participante cancela?',
+        answer: <p>Las cancelaciones y posibles devoluciones se gestionarán según las condiciones particulares de cada experiencia y las políticas generales de Kailu.</p>
+      },
+      {
+        question: '¿Puedo cancelar una actividad?',
+        answer: (
+          <>
+            <p>Sí. En caso de condiciones climáticas adversas, razones de seguridad, fuerza mayor u otras situaciones, podrás cancelar o reprogramar la actividad.</p>
+            <p>Kailu podrá revisar situaciones de cancelaciones reiteradas o injustificadas que afecten la experiencia de los participantes.</p>
+          </>
+        )
+      },
+      {
+        question: '¿Qué información recibiré sobre los participantes?',
+        answer: <p>Podrás acceder a la información necesaria para gestionar correctamente la experiencia, incluyendo datos de contacto e información relevante para la actividad.</p>
+      },
+      {
+        question: '¿Kailu cobra comisión?',
+        answer: (
+          <>
+            <p>Sí. Kailu cobra una comisión sobre las reservas realizadas a través de la plataforma, además de posibles gastos de gestión e impuestos aplicables.</p>
+            <p>Actualmente, la comisión general para publicaciones estándar es del 20% sobre el valor de la experiencia.</p>
+          </>
+        )
+      }
+    ]
   }
-]
+}
 
 export default function Landing() {
   const revealRefs = useRef([])
   const { featuredTrips, fetchFeaturedTrips } = useTripStore()
   const [openFaq, setOpenFaq] = useState(null)
+  const [activeFaqCategory, setActiveFaqCategory] = useState('generales')
 
   useEffect(() => {
     fetchFeaturedTrips()
@@ -387,16 +483,29 @@ export default function Landing() {
       {/* ══════════════════ PREGUNTAS FRECUENTES ══════════════════ */}
       <section className="section" id="faq">
         <div className="container reveal" ref={addRevealRef}>
-          <div className="section__header-row">
-            <div>
-              <p className="section__label">Aclaramos tus dudas</p>
-              <h2 className="section__title">Preguntas Frecuentes</h2>
-            </div>
+          <div className="section__header-row" style={{ alignItems: 'center', flexDirection: 'column', textAlign: 'center' }}>
+            <p className="section__label">Aclaramos tus dudas</p>
+            <h2 className="section__title">Preguntas Frecuentes</h2>
           </div>
-          <div className="divider" />
+          <div className="divider" style={{ margin: '0 auto var(--space-8)' }} />
+
+          <div className="faq-tabs">
+            {Object.entries(FAQS).map(([key, category]) => (
+              <button 
+                key={key}
+                className={`faq-tab ${activeFaqCategory === key ? 'faq-tab--active' : ''}`}
+                onClick={() => {
+                  setActiveFaqCategory(key)
+                  setOpenFaq(null)
+                }}
+              >
+                {category.title}
+              </button>
+            ))}
+          </div>
 
           <div className="faq-accordion stagger-children">
-            {FAQS.map((faq, i) => {
+            {FAQS[activeFaqCategory].items.map((faq, i) => {
               const isOpen = openFaq === i
               return (
                 <div key={i} className={`faq-item ${isOpen ? 'faq-item--open' : ''}`} onClick={() => setOpenFaq(isOpen ? null : i)}>
@@ -404,7 +513,7 @@ export default function Landing() {
                     <h3 className="faq-item__question">{faq.question}</h3>
                     <div className="faq-item__icon">{isOpen ? '−' : '+'}</div>
                   </div>
-                  <div className="faq-item__body" style={{ maxHeight: isOpen ? '500px' : '0', overflow: 'hidden', transition: 'max-height 0.3s ease' }}>
+                  <div className="faq-item__body" style={{ maxHeight: isOpen ? '1000px' : '0', overflow: 'hidden', transition: 'max-height 0.3s ease' }}>
                     <div className="faq-item__content">
                       {faq.answer}
                     </div>
