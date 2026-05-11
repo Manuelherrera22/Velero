@@ -18,7 +18,6 @@ import Review from './pages/Review'
 import Terms from './pages/Terms'
 import Cookies from './pages/Cookies'
 import Privacy from './pages/Privacy'
-import FAQ from './pages/FAQ'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/layout/ProtectedRoute'
@@ -48,8 +47,6 @@ function App() {
           <Route path="/terminos" element={<Terms />} />
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/privacidad" element={<Privacy />} />
-          <Route path="/faq" element={<FAQ />} />
-
           {/* Protected routes */}
           <Route path="/perfil" element={
             <ProtectedRoute>

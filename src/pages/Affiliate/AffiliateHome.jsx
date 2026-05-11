@@ -127,7 +127,7 @@ export default function AffiliateHome() {
         <h3 className="item-card__title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <TrendingUp size={18} /> ¿Cómo funciona?
         </h3>
-        <p className="item-card__subtitle" style={{ marginTop: '12px', lineHeight: '1.6' }}>
+        <p className="item-card__subtitle" style={{ display: 'block', marginTop: '12px', lineHeight: '1.6' }}>
           Generá códigos QR desde la pestaña <strong>Mis Códigos QR</strong> y colocalos en la recepción o habitaciones. 
           Cuando los huéspedes escanean el código, ven una lista curada de travesías. Si reservan a través de tu link, ganás la comisión acordada automáticamente.
         </p>

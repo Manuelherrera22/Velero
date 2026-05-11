@@ -8,7 +8,9 @@ const supabaseKey = env.match(/VITE_SUPABASE_ANON_KEY=(.*)/)[1]
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function check() {
-  const { data, error } = await supabase.from('profiles').select('*').in('email', ['haccorinti@yahoo.com.ar', 'hernanacco@gmail.com', 'haccorinti@naturgy.com.ar'])
-  console.log('PROFILES:', data, error)
+  const { data, error } = await supabase.from('profiles').update({ role: 'admin' }).eq('email', 'haccorinti@yahoo.com.ar')
+  console.log('UPDATE:', data, error)
+  const { data: data2 } = await supabase.from('profiles').select('*').eq('email', 'haccorinti@yahoo.com.ar')
+  console.log('NEW PROFILE:', data2)
 }
 check()

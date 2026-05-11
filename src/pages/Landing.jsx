@@ -34,9 +34,56 @@ const STEPS = [
   { num: '03', title: 'Navega', desc: 'Vive una experiencia única en el agua con capitanes expertos.' },
 ]
 
+const FAQS = [
+  {
+    question: '¿Qué es Kailu?',
+    answer: <p>Kailu es una plataforma que conecta personas con experiencias vinculadas a la navegación, la naturaleza y el encuentro con otras personas. A través de Kailu puedes descubrir y reservar actividades organizadas por capitanes, anfitriones y organizadores independientes, además de experiencias creadas o coordinadas directamente por Kailu.</p>
+  },
+  {
+    question: '¿Es necesario registrarme para reservar?',
+    answer: (
+      <>
+        <p>No. No es necesario crear una cuenta en Kailu para realizar una reserva.</p>
+        <p>Durante el proceso de contratación solicitaremos un correo electrónico y un número de teléfono para validar la reserva, enviar la confirmación correspondiente y poder contactarte en caso de ser necesario para la correcta coordinación de la experiencia.</p>
+      </>
+    )
+  },
+  {
+    question: '¿Quiénes pueden utilizar Kailu?',
+    answer: (
+      <>
+        <p>En Kailu existen distintos tipos de usuarios dentro de la plataforma:</p>
+        <ul style={{ paddingLeft: '20px', marginTop: '8px' }}>
+          <li><strong>Participantes</strong>, que reservan experiencias;</li>
+          <li><strong>Capitanes u Organizadores</strong>, que publican actividades;</li>
+          <li>y <strong>Aliados Kailu</strong>, que ayudan a difundir propuestas y ganan comisiones.</li>
+        </ul>
+      </>
+    )
+  },
+  {
+    question: '¿Cómo funcionan los pagos?',
+    answer: (
+      <>
+        <p>Dependiendo de la experiencia, algunas reservas podrán abonarse completamente online y otras podrán requerir un anticipo para confirmar la plaza y el pago del saldo restante directamente al Capitán u Organizador.</p>
+        <p>Las condiciones de pago se informarán antes de confirmar la reserva.</p>
+      </>
+    )
+  },
+  {
+    question: '¿Puedo cancelar una reserva?',
+    answer: <p>Sí. Las condiciones de cancelación y devolución pueden variar según la experiencia contratada. Te recomendamos revisar las condiciones particulares de cada actividad antes de reservar.</p>
+  },
+  {
+    question: '¿Cómo me comunico con el Capitán u Organizador?',
+    answer: <p>Kailu te brindará los datos de contacto del Capitán u Organizador una vez confirmada la reserva para facilitar la coordinación de la experiencia.</p>
+  }
+]
+
 export default function Landing() {
   const revealRefs = useRef([])
   const { featuredTrips, fetchFeaturedTrips } = useTripStore()
+  const [openFaq, setOpenFaq] = useState(null)
 
   useEffect(() => {
     fetchFeaturedTrips()
@@ -333,6 +380,38 @@ export default function Landing() {
                 <Compass size={120} strokeWidth={0.8} />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════ PREGUNTAS FRECUENTES ══════════════════ */}
+      <section className="section" id="faq">
+        <div className="container reveal" ref={addRevealRef}>
+          <div className="section__header-row">
+            <div>
+              <p className="section__label">Aclaramos tus dudas</p>
+              <h2 className="section__title">Preguntas Frecuentes</h2>
+            </div>
+          </div>
+          <div className="divider" />
+
+          <div className="faq-accordion stagger-children">
+            {FAQS.map((faq, i) => {
+              const isOpen = openFaq === i
+              return (
+                <div key={i} className={`faq-item ${isOpen ? 'faq-item--open' : ''}`} onClick={() => setOpenFaq(isOpen ? null : i)}>
+                  <div className="faq-item__header">
+                    <h3 className="faq-item__question">{faq.question}</h3>
+                    <div className="faq-item__icon">{isOpen ? '−' : '+'}</div>
+                  </div>
+                  <div className="faq-item__body" style={{ maxHeight: isOpen ? '500px' : '0', overflow: 'hidden', transition: 'max-height 0.3s ease' }}>
+                    <div className="faq-item__content">
+                      {faq.answer}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>

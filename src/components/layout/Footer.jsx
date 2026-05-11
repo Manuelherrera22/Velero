@@ -64,7 +64,7 @@ export default function Footer() {
             <Link to="/terminos" className="footer__link">Términos y Condiciones</Link>
             <Link to="/privacidad" className="footer__link">Privacidad</Link>
             <Link to="/cookies" className="footer__link">Cookies</Link>
-            <Link to="/faq" className="footer__link">Preguntas Frecuentes</Link>
+            <a href="/#faq" className="footer__link">Preguntas Frecuentes</a>
           </div>
         </div>
 
