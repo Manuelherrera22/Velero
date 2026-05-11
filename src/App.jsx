@@ -17,6 +17,7 @@ import QRLanding from './pages/QRLanding'
 import Review from './pages/Review'
 import Terms from './pages/Terms'
 import Cookies from './pages/Cookies'
+import Privacy from './pages/Privacy'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/layout/ProtectedRoute'
@@ -45,6 +46,7 @@ function App() {
           <Route path="/review/:bookingId" element={<Review />} />
           <Route path="/terminos" element={<Terms />} />
           <Route path="/cookies" element={<Cookies />} />
+          <Route path="/privacidad" element={<Privacy />} />
 
           {/* Protected routes */}
           <Route path="/perfil" element={
