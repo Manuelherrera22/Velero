@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import useAuthStore from './stores/authStore'
 import Landing from './pages/Landing'
 import Search from './pages/Search'
@@ -24,10 +24,18 @@ import ProtectedRoute from './components/layout/ProtectedRoute'
 
 function App() {
   const initialize = useAuthStore((s) => s.initialize)
+  const location = useLocation()
 
   useEffect(() => {
     initialize()
   }, [initialize])
+
+  useEffect(() => {
+    // Solo scrollear arriba si no hay un hash (ancla) en la URL
+    if (!location.hash) {
+      window.scrollTo(0, 0)
+    }
+  }, [location.pathname, location.hash])
 
   return (
     <div className="app">
