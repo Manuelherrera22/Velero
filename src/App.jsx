@@ -15,6 +15,7 @@ import Admin from './pages/Admin'
 import AffiliateDashboard from './pages/Affiliate'
 import QRLanding from './pages/QRLanding'
 import Review from './pages/Review'
+import Terms from './pages/Terms'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/layout/ProtectedRoute'
@@ -41,6 +42,7 @@ function App() {
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/qr" element={<QRLanding />} />
           <Route path="/review/:bookingId" element={<Review />} />
+          <Route path="/terminos" element={<Terms />} />
 
           {/* Protected routes */}
           <Route path="/perfil" element={
