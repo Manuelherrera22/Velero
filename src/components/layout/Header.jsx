@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X, Sailboat, User, LogOut, LayoutDashboard, Ticket, Building2 } from 'lucide-react'
+import { Menu, X, Sailboat, User, LogOut, LayoutDashboard, Ticket, Building2, Shield } from 'lucide-react'
 import useAuthStore from '../../stores/authStore'
 import Notifications from './Notifications'
 import './Header.css'
@@ -50,6 +50,12 @@ export default function Header() {
 
           {user ? (
             <>
+              {profile?.role === 'admin' && (
+                <Link to="/admin" className="header__link header__link--captain" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+                  <Shield size={16} />
+                  Panel Admin
+                </Link>
+              )}
               {(profile?.role === 'publisher' || profile?.role === 'admin') && (
                 <Link to="/dashboard" className="header__link header__link--captain">
                   <LayoutDashboard size={16} />
@@ -59,7 +65,7 @@ export default function Header() {
               {(profile?.role === 'affiliate' || profile?.role === 'admin') && (
                 <Link to="/afiliado" className="header__link header__link--captain" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.2)' }}>
                   <Building2 size={16} />
-                  Panel Aliado Kailu
+                  Panel Aliado
                 </Link>
               )}
               
@@ -87,9 +93,14 @@ export default function Header() {
                   <Link to="/perfil" className="header__dropdown-item">
                     <User size={16} /> Mi Perfil
                   </Link>
+                  {profile?.role === 'admin' && (
+                    <Link to="/admin" className="header__dropdown-item">
+                      <Shield size={16} /> Panel Admin
+                    </Link>
+                  )}
                   {(profile?.role === 'publisher' || profile?.role === 'admin') && (
                     <Link to="/dashboard" className="header__dropdown-item">
-                      <LayoutDashboard size={16} /> Dashboard
+                      <LayoutDashboard size={16} /> Dashboard Capitán
                     </Link>
                   )}
                   <button onClick={handleSignOut} className="header__dropdown-item header__dropdown-item--danger">
