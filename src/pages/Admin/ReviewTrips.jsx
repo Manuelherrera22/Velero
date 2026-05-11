@@ -73,10 +73,13 @@ export default function ReviewTrips() {
   const formatPrice = (p, c) => c === 'EUR' ? `€${p}` : `$${p?.toLocaleString('es-AR')}`
 
   return (
-    <div>
-      <div className="dashboard__header">
-        <h1 className="dashboard__title">Revisar Travesías</h1>
-      </div>
+    <div className="dash-page">
+      <div className="dash-pane">
+        <div className="dash-pane__header">
+          <div className="dash-pane__header-left">
+            <h1 className="dash-pane__title">Revisión de Travesías</h1>
+          </div>
+        </div>
 
       <div className="search-tags" style={{ marginBottom: 'var(--space-6)' }}>
         {['pending', 'published', 'rejected', 'draft', 'all'].map(f => (
@@ -188,6 +191,7 @@ export default function ReviewTrips() {
             )}
           </div>
         ))}
+      </div>
       </div>
     </div>
   )

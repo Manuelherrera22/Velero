@@ -70,15 +70,18 @@ export default function ManageHotels() {
   const updateField = (f, v) => setForm(p => ({ ...p, [f]: v }))
 
   return (
-    <div>
-      <div className="dashboard__header">
-        <h1 className="dashboard__title">Hoteles & QR</h1>
-        {!showForm && (
-          <button className="btn btn--accent btn--sm" onClick={() => setShowForm(true)}>
-            <Plus size={16} /> Nuevo Hotel
-          </button>
-        )}
-      </div>
+    <div className="dash-page">
+      <div className="dash-pane">
+        <div className="dash-pane__header">
+          <div className="dash-pane__header-left">
+            <h1 className="dash-pane__title">Hoteles & QR</h1>
+          </div>
+          {!showForm && (
+            <button className="btn btn--accent btn--sm" onClick={() => setShowForm(true)}>
+              <Plus size={16} /> Nuevo Hotel
+            </button>
+          )}
+        </div>
 
       {showForm && (
         <div className="item-card glass" style={{ marginBottom: 'var(--space-6)' }}>
@@ -183,6 +186,7 @@ export default function ManageHotels() {
             </button>
           </div>
         ))}
+      </div>
       </div>
     </div>
   )

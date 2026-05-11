@@ -93,10 +93,13 @@ export default function AdminMetrics() {
   }
 
   return (
-    <div>
-      <div className="dashboard__header">
-        <h1 className="dashboard__title">Métricas del Negocio</h1>
-      </div>
+    <div className="dash-page">
+      <div className="dash-pane">
+        <div className="dash-pane__header">
+          <div className="dash-pane__header-left">
+            <h1 className="dash-pane__title">Métricas del Negocio</h1>
+          </div>
+        </div>
 
       {/* KPI Cards */}
       <div className="metrics-grid">
@@ -219,6 +222,7 @@ export default function AdminMetrics() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   )

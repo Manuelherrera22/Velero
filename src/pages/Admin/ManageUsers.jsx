@@ -49,10 +49,13 @@ export default function ManageUsers() {
   }
 
   return (
-    <div>
-      <div className="dashboard__header">
-        <h1 className="dashboard__title">Gestión de Usuarios</h1>
-      </div>
+    <div className="dash-page">
+      <div className="dash-pane">
+        <div className="dash-pane__header">
+          <div className="dash-pane__header-left">
+            <h1 className="dash-pane__title">Gestión de Usuarios</h1>
+          </div>
+        </div>
 
       <div className="search-tags" style={{ marginBottom: 'var(--space-6)' }}>
         {['all', 'publisher', 'affiliate', 'viewer'].map(f => (
@@ -126,6 +129,7 @@ export default function ManageUsers() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   )

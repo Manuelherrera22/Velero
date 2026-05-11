@@ -50,15 +50,18 @@ export default function ManageCoupons() {
   const updateField = (f, v) => setForm(p => ({ ...p, [f]: v }))
 
   return (
-    <div>
-      <div className="dashboard__header">
-        <h1 className="dashboard__title">Cupones de Descuento</h1>
-        {!showForm && (
-          <button className="btn btn--accent btn--sm" onClick={() => setShowForm(true)}>
-            <Plus size={16} /> Nuevo Cupón
-          </button>
-        )}
-      </div>
+    <div className="dash-page">
+      <div className="dash-pane">
+        <div className="dash-pane__header">
+          <div className="dash-pane__header-left">
+            <h1 className="dash-pane__title">Cupones de Descuento</h1>
+          </div>
+          {!showForm && (
+            <button className="btn btn--accent btn--sm" onClick={() => setShowForm(true)}>
+              <Plus size={16} /> Nuevo Cupón
+            </button>
+          )}
+        </div>
 
       {showForm && (
         <div className="item-card glass" style={{ marginBottom: 'var(--space-6)' }}>
@@ -158,6 +161,7 @@ export default function ManageCoupons() {
             </button>
           </div>
         ))}
+      </div>
       </div>
     </div>
   )
