@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   phone TEXT,
   full_name TEXT,
   avatar_url TEXT,
-  role TEXT DEFAULT 'viewer' CHECK (role IN ('viewer', 'publisher', 'admin')),
+  role TEXT DEFAULT 'viewer' CHECK (role IN ('viewer', 'publisher', 'admin', 'affiliate')),
   is_verified BOOLEAN DEFAULT FALSE,
   bio TEXT,
   location TEXT,
@@ -24,13 +24,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, phone, full_name, avatar_url)
+  INSERT INTO public.profiles (id, email, phone, full_name, avatar_url, role)
   VALUES (
     NEW.id,
     NEW.email,
     NEW.phone,
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-    COALESCE(NEW.raw_user_meta_data->>'avatar_url', '')
+    COALESCE(NEW.raw_user_meta_data->>'avatar_url', ''),
+    COALESCE(NEW.raw_user_meta_data->>'role', 'viewer')
   );
   RETURN NEW;
 END;
