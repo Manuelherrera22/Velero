@@ -31,7 +31,15 @@ const useAuthStore = create((set, get) => ({
       // Get current session
       const { data: { session }, error } = await supabase.auth.getSession()
       
-      if (error) throw error
+      if (error) {
+        // If the refresh token is invalid/expired, quietly sign out to clean local storage
+        if (error.message.includes('Refresh Token') || error.status === 400) {
+          await supabase.auth.signOut().catch(() => {})
+          set({ loading: false })
+          return // Exit without throwing, so we don't show the error to the user
+        }
+        throw error
+      }
 
       if (session?.user) {
         const profile = await get().fetchProfile(session.user.id)
