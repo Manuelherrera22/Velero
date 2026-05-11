@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X, Sailboat, User, LogOut, LayoutDashboard, Ticket, Building2 } from 'lucide-react'
 import useAuthStore from '../../stores/authStore'
+import Notifications from './Notifications'
 import './Header.css'
 
 export default function Header() {
@@ -61,18 +62,22 @@ export default function Header() {
                   Panel Aliado Kailu
                 </Link>
               )}
-              <div className="header__user-menu">
-              <button 
-                className="header__user-btn"
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-              >
-                <div className="header__user-avatar">
-                  {(profile?.full_name || user.email || '?').charAt(0).toUpperCase()}
-                </div>
-                <span className="header__user-name">
-                  {profile?.full_name || user.email?.split('@')[0] || 'Mi cuenta'}
-                </span>
-              </button>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
+                <Notifications />
+                
+                <div className="header__user-menu">
+                <button 
+                  className="header__user-btn"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                >
+                  <div className="header__user-avatar">
+                    {(profile?.full_name || user.email || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <span className="header__user-name">
+                    {profile?.full_name || user.email?.split('@')[0] || 'Mi cuenta'}
+                  </span>
+                </button>
 
               {userMenuOpen && (
                 <div className="header__dropdown glass animate-fade-in">
@@ -92,6 +97,7 @@ export default function Header() {
                   </button>
                 </div>
               )}
+            </div>
             </div>
             </>
           ) : (

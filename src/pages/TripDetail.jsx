@@ -262,13 +262,13 @@ export default function TripDetail() {
 
               {/* Dynamic Price Header */}
               <div className="booking-card__price mb-6 flex flex-col border-b border-border/40 pb-6">
-                {trip.discount_percentage > 0 && (
+                {(trip.metadata?.discount_percentage > 0 || trip.discount_percentage > 0) && (
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-muted-foreground line-through text-lg font-normal">
                       {formatPrice(basePriceOriginal, trip.currency)}
                     </span>
                     <span className="badge badge-primary bg-primary/10 text-primary border-none text-xs font-bold px-2 py-1">
-                      -{trip.discount_percentage}% dto
+                      -{trip.metadata?.discount_percentage || trip.discount_percentage}% dto
                     </span>
                   </div>
                 )}

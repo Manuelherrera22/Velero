@@ -1,8 +1,9 @@
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom'
-import { Shield, Eye, Tag, BarChart3, Building2 } from 'lucide-react'
+import { Shield, Eye, Tag, BarChart3, Building2, Users } from 'lucide-react'
 import ReviewTrips from './ReviewTrips'
 import ManageCoupons from './ManageCoupons'
 import ManageHotels from './ManageHotels'
+import ManageUsers from './ManageUsers'
 import AdminMetrics from './AdminMetrics'
 import '../Dashboard/Dashboard.css'
 import './Admin.css'
@@ -24,6 +25,9 @@ export default function Admin() {
               <NavLink to="/admin/travesias" className={({ isActive }) => `dashboard__nav-item ${isActive ? 'dashboard__nav-item--active' : ''}`}>
                 <Eye size={18} /> Revisar Travesías
               </NavLink>
+              <NavLink to="/admin/usuarios" className={({ isActive }) => `dashboard__nav-item ${isActive ? 'dashboard__nav-item--active' : ''}`}>
+                <Users size={18} /> Usuarios
+              </NavLink>
               <NavLink to="/admin/cupones" className={({ isActive }) => `dashboard__nav-item ${isActive ? 'dashboard__nav-item--active' : ''}`}>
                 <Tag size={18} /> Cupones
               </NavLink>
@@ -38,6 +42,7 @@ export default function Admin() {
               <Route index element={<Navigate to="metricas" replace />} />
               <Route path="metricas" element={<AdminMetrics />} />
               <Route path="travesias" element={<ReviewTrips />} />
+              <Route path="usuarios" element={<ManageUsers />} />
               <Route path="cupones" element={<ManageCoupons />} />
               <Route path="hoteles" element={<ManageHotels />} />
             </Routes>
