@@ -11,7 +11,7 @@ export default function MyBoats() {
   const [activeMenuId, setActiveMenuId] = useState(null)
   const [isCreating, setIsCreating] = useState(false)
   const [creating, setCreating] = useState(false)
-  const [newBoat, setNewBoat] = useState({ name: '', type: 'Velero', length_m: '' })
+  const [newBoat, setNewBoat] = useState({ name: '', type: 'Velero', length_m: '', cabins: '', bathrooms: '' })
 
   useEffect(() => { 
     fetchMyBoats() 
@@ -41,12 +41,17 @@ export default function MyBoats() {
   const handleCreate = async () => {
     if (!newBoat.name || !newBoat.type) return
     setCreating(true)
-    const data = { ...newBoat, length_m: newBoat.length_m ? parseFloat(newBoat.length_m) : null }
+    const data = { 
+      ...newBoat, 
+      length_m: newBoat.length_m ? parseFloat(newBoat.length_m) : null,
+      cabins: newBoat.cabins ? parseInt(newBoat.cabins) : 0,
+      bathrooms: newBoat.bathrooms ? parseInt(newBoat.bathrooms) : 0
+    }
     const result = await createBoat(data)
     setCreating(false)
     if (result.success) {
       setIsCreating(false)
-      setNewBoat({ name: '', type: 'Velero', length_m: '' })
+      setNewBoat({ name: '', type: 'Velero', length_m: '', cabins: '', bathrooms: '' })
     } else {
       alert("Error al crear: " + result.error)
     }
@@ -241,8 +246,6 @@ export default function MyBoats() {
                 >
                   <option value="Velero">Velero</option>
                   <option value="Catamarán">Catamarán</option>
-                  <option value="Lancha">Lancha</option>
-                  <option value="Yate">Yate</option>
                 </select>
               </div>
               <div className="input-group">
@@ -254,6 +257,31 @@ export default function MyBoats() {
                   placeholder="Ej: 12" 
                   value={newBoat.length_m} 
                   onChange={(e) => setNewBoat(p => ({ ...p, length_m: e.target.value }))} 
+                />
+              </div>
+            </div>
+
+            <div className="form-row" style={{ marginTop: '16px' }}>
+              <div className="input-group">
+                <label>Cantidad de camarotes</label>
+                <input 
+                  className="input" 
+                  type="number" 
+                  min="0" 
+                  placeholder="Ej: 2" 
+                  value={newBoat.cabins} 
+                  onChange={(e) => setNewBoat(p => ({ ...p, cabins: e.target.value }))} 
+                />
+              </div>
+              <div className="input-group">
+                <label>Cantidad de baños</label>
+                <input 
+                  className="input" 
+                  type="number" 
+                  min="0" 
+                  placeholder="Ej: 1" 
+                  value={newBoat.bathrooms} 
+                  onChange={(e) => setNewBoat(p => ({ ...p, bathrooms: e.target.value }))} 
                 />
               </div>
             </div>
