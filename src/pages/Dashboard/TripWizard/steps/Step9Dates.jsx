@@ -5,32 +5,52 @@ import { Calendar, Clock, Info, Trash2 } from 'lucide-react'
 const Step9Dates = () => {
   const { formData, updateFormData } = useTripWizardStore()
   
-  // Local state for the "New Date Form" before pushing it to the global array
   const [newDate, setNewDate] = useState({
     departure_date: '',
     departure_time: '',
     arrival_date: '',
     arrival_time: '',
     price_per_person: formData.price_per_person || 0,
-    full_boat_price: formData.full_boat_price || 0
+    full_boat_price: formData.full_boat_price || 0,
+    repeat_days: 1
   })
 
   const handleAddDate = () => {
-    // Validate minimal fields
     if (!newDate.departure_date || !newDate.arrival_date) return
 
+    const newDates = []
+    const startDepDate = new Date(`${newDate.departure_date}T12:00:00`)
+    const startArrDate = new Date(`${newDate.arrival_date}T12:00:00`)
+    
+    for (let i = 0; i < newDate.repeat_days; i++) {
+      const curDep = new Date(startDepDate)
+      curDep.setDate(curDep.getDate() + i)
+      const curArr = new Date(startArrDate)
+      curArr.setDate(curArr.getDate() + i)
+      
+      newDates.push({
+        id: Date.now() + i,
+        departure_date: curDep.toISOString().split('T')[0],
+        departure_time: newDate.departure_time,
+        arrival_date: curArr.toISOString().split('T')[0],
+        arrival_time: newDate.arrival_time,
+        price_per_person: newDate.price_per_person,
+        full_boat_price: newDate.full_boat_price
+      })
+    }
+
     updateFormData({
-      custom_dates: [...formData.custom_dates, { ...newDate, id: Date.now() }]
+      custom_dates: [...formData.custom_dates, ...newDates]
     })
 
-    // Reset local to base
     setNewDate({
       departure_date: '',
       departure_time: '',
       arrival_date: '',
       arrival_time: '',
       price_per_person: formData.price_per_person || 0,
-      full_boat_price: formData.full_boat_price || 0
+      full_boat_price: formData.full_boat_price || 0,
+      repeat_days: 1
     })
   }
 
@@ -58,9 +78,9 @@ const Step9Dates = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-4)' }}>
           
           {/* Salida */}
-          <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)' }}>
+          <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
             <label className="form-group__label" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-              Fecha y hora de salida
+              Salida
               <Info size={16} color="var(--text-muted)" />
             </label>
             <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
@@ -70,6 +90,7 @@ const Step9Dates = () => {
                   type="date"
                   className="input-control"
                   style={{ paddingLeft: '36px' }}
+                  title="Fecha de salida"
                   value={newDate.departure_date}
                   onChange={(e) => setNewDate({ ...newDate, departure_date: e.target.value })}
                 />
@@ -80,17 +101,22 @@ const Step9Dates = () => {
                   type="time"
                   className="input-control"
                   style={{ paddingLeft: '36px' }}
+                  title="Hora de salida"
                   value={newDate.departure_time}
                   onChange={(e) => setNewDate({ ...newDate, departure_time: e.target.value })}
                 />
               </div>
             </div>
+            <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: '4px', fontSize: '11px', color: 'var(--text-muted)' }}>
+              <span style={{ flex: 1, paddingLeft: '8px' }}>Día / Mes / Año</span>
+              <span style={{ width: '130px', paddingLeft: '8px' }}>Hora (Ej: 09:00)</span>
+            </div>
           </div>
 
           {/* Llegada */}
-          <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)' }}>
+          <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
             <label className="form-group__label" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-              Fecha y hora de llegada
+              Llegada
               <Info size={16} color="var(--text-muted)" />
             </label>
             <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
@@ -100,6 +126,7 @@ const Step9Dates = () => {
                   type="date"
                   className="input-control"
                   style={{ paddingLeft: '36px' }}
+                  title="Fecha de llegada"
                   value={newDate.arrival_date}
                   onChange={(e) => setNewDate({ ...newDate, arrival_date: e.target.value })}
                 />
@@ -110,10 +137,15 @@ const Step9Dates = () => {
                   type="time"
                   className="input-control"
                   style={{ paddingLeft: '36px' }}
+                  title="Hora de llegada"
                   value={newDate.arrival_time}
                   onChange={(e) => setNewDate({ ...newDate, arrival_time: e.target.value })}
                 />
               </div>
+            </div>
+            <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: '4px', fontSize: '11px', color: 'var(--text-muted)' }}>
+              <span style={{ flex: 1, paddingLeft: '8px' }}>Día / Mes / Año</span>
+              <span style={{ width: '130px', paddingLeft: '8px' }}>Hora (Ej: 18:00)</span>
             </div>
           </div>
 
@@ -122,7 +154,7 @@ const Step9Dates = () => {
         {/* Dynamic Pricing and Submit for Date */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-4)', alignItems: 'flex-end', paddingTop: 'var(--space-2)' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-group__label" style={{ fontSize: '12px' }}>Precio por Pasajero (Opcional)</label>
+            <label className="form-group__label" style={{ fontSize: '12px' }}>Precio por Pasajero</label>
             <input 
               type="number"
               className="input-control"
@@ -141,6 +173,20 @@ const Step9Dates = () => {
               style={{ fontWeight: 'bold', fontSize: '18px', opacity: formData.allow_full_boat ? 1 : 0.5 }}
               value={newDate.full_boat_price}
               onChange={(e) => setNewDate({ ...newDate, full_boat_price: parseFloat(e.target.value) || 0 })}
+            />
+          </div>
+
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-group__label" style={{ fontSize: '12px', color: 'var(--color-accent-500)' }}>Repetir (Días Seguidos)</label>
+            <input 
+              type="number"
+              min="1"
+              max="30"
+              className="input-control"
+              style={{ fontWeight: 'bold', fontSize: '18px', borderColor: 'var(--color-accent-500)' }}
+              value={newDate.repeat_days}
+              onChange={(e) => setNewDate({ ...newDate, repeat_days: parseInt(e.target.value) || 1 })}
+              title="Añadir esta misma travesía durante varios días consecutivos automáticamente."
             />
           </div>
 

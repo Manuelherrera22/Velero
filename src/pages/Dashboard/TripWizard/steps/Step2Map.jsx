@@ -114,7 +114,10 @@ const Step2Map = () => {
           <label className="form-group__label">
             Ubicación exacta de embarque (Privado)
           </label>
-          <p className="step-subtitle" style={{ fontSize: '14px', marginBottom: '16px' }}>Haz clic en el mapa para marcar el muelle o puerto. Esta ubicación exacta solo se compartirá con quienes realicen la reserva.</p>
+          <p className="step-subtitle" style={{ fontSize: '14px', marginBottom: '16px' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>Paso 1:</strong> Busca la ciudad o región arriba para centrar el mapa.<br/>
+            <strong style={{ color: 'var(--text-primary)' }}>Paso 2:</strong> Haz clic en el mapa para clavar el PIN en el muelle o puerto exacto de salida. Esta ubicación exacta solo se compartirá con quienes realicen la reserva.
+          </p>
           
           <div style={{
             width: '100%',

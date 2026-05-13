@@ -12,12 +12,32 @@ const PHOTO_CATEGORIES = [
 
 const Step4Photos = () => {
   const { formData, addPhoto, removePhoto } = useTripWizardStore()
+  const fileInputRef = React.useRef(null)
+  const [activeCategory, setActiveCategory] = React.useState(null)
 
-  // Simplified mockup for photo uploading
-  const handleSimulatedUpload = (category) => {
-    // In production, this would trigger a Supabase Storage upload
-    const mockUrl = `https://picsum.photos/seed/${Math.random()}/800/600`
-    addPhoto(category, mockUrl)
+  const handleUploadClick = (category) => {
+    setActiveCategory(category)
+    if (fileInputRef.current) {
+      // If it's portada, we only want 1 file. Otherwise, multiple.
+      if (category === 'portada') {
+        fileInputRef.current.removeAttribute('multiple')
+      } else {
+        fileInputRef.current.setAttribute('multiple', '')
+      }
+      fileInputRef.current.click()
+    }
+  }
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files)
+    if (files.length === 0 || !activeCategory) return
+
+    files.forEach(file => {
+      const url = URL.createObjectURL(file)
+      addPhoto(activeCategory, url)
+    })
+    
+    e.target.value = null // reset
   }
 
   const getTotalPhotos = () => {
@@ -30,6 +50,14 @@ const Step4Photos = () => {
 
   return (
     <div className="step-container">
+      {/* Hidden File Input */}
+      <input 
+        type="file" 
+        accept="image/png, image/jpeg, image/webp" 
+        ref={fileInputRef} 
+        style={{ display: 'none' }} 
+        onChange={handleFileChange}
+      />
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div className="step-header" style={{ maxWidth: '36rem' }}>
@@ -44,7 +72,7 @@ const Step4Photos = () => {
           <button 
             className="btn btn--outline" 
             style={{ borderRadius: '9999px' }}
-            onClick={() => handleSimulatedUpload('portada')}
+            onClick={() => handleUploadClick('portada')}
           >
             <UploadCloud size={20} style={{ marginRight: '8px' }} />
             Cargar imágenes
@@ -99,7 +127,7 @@ const Step4Photos = () => {
 
               {/* Upload Trigger / Edit */}
               <button 
-                onClick={() => handleSimulatedUpload(category.id)}
+                onClick={() => handleUploadClick(category.id)}
                 style={{
                   position: 'absolute',
                   top: '12px',

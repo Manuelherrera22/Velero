@@ -149,7 +149,7 @@ const Step8Pricing = () => {
 
         {/* Pagos y Cancelaciones */}
         <div className="step-section" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-6)' }}>
-          <div className="form-group">
+          <div className="form-group" style={{ display: 'none' }}>
             <label className="form-group__label" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
               Métodos de pago permitidos
               <div title="Vías por las cuales podés recibir el dinero" style={{ cursor: 'help' }}>
@@ -157,16 +157,7 @@ const Step8Pricing = () => {
               </div>
             </label>
             <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'center' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', cursor: 'pointer', backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: '12px 16px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)' }}>
-                <input 
-                  type="checkbox" 
-                  style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary-500)' }}
-                  checked={formData.allowed_payment_methods.includes('PayPal')}
-                  onChange={() => handleTogglePaymentMethod('PayPal')}
-                />
-                <span style={{ fontWeight: 600 }}>PayPal</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', cursor: 'pointer', backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: '12px 16px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', cursor: 'pointer', backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: '12px 16px', border: '1px solid rgba(255, 255, 255, 0.3)', borderRadius: 'var(--radius-xl)' }}>
                 <input 
                   type="checkbox" 
                   style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary-500)' }}
@@ -187,10 +178,10 @@ const Step8Pricing = () => {
             </label>
             <select
               className="input-control"
-              value={formData.cancellation_policy || ''}
+              style={{ border: '1px solid rgba(255, 255, 255, 0.3)' }}
+              value={formData.cancellation_policy || 'flexible'}
               onChange={(e) => updateFormData({ cancellation_policy: e.target.value })}
             >
-              <option value="" disabled>Seleccione una política</option>
               <option value="flexible">Flexible (100% reembolso hasta 24hs antes)</option>
               <option value="moderada">Moderada (50% reembolso hasta 5 días antes)</option>
               <option value="estricta">Estricta (Sin reembolso)</option>

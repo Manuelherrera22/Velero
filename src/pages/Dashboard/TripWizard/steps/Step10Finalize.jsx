@@ -10,15 +10,72 @@ const Step10Finalize = () => {
 
   const handleCreate = async () => {
     setIsSaving(true)
-    // 1. TODO: API call to Supabase to save `formData` into `trips`
-    // 2. TODO: Loop over `formData.custom_dates` and insert them into `trip_dates`
-    
-    // Simulating API lag
-    setTimeout(() => {
-      setIsSaving(false)
+    try {
+      const { supabase } = await import('../../../../lib/supabase.js')
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !user) {
+        throw new Error('Debes estar autenticado para publicar.')
+      }
+
+      // Collect all images in one array for the `images` column
+      const allImages = [
+        formData.images_meta.portada,
+        ...(formData.images_meta.camarote || []),
+        ...(formData.images_meta.actividad || []),
+        ...(formData.images_meta.comidas || []),
+        ...(formData.images_meta.paisaje || [])
+      ].filter(Boolean)
+
+      // 1. Save trip
+      const { data: trip, error: tripError } = await supabase
+        .from('trips')
+        .insert({
+          captain_id: user.id,
+          boat_id: formData.boat_id || null,
+          title: formData.title || 'Travesía sin título',
+          description: formData.description,
+          location: formData.location || 'Sin ubicación',
+          capacity: formData.max_passengers || 6,
+          price_per_person: formData.price_per_person || 0,
+          status: 'published',
+          images: allImages,
+          tags: formData.tags || [],
+          metadata: formData
+        })
+        .select()
+        .single()
+
+      if (tripError) throw tripError
+
+      // 2. Save dates
+      if (formData.custom_dates && formData.custom_dates.length > 0) {
+        const datesToInsert = formData.custom_dates.map(d => ({
+          trip_id: trip.id,
+          date: d.departure_date,
+          start_time: d.departure_time ? `${d.departure_time}:00` : '08:00:00',
+          end_time: d.arrival_time ? `${d.arrival_time}:00` : null,
+          available_spots: formData.max_passengers || 6
+        }))
+
+        const { error: datesError } = await supabase
+          .from('trip_dates')
+          .insert(datesToInsert)
+
+        if (datesError) {
+          console.error('Error guardando fechas:', datesError)
+          // We don't abort, the trip is created, but dates failed
+        }
+      }
+
       resetWizard()
       navigate('/dashboard/travesias')
-    }, 1500)
+    } catch (err) {
+      console.error('Error al publicar travesía:', err)
+      alert(err.message || 'Ocurrió un error al intentar publicar. Revisa la consola.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (

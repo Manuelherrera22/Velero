@@ -123,6 +123,13 @@ const TripWizard = () => {
                   return
                 }
               }
+              if (currentStep === 6) {
+                const { formData } = useTripWizardStore.getState();
+                if (!formData.price_per_person || formData.price_per_person <= 0) {
+                  alert('Debes ingresar un precio por pasajero mayor a 0 para continuar.');
+                  return;
+                }
+              }
               nextStep()
             }}
             className="btn btn--accent"

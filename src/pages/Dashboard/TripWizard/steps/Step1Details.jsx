@@ -111,6 +111,20 @@ const Step1Details = () => {
                 {tag}
               </button>
             ))}
+            {/* Custom tags rendered right alongside default tags */}
+            {formData.tags?.filter(t => !['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].includes(t)).map(tag => (
+              <button 
+                key={tag}
+                type="button" 
+                className="tag-btn tag-btn--active"
+                onClick={() => updateFormData({ tags: formData.tags.filter(t => t !== tag) })}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                title="Eliminar etiqueta"
+              >
+                {tag}
+                <span style={{ fontSize: '16px', lineHeight: 1, color: 'rgba(255,255,255,0.7)' }}>×</span>
+              </button>
+            ))}
           </div>
           <div className="form-group" style={{ marginTop: '8px' }}>
             <input
@@ -130,25 +144,6 @@ const Step1Details = () => {
               }}
             />
           </div>
-          
-          {/* Custom Tags rendering */}
-          {formData.tags?.filter(t => !['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].includes(t)).length > 0 && (
-            <div className="tags-container" style={{ marginTop: '12px' }}>
-              {formData.tags.filter(t => !['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].includes(t)).map(tag => (
-                <span key={tag} className="tag-btn tag-btn--active" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  {tag}
-                  <button 
-                    type="button" 
-                    className="custom-tag__remove"
-                    onClick={() => updateFormData({ tags: formData.tags.filter(t => t !== tag) })}
-                    style={{ color: 'white' }}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
       </div>

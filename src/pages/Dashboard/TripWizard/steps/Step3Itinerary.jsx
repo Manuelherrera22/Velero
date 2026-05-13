@@ -56,7 +56,7 @@ const Step3Itinerary = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
           <div className="form-group">
             <label className="form-group__label">
-              Días de navegación
+              Cantidad de días
             </label>
             <input
               type="number"
@@ -69,7 +69,7 @@ const Step3Itinerary = () => {
           </div>
           <div className="form-group">
             <label className="form-group__label">
-              Noches a bordo
+              Cantidad de noches
             </label>
             <input
               type="number"
@@ -121,7 +121,9 @@ const Step3Itinerary = () => {
               <Plus size={16} style={{ marginRight: '4px' }} /> Agregar Día
             </button>
           </div>
-          <p className="step-subtitle" style={{ fontSize: '14px', marginBottom: 'var(--space-4)' }}>Puedes agregar descripciones por día si lo deseas (opcional).</p>
+          <p className="step-subtitle" style={{ fontSize: '14px', marginBottom: 'var(--space-4)', padding: '8px 12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', borderLeft: '4px solid var(--color-primary-500)' }}>
+            <strong>💡 Opcional:</strong> Puedes agregar descripciones detalladas por día si lo deseas para dar más contexto a tus pasajeros.
+          </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             {formData.itinerary.length === 0 && (
