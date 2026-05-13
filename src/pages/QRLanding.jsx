@@ -90,14 +90,14 @@ export default function QRLanding() {
 
   return (
     <div className="qr-landing">
-      {/* Hotel header */}
+      {/* Aliado exclusive header */}
       {hotel && (
         <div className="qr-hotel-header glass">
           <div className="container">
             <div className="qr-hotel-header__inner">
               <Sailboat size={28} />
               <div>
-                <p className="qr-hotel-header__label">Travesías recomendadas por</p>
+                <p className="qr-hotel-header__label">Experiencias seleccionadas junto a</p>
                 <h2 className="qr-hotel-header__name">{hotel.name}</h2>
                 {qrData?.zone && <p className="qr-hotel-header__zone">Zona: {qrData.zone}</p>}
               </div>
@@ -109,10 +109,10 @@ export default function QRLanding() {
       <div className="container">
         <div className="qr-landing__intro">
           <h1 className="qr-landing__title">
-            Descubre experiencias náuticas <span className="hero__title--accent">cerca de tu hotel</span>
+            Descubre experiencias náuticas <span className="hero__title--accent">exclusivas para vos</span>
           </h1>
           <p className="qr-landing__subtitle">
-            Travesías exclusivas seleccionadas para huéspedes de {hotel?.name || 'tu hotel'}. Reserva fácil, sin registro.
+            Travesías seleccionadas especialmente para huéspedes de {hotel?.name || 'nuestro aliado'}. Reserva fácil, sin registro.
           </p>
         </div>
 

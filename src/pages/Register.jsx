@@ -92,12 +92,24 @@ export default function Register() {
       // Pasamos también el teléfono a la función signUp o actualizamos el perfil luego
       const result = await signUp(email, password, fullName.trim(), role)
       if (result.success) {
-        // Guardar el teléfono en el perfil
-        if (result.data?.user && phone.trim()) {
-          await supabase.from('profiles').update({ phone: phone.trim() }).eq('id', result.data.user.id)
+        const userId = result.data?.user?.id
+
+        if (userId) {
+          // Build profile update payload
+          const profileUpdate = {}
+          if (phone.trim()) profileUpdate.phone = phone.trim()
+
+          // Save business name/location for affiliates
+          if (role === 'affiliate') {
+            if (businessName.trim()) profileUpdate.business_name = businessName.trim()
+            if (businessLocation.trim()) profileUpdate.business_location = businessLocation.trim()
+          }
+
+          if (Object.keys(profileUpdate).length > 0) {
+            await supabase.from('profiles').update(profileUpdate).eq('id', userId)
+          }
         }
 
-        // El hotel y la comisión los configura manualmente el Admin de Kailu desde el dashboard.
         setSuccess(true)
       }
     } finally {
