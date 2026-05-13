@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import supabase from '../lib/supabase'
-import { Loader } from 'lucide-react'
+import { Loader, CheckCircle } from 'lucide-react'
 
 /**
  * Auth Callback — Handles magic link / OAuth redirect
@@ -10,6 +10,7 @@ import { Loader } from 'lucide-react'
 export default function AuthCallback() {
   const navigate = useNavigate()
   const [status, setStatus] = useState('Verificando tu identidad...')
+  const [verified, setVerified] = useState(false)
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -38,37 +39,56 @@ export default function AuthCallback() {
           const isRecovery = new URLSearchParams(window.location.search).get('type') === 'recovery' || hashParams.get('type') === 'recovery'
           const isSignup = hashParams.get('type') === 'signup'
 
-          // Success — redirect
-          if (isSignup) {
-            setStatus('¡Email validado correctamente! Iniciando sesión...')
-          } else {
-            setStatus('¡Listo! Redirigiendo...')
+          if (isRecovery) {
+            setStatus('Redirigiendo a tu perfil...')
+            setTimeout(() => navigate('/perfil?recover=true', { replace: true }), 1000)
+            return
           }
-          
-          setTimeout(() => {
-            if (isRecovery) {
-              navigate('/perfil?recover=true', { replace: true })
-            } else {
-              navigate('/mis-viajes', { replace: true })
+
+          if (isSignup) {
+            // Email verification — show success message, then redirect to role-based panel
+            setVerified(true)
+            setStatus('¡Tu cuenta fue verificada exitosamente!')
+
+            // Fetch user profile to determine role
+            const { data: { user } } = await supabase.auth.getUser()
+            let redirectTo = '/mis-viajes'
+
+            if (user) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+
+              if (profile?.role === 'publisher') {
+                redirectTo = '/dashboard'
+              } else if (profile?.role === 'affiliate') {
+                redirectTo = '/afiliado'
+              } else if (profile?.role === 'admin') {
+                redirectTo = '/admin'
+              }
             }
-          }, 1500)
+
+            setTimeout(() => navigate(redirectTo, { replace: true }), 2500)
+            return
+          }
+
+          // General sign-in
+          setStatus('¡Listo! Redirigiendo...')
+          setTimeout(() => navigate('/mis-viajes', { replace: true }), 1000)
           return
         }
 
         // No hash tokens — try getting existing session
-        // Supabase client might have already consumed the hash and set the session
-        const { data: { session }, error } = await supabase.auth.getSession()
+        const { data: { session } } = await supabase.auth.getSession()
 
         if (session) {
           setStatus('¡Sesión activa! Redirigiendo...')
-          setTimeout(() => {
-            navigate('/mis-viajes', { replace: true })
-          }, 1000)
+          setTimeout(() => navigate('/mis-viajes', { replace: true }), 1000)
         } else {
           setStatus('Redirigiendo a inicio de sesión...')
-          setTimeout(() => {
-            navigate('/login', { replace: true })
-          }, 1000)
+          setTimeout(() => navigate('/login', { replace: true }), 1000)
         }
       } catch (err) {
         console.error('Auth callback exception:', err)
@@ -81,9 +101,29 @@ export default function AuthCallback() {
   }, [navigate])
 
   return (
-    <div className="protected-loading">
-      <Loader size={32} className="spin" />
-      <p>{status}</p>
+    <div className="protected-loading" style={{ flexDirection: 'column', gap: '16px', minHeight: '60vh' }}>
+      {verified ? (
+        <>
+          <div style={{ 
+            width: '72px', height: '72px', borderRadius: '50%', 
+            background: 'rgba(16, 185, 129, 0.1)', border: '2px solid rgba(16, 185, 129, 0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#10B981', animation: 'fadeIn 0.5s ease-out'
+          }}>
+            <CheckCircle size={36} />
+          </div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+            ¡Cuenta verificada!
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: 0 }}>{status}</p>
+          <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem', margin: 0 }}>Redirigiendo a tu panel...</p>
+        </>
+      ) : (
+        <>
+          <Loader size={32} className="spin" />
+          <p>{status}</p>
+        </>
+      )}
     </div>
   )
 }

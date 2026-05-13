@@ -20,18 +20,27 @@ export default function ManageCoupons() {
     setLoading(false)
   }
 
+  // Helper: format date avoiding timezone offset (UTC midnight → Argentina = day before)
+  const formatDate = (dateStr) => {
+    if (!dateStr) return ''
+    const d = dateStr.split('T')[0] // take only YYYY-MM-DD
+    const [y, m, day] = d.split('-')
+    return `${day}/${m}/${y}`
+  }
+
   const handleCreate = async () => {
     if (!form.code || !form.value) return
     setSaving(true)
 
     const { data: { user } } = await supabase.auth.getUser()
 
+    // Append T12:00:00 to dates to prevent timezone rollback
     await supabase.from('coupons').insert({
       code: form.code.toUpperCase(),
       type: form.type,
       value: parseFloat(form.value),
-      valid_from: form.valid_from || null,
-      valid_until: form.valid_until || null,
+      valid_from: form.valid_from ? `${form.valid_from}T12:00:00` : null,
+      valid_until: form.valid_until ? `${form.valid_until}T12:00:00` : null,
       max_uses: parseInt(form.max_uses) || 100,
       created_by: user?.id,
     })
@@ -150,9 +159,9 @@ export default function ManageCoupons() {
 
             {(c.valid_from || c.valid_until) && (
               <div className="coupon-card__dates">
-                {c.valid_from && `Desde: ${new Date(c.valid_from).toLocaleDateString('es')}`}
+                {c.valid_from && `Desde: ${formatDate(c.valid_from)}`}
                 {c.valid_from && c.valid_until && ' · '}
-                {c.valid_until && `Hasta: ${new Date(c.valid_until).toLocaleDateString('es')}`}
+                {c.valid_until && `Hasta: ${formatDate(c.valid_until)}`}
               </div>
             )}
 

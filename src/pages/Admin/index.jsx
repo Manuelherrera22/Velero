@@ -32,7 +32,7 @@ export default function Admin() {
                 <Tag size={18} /> Cupones
               </NavLink>
               <NavLink to="/admin/hoteles" className={({ isActive }) => `dashboard__nav-item ${isActive ? 'dashboard__nav-item--active' : ''}`}>
-                <Building2 size={18} /> Hoteles & QR
+                <Building2 size={18} /> Aliados & QR
               </NavLink>
             </nav>
           </aside>

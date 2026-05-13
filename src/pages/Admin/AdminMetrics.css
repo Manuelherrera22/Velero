@@ -73,6 +73,58 @@
   white-space: nowrap;
 }
 
+/* Clickable KPI Cards */
+.metric-card--clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-direction: column;
+}
+
+.metric-card--clickable:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.metric-card--expanded {
+  border-color: rgba(11, 171, 195, 0.2) !important;
+}
+
+.metric-card__breakdown {
+  width: 100%;
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: fadeSlide 0.2s ease-out;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.metric-card__breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.metric-card__breakdown-row span:first-child {
+  color: var(--text-tertiary);
+}
+
 @media (max-width: 768px) {
   .metrics-tables {
     grid-template-columns: 1fr;

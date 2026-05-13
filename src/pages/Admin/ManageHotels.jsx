@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Building2, Plus, X, Save, Loader, MapPin, QrCode, Percent, Copy, Check } from 'lucide-react'
+import { Building2, Plus, X, Save, Loader, MapPin, QrCode, Percent, Copy, Check, DollarSign } from 'lucide-react'
 import supabase from '../../lib/supabase'
 
 export default function ManageHotels() {
@@ -10,7 +10,8 @@ export default function ManageHotels() {
   const [copiedId, setCopiedId] = useState(null)
   const [affiliates, setAffiliates] = useState([])
   const [form, setForm] = useState({
-    name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10, owner_id: ''
+    name: '', location: '', contact_email: '', contact_phone: '', 
+    commission_percent: 10, commission_type: 'percentage', owner_id: ''
   })
 
   useEffect(() => { 
@@ -46,7 +47,7 @@ export default function ManageHotels() {
     })
     setSaving(false)
     setShowForm(false)
-    setForm({ name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10, owner_id: '' })
+    setForm({ name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10, commission_type: 'percentage', owner_id: '' })
     fetchHotels()
   }
 
@@ -74,11 +75,11 @@ export default function ManageHotels() {
       <div className="dash-pane">
         <div className="dash-pane__header">
           <div className="dash-pane__header-left">
-            <h1 className="dash-pane__title">Hoteles & QR</h1>
+            <h1 className="dash-pane__title">Aliados & QR</h1>
           </div>
           {!showForm && (
             <button className="btn btn--accent btn--sm" onClick={() => setShowForm(true)}>
-              <Plus size={16} /> Nuevo Hotel
+              <Plus size={16} /> Nuevo Aliado
             </button>
           )}
         </div>
@@ -86,14 +87,14 @@ export default function ManageHotels() {
       {showForm && (
         <div className="item-card glass" style={{ marginBottom: 'var(--space-6)' }}>
           <div className="item-card__header">
-            <h3 className="item-card__title">Nuevo Hotel</h3>
+            <h3 className="item-card__title">Nuevo Aliado</h3>
             <button className="btn btn--ghost btn--sm" onClick={() => setShowForm(false)}><X size={14} /></button>
           </div>
 
           <div className="form-row">
             <div className="input-group">
-              <label>Nombre *</label>
-              <input className="input" placeholder="Ej: Hotel Faena" value={form.name} onChange={(e) => updateField('name', e.target.value)} />
+              <label>Nombre del aliado *</label>
+              <input className="input" placeholder="Ej: Hotel Faena, Agencia Norte" value={form.name} onChange={(e) => updateField('name', e.target.value)} />
             </div>
             <div className="input-group">
               <label>Ubicación</label>
@@ -104,17 +105,37 @@ export default function ManageHotels() {
           <div className="form-row">
             <div className="input-group">
               <label>Email de contacto</label>
-              <input className="input" type="email" placeholder="hotel@ejemplo.com" value={form.contact_email} onChange={(e) => updateField('contact_email', e.target.value)} />
+              <input className="input" type="email" placeholder="aliado@ejemplo.com" value={form.contact_email} onChange={(e) => updateField('contact_email', e.target.value)} />
             </div>
             <div className="input-group">
-              <label>Comisión (%)</label>
-              <input className="input" type="number" min={0} max={100} value={form.commission_percent} onChange={(e) => updateField('commission_percent', e.target.value)} />
+              <label>Comisión</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select 
+                  className="input" 
+                  style={{ width: '80px' }} 
+                  value={form.commission_type} 
+                  onChange={(e) => updateField('commission_type', e.target.value)}
+                >
+                  <option value="percentage">%</option>
+                  <option value="fixed">$</option>
+                </select>
+                <input 
+                  className="input" 
+                  type="number" 
+                  min={0} 
+                  max={form.commission_type === 'percentage' ? 100 : undefined}
+                  placeholder={form.commission_type === 'percentage' ? '10' : '5000'}
+                  value={form.commission_percent} 
+                  onChange={(e) => updateField('commission_percent', e.target.value)} 
+                  style={{ flex: 1 }}
+                />
+              </div>
             </div>
           </div>
 
           <div className="form-row" style={{ marginBottom: '16px' }}>
             <div className="input-group" style={{ width: '100%' }}>
-              <label>Usuario Aliado (Opcional, para que puedan ver sus métricas)</label>
+              <label>Usuario Aliado (vincular al usuario registrado para que vea sus métricas)</label>
               <select className="input" value={form.owner_id} onChange={(e) => updateField('owner_id', e.target.value)}>
                 <option value="">-- Seleccionar usuario registrado --</option>
                 {affiliates.map(aff => (
@@ -127,7 +148,7 @@ export default function ManageHotels() {
           </div>
 
           <button className="btn btn--accent" onClick={handleCreate} disabled={saving} style={{ alignSelf: 'flex-end' }}>
-            {saving ? <Loader size={16} className="spin" /> : <><Save size={16} /> Crear Hotel</>}
+            {saving ? <Loader size={16} className="spin" /> : <><Save size={16} /> Crear Aliado</>}
           </button>
         </div>
       )}
@@ -137,10 +158,10 @@ export default function ManageHotels() {
       {!loading && hotels.length === 0 && !showForm && (
         <div className="dashboard__empty">
           <div className="dashboard__empty-icon"><Building2 size={48} /></div>
-          <h3>Sin hoteles</h3>
-          <p>Registrá un hotel para generar códigos QR y trackear escaneos.</p>
+          <h3>Sin aliados registrados</h3>
+          <p>Registrá un aliado para generar códigos QR y trackear escaneos.</p>
           <button className="btn btn--accent" onClick={() => setShowForm(true)}>
-            <Plus size={16} /> Registrar hotel
+            <Plus size={16} /> Registrar aliado
           </button>
         </div>
       )}
