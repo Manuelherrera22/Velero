@@ -53,7 +53,7 @@ const Step2Map = () => {
         const newCoords = { lat, lng }
         
         setMapCenter(newCoords)
-        updateFormData({ location: searchQuery })
+        updateFormData({ location: searchQuery, coordinates: newCoords })
       } else {
         alert("No se encontró la ubicación. Intenta con un nombre más específico.")
       }

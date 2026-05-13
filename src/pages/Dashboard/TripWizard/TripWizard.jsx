@@ -111,7 +111,20 @@ const TripWizard = () => {
           </button>
           
           <button
-            onClick={nextStep}
+            onClick={() => {
+              if (currentStep === 4) {
+                // Must have at least 5 photos
+                let count = formData.images_meta.portada ? 1 : 0
+                ['camarote', 'actividad', 'comidas', 'paisaje'].forEach(cat => {
+                  count += (formData.images_meta[cat] || []).length
+                })
+                if (count < 5) {
+                  alert('Debes subir al menos 5 fotos para continuar.')
+                  return
+                }
+              }
+              nextStep()
+            }}
             className="btn btn--accent"
           >
             Siguiente <ChevronRight size={16} style={{ marginLeft: '8px' }} />

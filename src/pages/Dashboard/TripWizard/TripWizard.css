@@ -233,7 +233,7 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary, #64748B);
   margin-bottom: var(--space-1);
 }
 

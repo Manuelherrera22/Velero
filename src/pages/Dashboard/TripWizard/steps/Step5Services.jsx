@@ -5,6 +5,7 @@ import { Anchor, HelpCircle, Plus } from 'lucide-react'
 const AVAILABLE_SERVICES = [
   'Seguro',
   'Capitán',
+  'Salvavidas',
   'Embarcación auxiliar',
   'Gastos de Amarre y Fondeo',
   'Combustible',
@@ -142,7 +143,7 @@ const Step5Services = () => {
           value={formData.boat_id || ''}
           onChange={(e) => updateFormData({ boat_id: e.target.value })}
         >
-          <option value="" disabled>Seleccione...</option>
+          <option value="" disabled>Seleccione embarcación...</option>
           {MOCK_BOATS.map(b => (
             <option key={b.id} value={b.id}>{b.name}</option>
           ))}

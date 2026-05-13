@@ -135,12 +135,13 @@ const Step1Details = () => {
           {formData.tags?.filter(t => !['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].includes(t)).length > 0 && (
             <div className="tags-container" style={{ marginTop: '12px' }}>
               {formData.tags.filter(t => !['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].includes(t)).map(tag => (
-                <span key={tag} className="custom-tag">
+                <span key={tag} className="tag-btn tag-btn--active" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                   {tag}
                   <button 
                     type="button" 
                     className="custom-tag__remove"
                     onClick={() => updateFormData({ tags: formData.tags.filter(t => t !== tag) })}
+                    style={{ color: 'white' }}
                   >
                     ×
                   </button>

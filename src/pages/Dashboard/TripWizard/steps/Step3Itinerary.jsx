@@ -8,7 +8,8 @@ const PENSION_TYPES = [
   'Media pensión',
   'Todo incluido',
   'Desayuno',
-  'Sólo comida/cena'
+  'Sólo comida/cena',
+  'Snack y bebida'
 ]
 
 const Step3Itinerary = () => {
@@ -108,7 +109,7 @@ const Step3Itinerary = () => {
 
         {/* Itinerario Diario */}
         <div className="step-section">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
             <label className="form-group__label" style={{ marginBottom: 0 }}>
               Desglose día a día
             </label>
@@ -120,6 +121,7 @@ const Step3Itinerary = () => {
               <Plus size={16} style={{ marginRight: '4px' }} /> Agregar Día
             </button>
           </div>
+          <p className="step-subtitle" style={{ fontSize: '14px', marginBottom: 'var(--space-4)' }}>Puedes agregar descripciones por día si lo deseas (opcional).</p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             {formData.itinerary.length === 0 && (

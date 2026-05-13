@@ -41,11 +41,16 @@ const Step4Photos = () => {
           </p>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <button className="btn btn--outline" style={{ borderRadius: '9999px' }}>
+          <button 
+            className="btn btn--outline" 
+            style={{ borderRadius: '9999px' }}
+            onClick={() => handleSimulatedUpload('portada')}
+          >
             <UploadCloud size={20} style={{ marginRight: '8px' }} />
             Cargar imágenes
           </button>
           <p className="step-subtitle" style={{ fontSize: '14px', marginTop: '8px', fontWeight: 600 }}>({getTotalPhotos()} fotos)</p>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Videos: Próximamente</p>
         </div>
       </div>
 
