@@ -711,3 +711,13 @@ select.input option {
   background: rgba(11, 171, 195, 0.3);
   color: var(--text-primary);
 }
+
+/* --- Hide Input Number Spin Buttons --- */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}

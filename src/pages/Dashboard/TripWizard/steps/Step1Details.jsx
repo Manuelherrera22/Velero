@@ -88,11 +88,11 @@ const Step1Details = () => {
         {/* Tags */}
         <div className="step-section">
           <label className="form-group__label">
-            Categorías y Etiquetas
+            Categorías
           </label>
-          <p className="step-subtitle" style={{ fontSize: '14px', marginBottom: '8px' }}>Seleccioná los tags que describen tu travesía o escribí los tuyos presionando Enter.</p>
+          <p className="step-subtitle" style={{ fontSize: '14px', marginBottom: '8px' }}>Seleccioná las categorías que describen tu travesía.</p>
           <div className="tags-container">
-            {['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].map(tag => (
+            {['Paseo', 'Aventura', 'Pesca', 'Atardecer', 'Nocturno', 'Río', 'Delta', 'Costa', 'Relax', 'Naturaleza'].map(tag => (
               <button
                 key={tag}
                 type="button"
@@ -111,38 +111,6 @@ const Step1Details = () => {
                 {tag}
               </button>
             ))}
-            {/* Custom tags rendered right alongside default tags */}
-            {formData.tags?.filter(t => !['Romántico', 'Aventura', 'Atardecer', 'Pesca', 'Relax', 'Fiesta'].includes(t)).map(tag => (
-              <button 
-                key={tag}
-                type="button" 
-                className="tag-btn tag-btn--active"
-                onClick={() => updateFormData({ tags: formData.tags.filter(t => t !== tag) })}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-                title="Eliminar etiqueta"
-              >
-                {tag}
-                <span style={{ fontSize: '16px', lineHeight: 1, color: 'rgba(255,255,255,0.7)' }}>×</span>
-              </button>
-            ))}
-          </div>
-          <div className="form-group" style={{ marginTop: '8px' }}>
-            <input
-              type="text"
-              placeholder="Escribir nuevo tag y presionar Enter..."
-              className="input-control"
-              onKeyDown={(e) => {
-                const currentTags = formData.tags || [];
-                if (e.key === 'Enter' && e.target.value.trim() !== '') {
-                  e.preventDefault();
-                  const newTag = e.target.value.trim().charAt(0).toUpperCase() + e.target.value.trim().slice(1);
-                  if (!currentTags.includes(newTag)) {
-                    updateFormData({ tags: [...currentTags, newTag] });
-                  }
-                  e.target.value = '';
-                }
-              }}
-            />
           </div>
         </div>
 

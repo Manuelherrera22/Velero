@@ -30,6 +30,8 @@ const TripWizard = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { currentStep, totalSteps, nextStep, prevStep } = useTripWizardStore()
+  const { formData } = useTripWizardStore()
+  const [errorMsg, setErrorMsg] = React.useState('')
   
   const isEditing = id && id !== 'nueva'
 
@@ -102,40 +104,54 @@ const TripWizard = () => {
         </div>
 
         {/* Global Navigation Footer */}
-        <div className="wizard-footer">
-          <button
-            onClick={currentStep === 1 ? () => navigate('/dashboard/travesias') : prevStep}
-            className="btn btn--outline"
-          >
-            Atrás
-          </button>
+        <div className="wizard-footer" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          <button
-            onClick={() => {
-              if (currentStep === 4) {
-                // Must have at least 5 photos
-                let count = formData.images_meta.portada ? 1 : 0
-                ['camarote', 'actividad', 'comidas', 'paisaje'].forEach(cat => {
-                  count += (formData.images_meta[cat] || []).length
-                })
-                if (count < 5) {
-                  alert('Debes subir al menos 5 fotos para continuar.')
-                  return
+          {errorMsg && (
+            <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, textAlign: 'center', width: '100%' }}>
+              {errorMsg}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <button
+              onClick={() => {
+                setErrorMsg('')
+                currentStep === 1 ? navigate('/dashboard/travesias') : prevStep()
+              }}
+              className="btn btn--outline"
+            >
+              Atrás
+            </button>
+            
+            <button
+              onClick={() => {
+                setErrorMsg('')
+                
+                if (currentStep === 4) {
+                  // Must have at least 5 photos
+                  let count = formData.images_meta.portada ? 1 : 0
+                  ['camarote', 'actividad', 'comidas', 'paisaje'].forEach(cat => {
+                    count += (formData.images_meta[cat] || []).length
+                  })
+                  if (count < 5) {
+                    setErrorMsg(`Debes subir al menos 5 fotos para continuar. Tienes ${count}.`)
+                    return
+                  }
                 }
-              }
-              if (currentStep === 6) {
-                const { formData } = useTripWizardStore.getState();
-                if (!formData.price_per_person || formData.price_per_person <= 0) {
-                  alert('Debes ingresar un precio por pasajero mayor a 0 para continuar.');
-                  return;
+                if (currentStep === 6) {
+                  if (!formData.price_per_person || formData.price_per_person <= 0) {
+                    setErrorMsg('Debes ingresar un precio por pasajero mayor a 0 para continuar.')
+                    return
+                  }
                 }
-              }
-              nextStep()
-            }}
-            className="btn btn--accent"
-          >
-            Siguiente <ChevronRight size={16} style={{ marginLeft: '8px' }} />
-          </button>
+                
+                nextStep()
+              }}
+              className="btn btn--accent"
+            >
+              Siguiente <ChevronRight size={16} style={{ marginLeft: '8px' }} />
+            </button>
+          </div>
         </div>
       </div>
 

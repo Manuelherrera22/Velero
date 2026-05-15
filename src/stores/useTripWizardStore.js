@@ -8,6 +8,7 @@ const initialData = {
   
   // Step 2: Location
   location: '',
+  exact_location: '',
   coordinates: null,
 
   // Step 3: Itinerary

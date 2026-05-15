@@ -28,6 +28,16 @@ export default function TripDetail() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   useEffect(() => {
+    if (trip) {
+      const hasShared = trip.price_per_person > 0;
+      const hasPrivate = trip.allow_full_boat && trip.full_boat_price > 0;
+      if (!hasShared && hasPrivate) {
+        setBookingMode('private');
+      }
+    }
+  }, [trip]);
+
+  useEffect(() => {
     fetchTrip(id)
   }, [id])
 
@@ -106,7 +116,7 @@ export default function TripDetail() {
     const dateText = selectedDateObj
       ? `\nFecha: ${new Date(selectedDateObj.date + 'T12:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })} a las ${selectedDateObj.start_time?.slice(0, 5)}hs`
       : ''
-    const modeText = bookingMode === 'private' ? ' (Navío exclusivo)' : ' (Lugares compartidos)'
+    const modeText = trip.allow_full_boat ? (bookingMode === 'private' ? ' (Navío exclusivo)' : ' (Lugares compartidos)') : ''
     const msg = `¡Hola! 👋 Me interesa la travesía *${trip.title}* en ${trip.location}${modeText}.${dateText}\nSomos ${guests} persona${guests > 1 ? 's' : ''}.\n\n¿Podrían darme más información?`
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`
   }
@@ -234,31 +244,31 @@ export default function TripDetail() {
             <div className="booking-card glass">
               
               {/* Mode Selector */}
-              {trip.allow_full_boat && (
-                <div className="booking-card__section mb-6">
-                  <label className="booking-card__label" style={{ marginBottom: '12px' }}>
-                    Tipo de experiencia
-                  </label>
-                  <div className="booking-card__mode-selector" style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                    <button 
-                      className={`mode-btn ${bookingMode === 'shared' ? 'mode-btn--active' : ''}`}
-                      style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'shared' ? 'var(--color-primary-500)' : 'var(--color-neutral-100)', color: bookingMode === 'shared' ? 'white' : 'var(--text-secondary)', border: bookingMode === 'shared' ? '1px solid var(--color-primary-600)' : '1px solid var(--color-neutral-200)', cursor: 'pointer' }}
-                      onClick={() => setBookingMode('shared')}
-                    >
-                      <span style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '4px' }}>Compartido</span>
-                      <span style={{ fontSize: '11px', fontWeight: 'normal', opacity: bookingMode === 'shared' ? 0.9 : 0.6, textAlign: 'center', lineHeight: '1.2' }}>Viajás con otras personas</span>
-                    </button>
-                    <button 
-                      className={`mode-btn ${bookingMode === 'private' ? 'mode-btn--active' : ''}`}
-                      style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'private' ? 'var(--color-primary-500)' : 'var(--color-neutral-100)', color: bookingMode === 'private' ? 'white' : 'var(--text-secondary)', border: bookingMode === 'private' ? '1px solid var(--color-primary-600)' : '1px solid var(--color-neutral-200)', cursor: 'pointer' }}
-                      onClick={() => setBookingMode('private')}
-                    >
-                      <span style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '4px' }}>Velero privado</span>
-                      <span style={{ fontSize: '11px', fontWeight: 'normal', opacity: bookingMode === 'private' ? 0.9 : 0.6, textAlign: 'center', lineHeight: '1.2' }}>Reservás el velero completo</span>
-                    </button>
-                  </div>
+              <div className="booking-card__section mb-6">
+                <label className="booking-card__label" style={{ marginBottom: '12px' }}>
+                  Tipo de experiencia
+                </label>
+                <div className="booking-card__mode-selector" style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                  <button 
+                    className={`mode-btn ${bookingMode === 'shared' ? 'mode-btn--active' : ''}`}
+                    style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'shared' ? 'var(--color-primary-500)' : 'var(--color-neutral-100)', color: bookingMode === 'shared' ? 'white' : 'var(--text-secondary)', border: bookingMode === 'shared' ? '1px solid var(--color-primary-600)' : '1px solid var(--color-neutral-200)', cursor: (tripDates.length > 0 && trip.price_per_person > 0) ? 'pointer' : 'not-allowed', opacity: (tripDates.length > 0 && trip.price_per_person > 0) ? 1 : 0.5 }}
+                    onClick={() => { if (tripDates.length > 0 && trip.price_per_person > 0) setBookingMode('shared') }}
+                    title={tripDates.length === 0 ? 'No hay fechas disponibles' : (trip.price_per_person <= 0 ? 'Esta travesía solo se ofrece como velero privado' : '')}
+                  >
+                    <span style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '4px' }}>Compartido</span>
+                    <span style={{ fontSize: '11px', fontWeight: 'normal', opacity: bookingMode === 'shared' ? 0.9 : 0.6, textAlign: 'center', lineHeight: '1.2' }}>Viajás con otras personas</span>
+                  </button>
+                  <button 
+                    className={`mode-btn ${bookingMode === 'private' ? 'mode-btn--active' : ''}`}
+                    style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'private' ? 'var(--color-primary-500)' : 'var(--color-neutral-100)', color: bookingMode === 'private' ? 'white' : 'var(--text-secondary)', border: bookingMode === 'private' ? '1px solid var(--color-primary-600)' : '1px solid var(--color-neutral-200)', cursor: (tripDates.length > 0 && trip.allow_full_boat && trip.full_boat_price > 0) ? 'pointer' : 'not-allowed', opacity: (tripDates.length > 0 && trip.allow_full_boat && trip.full_boat_price > 0) ? 1 : 0.5 }}
+                    onClick={() => { if (tripDates.length > 0 && trip.allow_full_boat && trip.full_boat_price > 0) setBookingMode('private') }}
+                    title={tripDates.length === 0 ? 'No hay fechas disponibles' : (!(trip.allow_full_boat && trip.full_boat_price > 0) ? 'El capitán no habilitó la opción de velero privado para esta travesía' : '')}
+                  >
+                    <span style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '4px' }}>Velero privado</span>
+                    <span style={{ fontSize: '11px', fontWeight: 'normal', opacity: bookingMode === 'private' ? 0.9 : 0.6, textAlign: 'center', lineHeight: '1.2' }}>Reservás el velero completo</span>
+                  </button>
                 </div>
-              )}
+              </div>
 
               {/* Dynamic Price Header */}
               <div className="booking-card__price mb-6 flex flex-col border-b border-border/40 pb-6">

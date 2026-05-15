@@ -87,6 +87,11 @@ export default function Header() {
 
               {userMenuOpen && (
                 <div className="header__dropdown glass animate-fade-in">
+                  {(profile?.role === 'publisher' || profile?.role === 'admin') && (
+                    <Link to="/dashboard" className="header__dropdown-item" style={{ fontWeight: 600 }}>
+                      <LayoutDashboard size={16} /> Panel Capitán
+                    </Link>
+                  )}
                   <Link to="/mis-viajes" className="header__dropdown-item">
                     <Ticket size={16} /> Mis Viajes
                   </Link>
@@ -96,11 +101,6 @@ export default function Header() {
                   {profile?.role === 'admin' && (
                     <Link to="/admin" className="header__dropdown-item">
                       <Shield size={16} /> Panel Admin
-                    </Link>
-                  )}
-                  {(profile?.role === 'publisher' || profile?.role === 'admin') && (
-                    <Link to="/dashboard" className="header__dropdown-item">
-                      <LayoutDashboard size={16} /> Dashboard Capitán
                     </Link>
                   )}
                   <button onClick={handleSignOut} className="header__dropdown-item header__dropdown-item--danger">

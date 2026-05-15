@@ -124,8 +124,20 @@ const useBookingStore = create((set, get) => ({
       if (error) return { valid: false, error: 'Cupón no encontrado' }
 
       const now = new Date()
-      if (data.valid_from && new Date(data.valid_from) > now) return { valid: false, error: 'Cupón aún no válido' }
-      if (data.valid_until && new Date(data.valid_until) < now) return { valid: false, error: 'Cupón expirado' }
+      const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+      if (data.valid_from) {
+        const fromDate = new Date(data.valid_from)
+        const fromDateOnly = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate())
+        if (fromDateOnly > todayDate) return { valid: false, error: 'Cupón aún no válido' }
+      }
+      
+      if (data.valid_until) {
+        const untilDate = new Date(data.valid_until)
+        const untilDateOnly = new Date(untilDate.getFullYear(), untilDate.getMonth(), untilDate.getDate())
+        if (untilDateOnly < todayDate) return { valid: false, error: 'Cupón expirado' }
+      }
+
       if (data.current_uses >= data.max_uses) return { valid: false, error: 'Cupón agotado' }
 
       return { valid: true, coupon: data }

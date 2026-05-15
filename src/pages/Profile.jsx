@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
-import { User, Mail, Phone, MapPin, Sailboat, Shield, LogOut, Edit3, Save, Loader, Lock, CheckCircle, Eye, EyeOff } from 'lucide-react'
+import { User, Mail, Phone, MapPin, Shield, LogOut, Edit3, Save, Loader, Lock, CheckCircle, Eye, EyeOff, Building2, CreditCard } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import supabase from '../lib/supabase'
 import './Profile.css'
@@ -12,8 +12,11 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
     phone: profile?.phone || '',
-    bio: profile?.bio || '',
     location: profile?.location || '',
+    business_name: profile?.business_name || '',
+    business_location: profile?.business_location || '',
+    bank_alias: profile?.bank_alias || '',
+    bank_holder: profile?.bank_holder || '',
   })
 
   const [searchParams] = useSearchParams()
@@ -181,14 +184,42 @@ export default function Profile() {
               )}
             </div>
 
-            <div className="profile-field">
-              <label><Sailboat size={14} /> Bio</label>
-              {editing ? (
-                <textarea className="input" rows={3} value={formData.bio} onChange={(e) => updateField('bio', e.target.value)} placeholder="Contanos tu experiencia navegando..." />
-              ) : (
-                <p>{profile?.bio || '—'}</p>
-              )}
-            </div>
+            {profile?.role === 'affiliate' && (
+              <>
+                <div className="profile-field">
+                  <label><Building2 size={14} /> Nombre del negocio</label>
+                  {editing ? (
+                    <input className="input" value={formData.business_name} onChange={(e) => updateField('business_name', e.target.value)} placeholder="Ej: Hotel Faena" />
+                  ) : (
+                    <p>{profile?.business_name || '—'}</p>
+                  )}
+                </div>
+                <div className="profile-field">
+                  <label><MapPin size={14} /> Ubicación del negocio</label>
+                  {editing ? (
+                    <input className="input" value={formData.business_location} onChange={(e) => updateField('business_location', e.target.value)} placeholder="Ej: Puerto Madero, CABA" />
+                  ) : (
+                    <p>{profile?.business_location || '—'}</p>
+                  )}
+                </div>
+                <div className="profile-field">
+                  <label><CreditCard size={14} /> Alias o CBU (Transferencias)</label>
+                  {editing ? (
+                    <input className="input" value={formData.bank_alias} onChange={(e) => updateField('bank_alias', e.target.value)} placeholder="alias.de.mp" />
+                  ) : (
+                    <p>{profile?.bank_alias || '—'}</p>
+                  )}
+                </div>
+                <div className="profile-field">
+                  <label><User size={14} /> Titular de cuenta bancaria</label>
+                  {editing ? (
+                    <input className="input" value={formData.bank_holder} onChange={(e) => updateField('bank_holder', e.target.value)} placeholder="Nombre del titular" />
+                  ) : (
+                    <p>{profile?.bank_holder || '—'}</p>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="divider" style={{ width: '100%' }} />

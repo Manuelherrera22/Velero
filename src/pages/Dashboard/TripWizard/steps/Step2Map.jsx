@@ -153,6 +153,20 @@ const Step2Map = () => {
               <MapPin size={16} /> PIN marcado en {formData.coordinates.lat.toFixed(4)}, {formData.coordinates.lng.toFixed(4)}
             </div>
           )}
+
+          <div className="form-group" style={{ marginTop: '24px' }}>
+            <label className="form-group__label">
+              Dirección exacta de encuentro (Opcional)
+            </label>
+            <input
+              type="text"
+              className="input-control"
+              placeholder="Ej: Club Náutico San Fernando, Muelle 3"
+              value={formData.exact_location || ''}
+              onChange={(e) => updateFormData({ exact_location: e.target.value })}
+            />
+            <p className="step-subtitle" style={{ fontSize: '12px', marginTop: '4px' }}>Ayuda a tus pasajeros a encontrar fácilmente el punto exacto de abordaje.</p>
+          </div>
         </div>
 
       </div>

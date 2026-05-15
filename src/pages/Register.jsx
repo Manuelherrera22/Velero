@@ -64,6 +64,8 @@ export default function Register() {
   const [password, setPassword] = useState('')
   const [businessName, setBusinessName] = useState('')
   const [businessLocation, setBusinessLocation] = useState('')
+  const [bankAlias, setBankAlias] = useState('')
+  const [bankHolder, setBankHolder] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -86,30 +88,23 @@ export default function Register() {
       setLocalError('Ingresá el nombre de tu negocio.')
       return
     }
+    if (role === 'publisher' && (!phone.replace(/^\+\d+\s*/, '').trim())) {
+      setLocalError('Ingresá tu número de teléfono de contacto.')
+      return
+    }
 
     setLoading(true)
     try {
-      // Pasamos también el teléfono a la función signUp o actualizamos el perfil luego
-      const result = await signUp(email, password, fullName.trim(), role)
+      const metadata = {
+        phone: phone.trim() || null,
+        business_name: role === 'affiliate' && businessName.trim() ? businessName.trim() : null,
+        business_location: role === 'affiliate' && businessLocation.trim() ? businessLocation.trim() : null,
+        bank_alias: role === 'affiliate' && bankAlias.trim() ? bankAlias.trim() : null,
+        bank_holder: role === 'affiliate' && bankHolder.trim() ? bankHolder.trim() : null
+      }
+      
+      const result = await signUp(email, password, fullName.trim(), role, metadata)
       if (result.success) {
-        const userId = result.data?.user?.id
-
-        if (userId) {
-          // Build profile update payload
-          const profileUpdate = {}
-          if (phone.trim()) profileUpdate.phone = phone.trim()
-
-          // Save business name/location for affiliates
-          if (role === 'affiliate') {
-            if (businessName.trim()) profileUpdate.business_name = businessName.trim()
-            if (businessLocation.trim()) profileUpdate.business_location = businessLocation.trim()
-          }
-
-          if (Object.keys(profileUpdate).length > 0) {
-            await supabase.from('profiles').update(profileUpdate).eq('id', userId)
-          }
-        }
-
         setSuccess(true)
       }
     } finally {
@@ -176,6 +171,28 @@ export default function Register() {
                   placeholder="Ej: Puerto Madero, Buenos Aires"
                   value={businessLocation}
                   onChange={(e) => setBusinessLocation(e.target.value)}
+                />
+              </div>
+              <div className="input-group">
+                <label className="register-label">Alias o CBU *</label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="alias.de.mp o 0000000000000000000000"
+                  value={bankAlias}
+                  onChange={(e) => setBankAlias(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="input-group">
+                <label className="register-label">Titular de la cuenta de destino *</label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Nombre y Apellido del titular"
+                  value={bankHolder}
+                  onChange={(e) => setBankHolder(e.target.value)}
+                  required
                 />
               </div>
             </>

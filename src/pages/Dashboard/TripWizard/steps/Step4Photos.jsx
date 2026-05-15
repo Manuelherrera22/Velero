@@ -151,8 +151,15 @@ const Step4Photos = () => {
               {/* Render Images wrapper */}
               <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
                 {urls.length === 0 ? (
-                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255, 255, 255, 0.1)' }}>
-                    <ImageIcon size={64} />
+                  <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'rgba(255, 255, 255, 0.4)', gap: '12px' }}>
+                    <ImageIcon size={48} style={{ opacity: 0.5 }} />
+                    <button 
+                      onClick={() => handleUploadClick(category.id)}
+                      className="btn btn--outline btn--sm"
+                      style={{ padding: '6px 16px', fontSize: '13px', borderRadius: '9999px', pointerEvents: 'auto', zIndex: 20 }}
+                    >
+                      Subir foto{isPortada ? '' : 's'}
+                    </button>
                   </div>
                 ) : (
                   <div style={{ width: '100%', display: 'flex', overflowX: urls.length > 1 ? 'auto' : 'visible', scrollSnapType: urls.length > 1 ? 'x mandatory' : 'none' }}>

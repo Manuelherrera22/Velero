@@ -54,31 +54,67 @@ const Step3Itinerary = () => {
         
         {/* Duración (Días y Noches) */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
-          <div className="form-group">
-            <label className="form-group__label">
+          <div className="form-group" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+            <label className="form-group__label" style={{ marginBottom: '16px', display: 'block' }}>
               Cantidad de días
             </label>
-            <input
-              type="number"
-              min="1"
-              className="input-control"
-              style={{ fontWeight: 'bold' }}
-              value={formData.duration_days}
-              onChange={(e) => updateFormData({ duration_days: parseInt(e.target.value) || 1 })}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+              <button 
+                type="button"
+                className="btn btn--outline" 
+                style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%' }}
+                onClick={() => updateFormData({ duration_days: Math.max(1, formData.duration_days - 1) })}
+              >
+                -
+              </button>
+              <input
+                type="number"
+                min="1"
+                className="input-control"
+                style={{ fontWeight: 'bold', textAlign: 'center', width: '80px', fontSize: '18px' }}
+                value={formData.duration_days}
+                onChange={(e) => updateFormData({ duration_days: parseInt(e.target.value) || 1 })}
+              />
+              <button 
+                type="button"
+                className="btn btn--outline" 
+                style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%' }}
+                onClick={() => updateFormData({ duration_days: formData.duration_days + 1 })}
+              >
+                +
+              </button>
+            </div>
           </div>
-          <div className="form-group">
-            <label className="form-group__label">
+          <div className="form-group" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+            <label className="form-group__label" style={{ marginBottom: '16px', display: 'block' }}>
               Cantidad de noches
             </label>
-            <input
-              type="number"
-              min="0"
-              className="input-control"
-              style={{ fontWeight: 'bold' }}
-              value={formData.duration_nights}
-              onChange={(e) => updateFormData({ duration_nights: parseInt(e.target.value) || 0 })}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+              <button 
+                type="button"
+                className="btn btn--outline" 
+                style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%' }}
+                onClick={() => updateFormData({ duration_nights: Math.max(0, formData.duration_nights - 1) })}
+              >
+                -
+              </button>
+              <input
+                type="number"
+                min="0"
+                className="input-control"
+                style={{ fontWeight: 'bold', textAlign: 'center', width: '80px', fontSize: '18px' }}
+                value={formData.duration_nights}
+                onChange={(e) => updateFormData({ duration_nights: parseInt(e.target.value) || 0 })}
+              />
+              <button 
+                type="button"
+                className="btn btn--outline" 
+                style={{ width: '40px', height: '40px', padding: 0, borderRadius: '50%' }}
+                onClick={() => updateFormData({ duration_nights: formData.duration_nights + 1 })}
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
 

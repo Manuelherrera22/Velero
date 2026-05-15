@@ -35,12 +35,20 @@ export default function AffiliateQRs() {
     setGeneratingFor(hotelId)
     try {
       const code = `A${hotelId.slice(0, 5).toUpperCase()}${Date.now().toString(36).toUpperCase()}`
-      await supabase.from('qr_codes').insert({
+      const { error } = await supabase.from('qr_codes').insert({
         hotel_id: hotelId,
         code,
         is_active: true,
       })
+      if (error) {
+        console.error('QR creation error:', error)
+        alert('Hubo un error al generar el código QR. ' + (error.message || ''))
+        return
+      }
       await fetchHotelsAndQRs()
+    } catch (err) {
+      console.error(err)
+      alert('Error de conexión al generar QR.')
     } finally {
       setGeneratingFor(null)
     }

@@ -28,6 +28,19 @@ export default function ManageCoupons() {
     return `${day}/${m}/${y}`
   }
 
+  const getCouponStatus = (c) => {
+    if (!c.is_active) return { text: 'Inactivo', className: 'status-badge--archived' }
+    if (c.max_uses && c.current_uses >= c.max_uses) return { text: 'Agotado', className: 'status-badge--archived' }
+    if (c.valid_until) {
+      const now = new Date()
+      const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const untilDate = new Date(c.valid_until)
+      const untilDateOnly = new Date(untilDate.getFullYear(), untilDate.getMonth(), untilDate.getDate())
+      if (untilDateOnly < todayDate) return { text: 'Vencido', className: 'status-badge--archived' }
+    }
+    return { text: 'Activo', className: 'status-badge--published' }
+  }
+
   const handleCreate = async () => {
     if (!form.code || !form.value) return
     setSaving(true)
@@ -148,8 +161,8 @@ export default function ManageCoupons() {
                   )}
                 </div>
               </div>
-              <span className={`status-badge ${c.is_active ? 'status-badge--published' : 'status-badge--archived'}`}>
-                {c.is_active ? 'Activo' : 'Inactivo'}
+              <span className={`status-badge ${getCouponStatus(c).className}`}>
+                {getCouponStatus(c).text}
               </span>
             </div>
 

@@ -87,14 +87,14 @@ const useAuthStore = create((set, get) => ({
   },
 
   // Sign up with email + password + role
-  signUp: async (email, password, fullName, role = 'viewer') => {
+  signUp: async (email, password, fullName, role = 'viewer', metadata = {}) => {
     set({ error: null })
     try {
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { full_name: fullName, role },
+          data: { full_name: fullName, role, ...metadata },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })

@@ -185,7 +185,7 @@ export default function Checkout() {
     setCouponLoading(false)
   }
 
-  const handleSubmitContact = (e) => {
+  const handleSubmitContact = async (e) => {
     e.preventDefault()
     setError(null)
     if (!formData.name || !formData.email || !formData.emailConfirm || !formData.phone) {
@@ -225,6 +225,26 @@ export default function Checkout() {
     if (mode === 'shared' && validPassengers.length < guests) {
       setError(`Ingresá los datos de las personas que faltan. (Total plazas reservadas: ${guests})`)
       return
+    }
+
+    if (!user) {
+      setLoading(true)
+      try {
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', formData.email.trim().toLowerCase())
+          .maybeSingle()
+          
+        if (existingUser) {
+          setError('Ya existe un usuario registrado con este email. Por favor, iniciá sesión para continuar.')
+          setLoading(false)
+          return
+        }
+      } catch (err) {
+        console.error("Error checking email", err)
+      }
+      setLoading(false)
     }
 
     // Go to email confirmation step
@@ -721,8 +741,8 @@ export default function Checkout() {
                   </label>
                 </div>
 
-                <button type="submit" className="btn btn--accent btn--lg checkout-form__submit">
-                  Continuar
+                <button type="submit" className="btn btn--accent btn--lg checkout-form__submit" disabled={loading}>
+                  {loading ? <Loader size={16} className="spin" /> : 'Continuar'}
                 </button>
 
 

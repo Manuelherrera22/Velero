@@ -11,7 +11,7 @@ export default function MyBoats() {
   const [activeMenuId, setActiveMenuId] = useState(null)
   const [isCreating, setIsCreating] = useState(false)
   const [creating, setCreating] = useState(false)
-  const [newBoat, setNewBoat] = useState({ name: '', type: 'Velero', length_m: '', cabins: '', bathrooms: '' })
+  const [newBoat, setNewBoat] = useState({ name: '', model: '', type: 'velero', length_m: '', cabins: '', bathrooms: '' })
 
   useEffect(() => { 
     fetchMyBoats() 
@@ -51,7 +51,7 @@ export default function MyBoats() {
     setCreating(false)
     if (result.success) {
       setIsCreating(false)
-      setNewBoat({ name: '', type: 'Velero', length_m: '', cabins: '', bathrooms: '' })
+      setNewBoat({ name: '', model: '', type: 'velero', length_m: '', cabins: '', bathrooms: '' })
     } else {
       alert("Error al crear: " + result.error)
     }
@@ -236,6 +236,16 @@ export default function MyBoats() {
               />
             </div>
 
+            <div className="input-group" style={{ marginTop: '16px' }}>
+              <label>Modelo del velero / Marca (Opcional)</label>
+              <input 
+                className="input" 
+                placeholder="Ej: Bavaria 34 Cruiser" 
+                value={newBoat.model} 
+                onChange={(e) => setNewBoat(p => ({ ...p, model: e.target.value }))} 
+              />
+            </div>
+
             <div className="form-row" style={{ marginTop: '16px' }}>
               <div className="input-group">
                 <label>Tipo *</label>
@@ -244,8 +254,8 @@ export default function MyBoats() {
                   value={newBoat.type} 
                   onChange={(e) => setNewBoat(p => ({ ...p, type: e.target.value }))}
                 >
-                  <option value="Velero">Velero</option>
-                  <option value="Catamarán">Catamarán</option>
+                  <option value="velero">Velero</option>
+                  <option value="catamaran">Catamarán</option>
                 </select>
               </div>
               <div className="input-group">
