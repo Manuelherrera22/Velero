@@ -162,20 +162,20 @@ const Step4Photos = () => {
                     </button>
                   </div>
                 ) : (
-                  <div style={{ width: '100%', display: 'flex', overflowX: urls.length > 1 ? 'auto' : 'visible', scrollSnapType: urls.length > 1 ? 'x mandatory' : 'none' }}>
+                  <div style={{ width: '100%', height: '100%', display: 'flex', flexWrap: 'wrap', gap: '4px', overflowY: 'auto', padding: '4px', boxSizing: 'border-box' }}>
                     {urls.map((url, i) => (
                       <div 
                         key={i} 
                         style={{
                           position: 'relative',
-                          flexShrink: 0,
-                          width: (isPortada || urls.length === 1) ? '100%' : '80%',
-                          height: '100%',
-                          scrollSnapAlign: 'center'
+                          width: (isPortada || urls.length === 1) ? '100%' : 'calc(50% - 2px)',
+                          height: (isPortada || urls.length === 1) ? '100%' : 'calc(50% - 2px)',
+                          minHeight: urls.length > 2 ? '70px' : '100%',
+                          flexGrow: 1
                         }}
                         className="photo-card-hover"
                       >
-                        <img src={url} alt={category.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={url} alt={category.label} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-lg)' }} />
                         <button 
                           onClick={() => removePhoto(category.id, url)}
                           className="photo-remove-btn"

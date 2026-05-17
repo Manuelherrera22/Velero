@@ -30,7 +30,6 @@ const TripWizard = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { currentStep, totalSteps, nextStep, prevStep } = useTripWizardStore()
-  const { formData } = useTripWizardStore()
   const [errorMsg, setErrorMsg] = React.useState('')
   
   const isEditing = id && id !== 'nueva'
@@ -128,10 +127,11 @@ const TripWizard = () => {
                 setErrorMsg('')
                 
                 if (currentStep === 4) {
+                  const currentData = useTripWizardStore.getState().formData;
                   // Must have at least 5 photos
-                  let count = formData.images_meta.portada ? 1 : 0
+                  let count = currentData.images_meta.portada ? 1 : 0
                   ['camarote', 'actividad', 'comidas', 'paisaje'].forEach(cat => {
-                    count += (formData.images_meta[cat] || []).length
+                    count += (currentData.images_meta[cat] || []).length
                   })
                   if (count < 5) {
                     setErrorMsg(`Debes subir al menos 5 fotos para continuar. Tienes ${count}.`)
@@ -139,7 +139,8 @@ const TripWizard = () => {
                   }
                 }
                 if (currentStep === 6) {
-                  if (!formData.price_per_person || formData.price_per_person <= 0) {
+                  const currentData = useTripWizardStore.getState().formData;
+                  if (!currentData.price_per_person || currentData.price_per_person <= 0) {
                     setErrorMsg('Debes ingresar un precio por pasajero mayor a 0 para continuar.')
                     return
                   }

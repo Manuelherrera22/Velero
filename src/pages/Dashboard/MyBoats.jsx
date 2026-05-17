@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, MoreVertical, Ship, AlertCircle, X } from 'lucide-react'
+import { Plus, MoreVertical, Sailboat, AlertCircle, X } from 'lucide-react'
 import useBoatStore from '../../stores/boatStore'
 import './Dashboard.css'
 
@@ -67,7 +67,7 @@ export default function MyBoats() {
         <div className="dash-pane__header">
           <div className="dash-pane__header-left">
             <div className="dash-pane__icon" style={{ background: 'rgba(16, 89, 203, 0.15)', color: 'var(--color-primary-400)' }}>
-              <Ship size={28} />
+              <Sailboat size={28} />
             </div>
             <h1 className="dash-pane__title">Embarcaciones</h1>
           </div>
@@ -92,7 +92,7 @@ export default function MyBoats() {
         {/* Empty */}
         {!loading && boats.length === 0 && (
           <div className="dash-pane__empty dash-pane__empty--dashed">
-            <Ship size={64} style={{ color: 'rgba(255,255,255,0.1)', marginBottom: '16px' }} />
+            <Sailboat size={64} style={{ color: 'rgba(255,255,255,0.1)', marginBottom: '16px' }} />
             <h3 className="dash-pane__empty-title">Sin embarcaciones</h3>
             <p className="dash-pane__empty-desc">Agrega tu primera embarcación para poder publicarla en futuras travesías.</p>
             <button 
@@ -237,7 +237,7 @@ export default function MyBoats() {
             </div>
 
             <div className="input-group" style={{ marginTop: '16px' }}>
-              <label>Modelo del velero / Marca (Opcional)</label>
+              <label>Marca / Modelo del velero (Opcional)</label>
               <input 
                 className="input" 
                 placeholder="Ej: Bavaria 34 Cruiser" 

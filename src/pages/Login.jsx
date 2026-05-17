@@ -30,14 +30,20 @@ export default function Login() {
     }
   }, [searchParams])
 
-  const { signInWithEmail, signInWithPhone, verifyPhoneOtp, error, clearError, isAuthenticated } = useAuthStore()
+  const { signInWithEmail, signInWithPhone, verifyPhoneOtp, error, clearError, isAuthenticated, profile } = useAuthStore()
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      window.location.href = '/mis-viajes'
+    if (isAuthenticated && profile) {
+      if (profile.role === 'publisher' || profile.role === 'admin') {
+        window.location.href = '/dashboard'
+      } else if (profile.role === 'affiliate') {
+        window.location.href = '/afiliado'
+      } else {
+        window.location.href = '/mis-viajes'
+      }
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, profile])
 
   const handleResetPassword = async () => {
     if (!value) {
@@ -77,9 +83,8 @@ export default function Login() {
             setPasswordError(authError.message === 'Invalid login credentials'
               ? 'Email o contraseña incorrectos'
               : authError.message)
-          } else {
-            window.location.href = '/'
           }
+          // Removing window.location.href = '/' so the useEffect can handle it correctly based on profile.role.
         } else {
           const result = await signInWithEmail(value)
           if (result.success) setSent(true)
@@ -100,9 +105,7 @@ export default function Login() {
 
     try {
       const result = await verifyPhoneOtp(value, otp)
-      if (result.success) {
-        window.location.href = '/'
-      }
+      // Removing window.location.href = '/' so the useEffect can handle it correctly based on profile.role.
     } finally {
       setLoading(false)
     }

@@ -27,6 +27,25 @@ const Step10Finalize = () => {
         ...(formData.images_meta.paisaje || [])
       ].filter(Boolean)
 
+      const uploadedUrls = []
+      
+      for (const url of allImages) {
+        if (url.startsWith('blob:')) {
+           const response = await fetch(url)
+           const blob = await response.blob()
+           const ext = blob.type.split('/')[1] || 'jpg'
+           const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+           
+           const { error: uploadError } = await supabase.storage.from('trip-images').upload(fileName, blob)
+           if (uploadError) throw uploadError
+           
+           const { data: { publicUrl } } = supabase.storage.from('trip-images').getPublicUrl(fileName)
+           uploadedUrls.push(publicUrl)
+        } else {
+           uploadedUrls.push(url)
+        }
+      }
+
       // 1. Save trip
       const { data: trip, error: tripError } = await supabase
         .from('trips')
@@ -39,7 +58,7 @@ const Step10Finalize = () => {
           capacity: formData.max_passengers || 6,
           price_per_person: formData.price_per_person || 0,
           status: 'published',
-          images: allImages,
+          images: uploadedUrls,
           tags: formData.tags || [],
           metadata: formData
         })
@@ -109,7 +128,12 @@ const Step10Finalize = () => {
           onClick={handleCreate}
           disabled={isSaving}
         >
-          {isSaving ? <span className="loading-spinner" style={{ width: '24px', height: '24px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block' }}></span> : 'Publicar Travesía'}
+          {isSaving ? (
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="loading-spinner" style={{ width: '20px', height: '20px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block' }}></span> 
+              Subiendo fotos...
+            </span>
+          ) : 'Publicar Travesía'}
         </button>
       </div>
       <style>{`

@@ -45,15 +45,9 @@ export default function AuthCallback() {
             return
           }
 
-          if (isSignup) {
-            // Email verification — show success message, then redirect to role-based panel
-            setVerified(true)
-            setStatus('¡Tu cuenta fue verificada exitosamente!')
-
-            // Fetch user profile to determine role
+          // Helper to get redirect path based on role
+          const getRedirectPath = async () => {
             const { data: { user } } = await supabase.auth.getUser()
-            let redirectTo = '/mis-viajes'
-
             if (user) {
               const { data: profile } = await supabase
                 .from('profiles')
@@ -61,22 +55,26 @@ export default function AuthCallback() {
                 .eq('id', user.id)
                 .single()
 
-              if (profile?.role === 'publisher') {
-                redirectTo = '/dashboard'
-              } else if (profile?.role === 'affiliate') {
-                redirectTo = '/afiliado'
-              } else if (profile?.role === 'admin') {
-                redirectTo = '/admin'
-              }
+              if (profile?.role === 'publisher') return '/dashboard'
+              if (profile?.role === 'affiliate') return '/afiliado'
+              if (profile?.role === 'admin') return '/admin'
             }
+            return '/mis-viajes'
+          }
 
+          if (isSignup) {
+            // Email verification — show success message, then redirect to role-based panel
+            setVerified(true)
+            setStatus('¡Tu cuenta fue verificada exitosamente!')
+            const redirectTo = await getRedirectPath()
             setTimeout(() => navigate(redirectTo, { replace: true }), 2500)
             return
           }
 
           // General sign-in
           setStatus('¡Listo! Redirigiendo...')
-          setTimeout(() => navigate('/mis-viajes', { replace: true }), 1000)
+          const redirectTo = await getRedirectPath()
+          setTimeout(() => navigate(redirectTo, { replace: true }), 1000)
           return
         }
 
@@ -85,7 +83,23 @@ export default function AuthCallback() {
 
         if (session) {
           setStatus('¡Sesión activa! Redirigiendo...')
-          setTimeout(() => navigate('/mis-viajes', { replace: true }), 1000)
+          
+          // Helper to get redirect path based on role
+          const { data: { user } } = await supabase.auth.getUser()
+          let redirectTo = '/mis-viajes'
+          if (user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', user.id)
+              .single()
+
+            if (profile?.role === 'publisher') redirectTo = '/dashboard'
+            else if (profile?.role === 'affiliate') redirectTo = '/afiliado'
+            else if (profile?.role === 'admin') redirectTo = '/admin'
+          }
+          
+          setTimeout(() => navigate(redirectTo, { replace: true }), 1000)
         } else {
           setStatus('Redirigiendo a inicio de sesión...')
           setTimeout(() => navigate('/login', { replace: true }), 1000)
