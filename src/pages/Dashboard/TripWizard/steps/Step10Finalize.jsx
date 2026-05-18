@@ -27,9 +27,7 @@ const Step10Finalize = () => {
         ...(formData.images_meta.paisaje || [])
       ].filter(Boolean)
 
-      const uploadedUrls = []
-      
-      for (const url of allImages) {
+      const uploadPromises = allImages.map(async (url) => {
         if (url.startsWith('blob:')) {
            const response = await fetch(url)
            const blob = await response.blob()
@@ -40,11 +38,12 @@ const Step10Finalize = () => {
            if (uploadError) throw uploadError
            
            const { data: { publicUrl } } = supabase.storage.from('trip-images').getPublicUrl(fileName)
-           uploadedUrls.push(publicUrl)
-        } else {
-           uploadedUrls.push(url)
+           return publicUrl
         }
-      }
+        return url
+      })
+
+      const uploadedUrls = await Promise.all(uploadPromises)
 
       // 1. Save trip
       const { data: trip, error: tripError } = await supabase
@@ -101,7 +100,7 @@ const Step10Finalize = () => {
     <div className="step-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '500px', textAlign: 'center' }}>
       
       <div style={{ width: '128px', height: '128px', backgroundColor: 'rgba(0, 180, 180, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 'var(--space-4)', position: 'relative' }}>
-        <div style={{ width: '96px', height: '96px', backgroundColor: 'var(--color-primary-500)', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 25px rgba(0, 180, 180, 0.2)' }} className="pulse-animation">
+        <div style={{ width: '96px', height: '96px', backgroundColor: 'var(--color-primary-500)', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 25px rgba(0, 180, 180, 0.2)' }} className={isSaving ? 'pulse-animation' : ''}>
           <Navigation size={48} />
         </div>
         <div style={{ position: 'absolute', bottom: '8px', right: '8px', backgroundColor: 'var(--bg-primary)', borderRadius: '50%', padding: '4px', border: '2px solid var(--color-primary-500)' }}>
@@ -111,10 +110,12 @@ const Step10Finalize = () => {
 
       <div style={{ maxWidth: '32rem', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
         <h2 className="step-title" style={{ fontSize: '36px', fontWeight: 900, textAlign: 'center' }}>
-          ¡Travesía completada!
+          {isSaving ? 'Publicando Travesía...' : '¡Travesía completada!'}
         </h2>
         <p className="step-subtitle" style={{ fontWeight: 500 }}>
-          Revisamos que toda la información principal está lista. Puedes editar los detalles más tarde o crear una vista previa para ver cómo lucirá para tus futuros huéspedes.
+          {isSaving 
+            ? 'Por favor, espera unos instantes mientras subimos tus fotos de alta calidad y guardamos los detalles. Esto puede demorar unos segundos...' 
+            : 'Revisamos que toda la información principal está lista. Puedes editar los detalles más tarde o crear una vista previa para ver cómo lucirá para tus futuros huéspedes.'}
         </p>
       </div>
 
