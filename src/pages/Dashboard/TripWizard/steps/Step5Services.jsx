@@ -36,7 +36,7 @@ const Step5Services = () => {
         </p>
       </div>
 
-      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-2xl)', padding: 'var(--space-6)' }}>
+      <div style={{ backgroundColor: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-2xl)', padding: 'var(--space-6)', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
         {/* Table Header */}
         <div style={{ 
           display: 'grid', 
@@ -48,11 +48,11 @@ const Step5Services = () => {
           fontSize: '12px', 
           textTransform: 'uppercase', 
           letterSpacing: '-0.025em', 
-          color: 'rgba(255, 255, 255, 0.7)' 
+          color: 'var(--text-muted)' 
         }}>
           <div style={{ gridColumn: 'span 8 / span 8' }}>Servicios</div>
-          <div style={{ gridColumn: 'span 2 / span 2', textAlign: 'center', color: 'var(--color-primary-500)' }}>Incluidos</div>
-          <div style={{ gridColumn: 'span 2 / span 2', textAlign: 'center', color: 'var(--color-error-500)' }}>Excluidos</div>
+          <div style={{ gridColumn: 'span 2 / span 2', textAlign: 'center', color: 'var(--color-primary-600)' }}>Incluidos</div>
+          <div style={{ gridColumn: 'span 2 / span 2', textAlign: 'center', color: 'var(--color-error-600)' }}>Excluidos</div>
         </div>
 
         {/* Matrix rows */}
@@ -63,7 +63,7 @@ const Step5Services = () => {
 
             return (
               <div key={service} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 'var(--space-4)', alignItems: 'center' }} className="service-row-hover">
-                <div style={{ gridColumn: 'span 8 / span 8', fontWeight: 500, color: 'rgba(255, 255, 255, 0.9)', transition: 'color 0.2s ease' }} className="service-label">
+                <div style={{ gridColumn: 'span 8 / span 8', fontWeight: 500, color: 'var(--text-primary)', transition: 'color 0.2s ease' }} className="service-label">
                   {service}
                 </div>
                 <div style={{ gridColumn: 'span 2 / span 2', display: 'flex', justifyContent: 'center' }}>
@@ -172,7 +172,7 @@ const Step5Services = () => {
       </div>
       <style>{`
         .service-row-hover:hover .service-label {
-          color: white !important;
+          color: var(--color-accent-600) !important;
         }
       `}</style>
     </div>
