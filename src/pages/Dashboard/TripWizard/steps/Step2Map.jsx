@@ -117,7 +117,7 @@ const Step2Map = () => {
     setShowSuggestions(false)
     try {
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&limit=1&language=es`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&limit=1&language=es&country=ar&proximity=-58.3816,-34.6037`
       )
       const data = await response.json()
       
