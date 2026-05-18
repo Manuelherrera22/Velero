@@ -122,31 +122,33 @@ const TripWizard = () => {
               Atrás
             </button>
             
-            <button
-              onClick={() => {
-                setErrorMsg('')
-                
-                if (currentStep === 4) {
-                  const currentCount = useTripWizardStore.getState().getTotalPhotos();
-                  if (currentCount < 5) {
-                    setErrorMsg(`Debes subir al menos 5 fotos para continuar. Tienes ${currentCount}.`)
-                    return
+            {currentStep < 8 && (
+              <button
+                onClick={() => {
+                  setErrorMsg('')
+                  
+                  if (currentStep === 4) {
+                    const currentCount = useTripWizardStore.getState().getTotalPhotos();
+                    if (currentCount < 5) {
+                      setErrorMsg(`Debes subir al menos 5 fotos para continuar. Tienes ${currentCount}.`)
+                      return
+                    }
                   }
-                }
-                if (currentStep === 6) {
-                  const currentData = useTripWizardStore.getState().formData;
-                  if (!currentData.price_per_person || currentData.price_per_person <= 0) {
-                    setErrorMsg('Debes ingresar un precio por pasajero mayor a 0 para continuar.')
-                    return
+                  if (currentStep === 6) {
+                    const currentData = useTripWizardStore.getState().formData;
+                    if (!currentData.price_per_person || currentData.price_per_person <= 0) {
+                      setErrorMsg('Debes ingresar un precio por pasajero mayor a 0 para continuar.')
+                      return
+                    }
                   }
-                }
-                
-                nextStep()
-              }}
-              className="btn btn--accent"
-            >
-              Siguiente <ChevronRight size={16} style={{ marginLeft: '8px' }} />
-            </button>
+                  
+                  nextStep()
+                }}
+                className="btn btn--accent"
+              >
+                Siguiente <ChevronRight size={16} style={{ marginLeft: '8px' }} />
+              </button>
+            )}
           </div>
         </div>
       </div>

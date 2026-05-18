@@ -121,7 +121,14 @@ const Step10Finalize = () => {
     }, 60000)
 
     try {
-      const { data: { session }, error: authError } = await supabase.auth.getSession()
+      const getSessionWithTimeout = () => {
+        return Promise.race([
+          supabase.auth.getSession(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout de sesión. Por favor, recargá la página (F5) e intentá de nuevo.')), 5000))
+        ])
+      }
+      
+      const { data: { session }, error: authError } = await getSessionWithTimeout()
       const user = session?.user
       
       if (authError || !user) {
@@ -296,9 +303,9 @@ const Step10Finalize = () => {
             <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px', color: 'var(--color-primary-500)' }}>Vista Previa de tu Travesía</h2>
             
             {formData.images_meta?.portada ? (
-              <img src={formData.images_meta.portada} alt="Portada" style={{ width: '100%', height: '240px', objectFit: 'cover', borderRadius: '16px', marginBottom: '24px' }} />
+              <img src={formData.images_meta.portada} alt="Portada" style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '16px', marginBottom: '24px' }} />
             ) : (
-              <div style={{ width: '100%', height: '240px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+              <div style={{ width: '100%', height: '160px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
                 <p style={{ color: 'var(--text-muted)' }}>Sin foto de portada</p>
               </div>
             )}
