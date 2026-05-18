@@ -31,12 +31,14 @@ const Step8Pricing = () => {
         {/* Precios */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-6)' }}>
           <div className="form-group">
-            <label className="form-group__label" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-              Precio por pasajero
-              <div title="El costo individual base al reservar lugares compartidos." style={{ cursor: 'help' }}>
-                <Info size={16} color="var(--text-muted)" />
-              </div>
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-1)', minHeight: '32px' }}>
+              <label className="form-group__label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                Precio por pasajero
+                <div title="El costo individual base al reservar lugares compartidos." style={{ cursor: 'help' }}>
+                  <Info size={16} color="var(--text-muted)" />
+                </div>
+              </label>
+            </div>
             <div className="input-with-icon">
               <span className="input-icon" style={{ fontWeight: 'bold' }}>$</span>
               <input
@@ -52,7 +54,7 @@ const Step8Pricing = () => {
           </div>
 
           <div className="form-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-1)', minHeight: '32px' }}>
               <label className="form-group__label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)', color: formData.allow_full_boat ? 'var(--text-primary)' : 'var(--text-muted)', transition: 'color 0.3s ease' }}>
                 Precio por barco completo
                 <div title="El precio total si alguien reserva la exclusividad de todo el barco." style={{ cursor: 'help' }}>
