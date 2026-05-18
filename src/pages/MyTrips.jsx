@@ -14,7 +14,7 @@ const WhatsAppIcon = ({ size = 14 }) => (
 const WHATSAPP_NUMBER = '5491161789818'
 
 const STATUS_MAP = {
-  pending: { label: 'Pendiente', color: 'warning', icon: Clock },
+  pending: { label: 'Confirmada', color: 'success', icon: CheckCircle },
   confirmed: { label: 'Confirmada', color: 'success', icon: CheckCircle },
   completed: { label: 'Completada', color: 'info', icon: CheckCircle },
   cancelled: { label: 'Cancelada', color: 'error', icon: XCircle },
