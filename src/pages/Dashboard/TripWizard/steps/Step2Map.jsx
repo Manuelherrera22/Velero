@@ -167,6 +167,20 @@ const Step2Map = () => {
             />
             <p className="step-subtitle" style={{ fontSize: '12px', marginTop: '4px' }}>Ayuda a tus pasajeros a encontrar fácilmente el punto exacto de abordaje.</p>
           </div>
+
+          <div className="form-group" style={{ marginTop: '16px' }}>
+            <label className="form-group__label">
+              Referencias para ubicar la embarcación
+            </label>
+            <textarea
+              className="input-control"
+              style={{ minHeight: '80px', paddingTop: '12px', resize: 'vertical' }}
+              placeholder="Agregá referencias para ubicar la embarcación (ej: La amarra puede variar, comunicarse al llegar a la portería del club)..."
+              value={formData.location_reference || ''}
+              onChange={(e) => updateFormData({ location_reference: e.target.value })}
+            />
+            <p className="step-subtitle" style={{ fontSize: '12px', marginTop: '4px' }}>Si la amarra cambia con frecuencia o es difícil de encontrar solo con GPS, deja instrucciones claras aquí para tus pasajeros.</p>
+          </div>
         </div>
 
       </div>
