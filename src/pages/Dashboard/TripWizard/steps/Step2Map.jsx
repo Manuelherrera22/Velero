@@ -66,8 +66,9 @@ const Step2Map = () => {
     }
 
     try {
+      // proximity bias toward Buenos Aires metro area for better Argentine results
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&limit=5&language=es&country=ar&types=address,poi,place,neighborhood,locality`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&limit=5&language=es&proximity=-58.3816,-34.6037&country=ar`
       )
       const data = await response.json()
       if (data && data.features) {
