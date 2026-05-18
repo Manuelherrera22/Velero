@@ -42,7 +42,6 @@ const initialData = {
   min_passengers: 1,
   max_passengers: 6,
   allowed_payment_methods: ['PayPal'],
-  cancellation_policy: '',
   requires_full_payment: true,
 
   // Step 9: Dates

@@ -170,24 +170,7 @@ const Step8Pricing = () => {
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-group__label" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-              Política de cancelación
-              <div title="Qué pasa si el pasajero cancela a último momento" style={{ cursor: 'help' }}>
-                <Info size={16} color="var(--text-muted)" />
-              </div>
-            </label>
-            <select
-              className="input-control"
-              style={{ border: '1px solid rgba(255, 255, 255, 0.3)' }}
-              value={formData.cancellation_policy || 'flexible'}
-              onChange={(e) => updateFormData({ cancellation_policy: e.target.value })}
-            >
-              <option value="flexible">Flexible (100% reembolso hasta 24hs antes)</option>
-              <option value="moderada">Moderada (50% reembolso hasta 5 días antes)</option>
-              <option value="estricta">Estricta (Sin reembolso)</option>
-            </select>
-          </div>
+
         </div>
 
         {/* Modalidad de cobro */}
