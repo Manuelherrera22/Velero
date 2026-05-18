@@ -78,6 +78,7 @@ const Step9Dates = () => {
                 mode="multiple"
                 selected={selectedDates}
                 onSelect={setSelectedDates}
+                disabled={{ before: new Date() }}
               />
             </div>
           </div>
