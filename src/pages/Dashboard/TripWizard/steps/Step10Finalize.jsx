@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
 import { CheckCircle2, Navigation } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../../../../lib/supabase.js'
 
 const Step10Finalize = () => {
   const { formData, resetWizard } = useTripWizardStore()
@@ -10,37 +11,67 @@ const Step10Finalize = () => {
 
   const compressImage = async (blobUrl) => {
     return new Promise((resolve, reject) => {
+      let isSettled = false;
+
+      const fallbackToRaw = async () => {
+        if (isSettled) return;
+        isSettled = true;
+        try {
+          const res = await fetch(blobUrl);
+          const blob = await res.blob();
+          resolve(blob);
+        } catch (e) {
+          reject(e);
+        }
+      };
+
+      // 5-second timeout fallback in case Image object hangs (e.g. unsupported HEIC on some browsers)
+      const timeoutId = setTimeout(() => {
+        fallbackToRaw();
+      }, 5000);
+
       const img = new Image()
       img.onload = () => {
-        const MAX_WIDTH = 1200
-        const MAX_HEIGHT = 1200
-        let width = img.width
-        let height = img.height
+        if (isSettled) return;
+        clearTimeout(timeoutId);
+        try {
+          const MAX_WIDTH = 1200
+          const MAX_HEIGHT = 1200
+          let width = img.width
+          let height = img.height
 
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width
-            width = MAX_WIDTH
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width
+              width = MAX_WIDTH
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height
+              height = MAX_HEIGHT
+            }
           }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height
-            height = MAX_HEIGHT
-          }
+
+          const canvas = document.createElement('canvas')
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          ctx.drawImage(img, 0, 0, width, height)
+          
+          canvas.toBlob((blob) => {
+            if (isSettled) return;
+            isSettled = true;
+            if (blob) resolve(blob)
+            else fallbackToRaw() // fallback if canvas fails
+          }, 'image/jpeg', 0.8)
+        } catch (e) {
+          fallbackToRaw()
         }
-
-        const canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, width, height)
-        
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob)
-          else reject(new Error('Canvas toBlob failed'))
-        }, 'image/jpeg', 0.8)
       }
-      img.onerror = (err) => reject(err)
+      img.onerror = () => {
+        clearTimeout(timeoutId);
+        fallbackToRaw();
+      }
       img.src = blobUrl
     })
   }
@@ -48,7 +79,6 @@ const Step10Finalize = () => {
   const handleCreate = async () => {
     setIsSaving(true)
     try {
-      const { supabase } = await import('../../../../lib/supabase.js')
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       
       if (authError || !user) {
@@ -67,10 +97,12 @@ const Step10Finalize = () => {
       const uploadPromises = allImages.map(async (url) => {
         if (url.startsWith('blob:')) {
            const blob = await compressImage(url)
-           const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
+           const ext = blob.type === 'image/png' ? 'png' : 'jpg'
+           const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
            
            const { error: uploadError } = await supabase.storage.from('trip-images').upload(fileName, blob, {
-             contentType: 'image/jpeg'
+             contentType: blob.type || 'image/jpeg',
+             upsert: true
            })
            if (uploadError) throw uploadError
            
