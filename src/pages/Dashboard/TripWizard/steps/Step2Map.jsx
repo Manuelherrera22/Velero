@@ -136,8 +136,10 @@ const Step2Map = () => {
               style={{ width: '100%', height: '100%' }}
             >
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                attribution='&copy; <a href="https://www.mapbox.com/">Mapbox</a>'
+                url={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=${import.meta.env.VITE_MAPBOX_TOKEN}`}
+                tileSize={512}
+                zoomOffset={-1}
               />
               <MapFlyTo center={mapCenter} />
               <MapEvents setCoordinates={(coords) => {
