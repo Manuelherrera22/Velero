@@ -51,25 +51,26 @@ const Step8Pricing = () => {
             </div>
           </div>
 
-          <div className="form-group" style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', top: '-12px', right: 0, zIndex: 10 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: '4px 12px', borderRadius: '9999px', border: '1px solid var(--border-color)', cursor: 'pointer' }}>
-                <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>Habilitar chárter</span>
+          <div className="form-group">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-1)' }}>
+              <label className="form-group__label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)', color: formData.allow_full_boat ? 'var(--text-primary)' : 'var(--text-muted)', transition: 'color 0.3s ease' }}>
+                Precio por barco completo
+                <div title="El precio total si alguien reserva la exclusividad de todo el barco." style={{ cursor: 'help' }}>
+                  <Info size={16} color="var(--text-muted)" />
+                </div>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', backgroundColor: 'rgba(0, 0, 0, 0.02)', padding: '2px 8px', borderRadius: '9999px', border: '1px solid var(--border-color)', cursor: 'pointer' }}>
+                <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Permitir alquilar todo el barco</span>
                 <input 
                   type="checkbox" 
-                  style={{ width: '32px', height: '16px', accentColor: 'var(--color-primary-500)' }}
+                  style={{ width: '28px', height: '14px', accentColor: 'var(--color-primary-500)' }}
                   checked={formData.allow_full_boat}
                   onChange={(e) => updateFormData({ allow_full_boat: e.target.checked })}
                 />
               </label>
             </div>
 
-            <label className="form-group__label" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', color: formData.allow_full_boat ? 'var(--text-primary)' : 'var(--text-muted)', transition: 'color 0.3s ease' }}>
-              Precio por barco completo
-              <div title="El precio total si alguien reserva la exclusividad de todo el barco." style={{ cursor: 'help' }}>
-                <Info size={16} color="var(--text-muted)" />
-              </div>
-            </label>
             <div className="input-with-icon">
               <span className="input-icon" style={{ fontWeight: 'bold' }}>$</span>
               <input

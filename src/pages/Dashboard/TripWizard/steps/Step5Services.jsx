@@ -60,25 +60,28 @@ const Step5Services = () => {
           {[...new Set([...AVAILABLE_SERVICES, ...formData.included_services, ...formData.excluded_services])].map((service) => {
             const isIncluded = formData.included_services.includes(service)
             const isExcluded = formData.excluded_services.includes(service)
+            const isMandatory = service === 'Seguro' || service === 'Salvavidas'
 
             return (
               <div key={service} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 'var(--space-4)', alignItems: 'center' }} className="service-row-hover">
-                <div style={{ gridColumn: 'span 8 / span 8', fontWeight: 500, color: 'var(--text-primary)', transition: 'color 0.2s ease' }} className="service-label">
-                  {service}
+                <div style={{ gridColumn: 'span 8 / span 8', fontWeight: 500, color: 'var(--text-primary)', transition: 'color 0.2s ease', opacity: isMandatory ? 0.7 : 1 }} className="service-label">
+                  {service} {isMandatory && <span style={{ fontSize: '10px', backgroundColor: 'rgba(0,0,0,0.05)', padding: '2px 6px', borderRadius: '4px', marginLeft: '8px', color: 'var(--text-muted)' }}>Obligatorio</span>}
                 </div>
                 <div style={{ gridColumn: 'span 2 / span 2', display: 'flex', justifyContent: 'center' }}>
                   <input 
                     type="checkbox" 
-                    style={{ width: '16px', height: '16px', accentColor: 'var(--color-primary-500)', borderRadius: '4px' }}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--color-primary-500)', borderRadius: '4px', opacity: isMandatory ? 0.5 : 1 }}
                     checked={isIncluded}
+                    disabled={isMandatory}
                     onChange={() => toggleService('included_services', service)}
                   />
                 </div>
                 <div style={{ gridColumn: 'span 2 / span 2', display: 'flex', justifyContent: 'center' }}>
                   <input 
                     type="checkbox" 
-                    style={{ width: '16px', height: '16px', accentColor: 'var(--color-error-500)', borderRadius: '4px' }}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--color-error-500)', borderRadius: '4px', opacity: isMandatory ? 0.5 : 1 }}
                     checked={isExcluded}
+                    disabled={isMandatory}
                     onChange={() => toggleService('excluded_services', service)}
                   />
                 </div>
@@ -91,8 +94,9 @@ const Step5Services = () => {
               <input 
                 type="text" 
                 id="custom_service_input"
-                placeholder="Agregar servicio personalizado..." 
+                placeholder="Ej: Ropa blanca, Snorkel, Bebidas..." 
                 className="input-control" 
+
                 style={{ flex: 1, padding: 'var(--space-2)', fontSize: '13px' }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {

@@ -27,7 +27,7 @@ const initialData = {
   },
 
   // Step 5: Services & Boat
-  included_services: ['Capitán', 'Salvavidas'],
+  included_services: ['Seguro', 'Capitán', 'Salvavidas'],
   excluded_services: [],
   boat_id: null,
 
