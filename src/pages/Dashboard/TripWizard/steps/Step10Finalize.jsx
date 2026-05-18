@@ -7,6 +7,7 @@ import { supabase } from '../../../../lib/supabase.js'
 const Step10Finalize = () => {
   const { formData, resetWizard } = useTripWizardStore()
   const [isSaving, setIsSaving] = useState(false)
+  const [statusMsg, setStatusMsg] = useState('')
   const navigate = useNavigate()
 
   const compressImage = async (blobUrl) => {
@@ -25,8 +26,8 @@ const Step10Finalize = () => {
         }
       };
 
-      // 5-second timeout fallback in case Image object hangs (e.g. unsupported HEIC on some browsers)
       const timeoutId = setTimeout(() => {
+        console.warn('[compressImage] Timeout reached, falling back to raw blob')
         fallbackToRaw();
       }, 5000);
 
@@ -62,7 +63,7 @@ const Step10Finalize = () => {
             if (isSettled) return;
             isSettled = true;
             if (blob) resolve(blob)
-            else fallbackToRaw() // fallback if canvas fails
+            else fallbackToRaw()
           }, 'image/jpeg', 0.8)
         } catch (e) {
           fallbackToRaw()
@@ -76,8 +77,48 @@ const Step10Finalize = () => {
     })
   }
 
+  // Upload a single image with a 15-second timeout
+  const uploadSingleImage = async (url, userId) => {
+    if (!url.startsWith('blob:')) return url
+
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 15000)
+
+    try {
+      const blob = await compressImage(url)
+      const ext = blob.type === 'image/png' ? 'png' : 'jpg'
+      const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+      
+      const { error: uploadError } = await supabase.storage
+        .from('trip-images')
+        .upload(fileName, blob, {
+          contentType: blob.type || 'image/jpeg',
+          upsert: true
+        })
+      
+      clearTimeout(timeout)
+      if (uploadError) throw uploadError
+      
+      const { data: { publicUrl } } = supabase.storage.from('trip-images').getPublicUrl(fileName)
+      return publicUrl
+    } catch (e) {
+      clearTimeout(timeout)
+      console.error('[uploadSingleImage] Failed:', e)
+      return null // skip this image instead of crashing everything
+    }
+  }
+
   const handleCreate = async () => {
     setIsSaving(true)
+    setStatusMsg('Verificando sesión...')
+
+    // Global 60-second timeout
+    const globalTimeout = setTimeout(() => {
+      setIsSaving(false)
+      setStatusMsg('')
+      alert('El proceso tardó demasiado. Revisá tu conexión a internet e intentá de nuevo. Si el problema persiste, contacta soporte.')
+    }, 60000)
+
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       
@@ -85,7 +126,9 @@ const Step10Finalize = () => {
         throw new Error('Debes estar autenticado para publicar.')
       }
 
-      // Collect all images in one array for the `images` column
+      setStatusMsg('Preparando imágenes...')
+
+      // Collect all images
       const allImages = [
         formData.images_meta.portada,
         ...(formData.images_meta.camarote || []),
@@ -94,25 +137,28 @@ const Step10Finalize = () => {
         ...(formData.images_meta.paisaje || [])
       ].filter(Boolean)
 
-      const uploadPromises = allImages.map(async (url) => {
-        if (url.startsWith('blob:')) {
-           const blob = await compressImage(url)
-           const ext = blob.type === 'image/png' ? 'png' : 'jpg'
-           const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
-           
-           const { error: uploadError } = await supabase.storage.from('trip-images').upload(fileName, blob, {
-             contentType: blob.type || 'image/jpeg',
-             upsert: true
-           })
-           if (uploadError) throw uploadError
-           
-           const { data: { publicUrl } } = supabase.storage.from('trip-images').getPublicUrl(fileName)
-           return publicUrl
-        }
-        return url
-      })
+      let uploadedUrls = []
 
-      const uploadedUrls = await Promise.all(uploadPromises)
+      if (allImages.length > 0) {
+        const blobImages = allImages.filter(u => u.startsWith('blob:'))
+        const regularImages = allImages.filter(u => !u.startsWith('blob:'))
+
+        if (blobImages.length > 0) {
+          setStatusMsg(`Subiendo ${blobImages.length} foto(s)...`)
+        }
+
+        // Upload blob images one by one with status updates
+        const uploadedBlobs = []
+        for (let i = 0; i < blobImages.length; i++) {
+          setStatusMsg(`Subiendo foto ${i + 1} de ${blobImages.length}...`)
+          const result = await uploadSingleImage(blobImages[i], user.id)
+          if (result) uploadedBlobs.push(result)
+        }
+
+        uploadedUrls = [...uploadedBlobs, ...regularImages]
+      }
+
+      setStatusMsg('Guardando travesía...')
 
       // 1. Save trip
       const { data: trip, error: tripError } = await supabase
@@ -137,6 +183,7 @@ const Step10Finalize = () => {
 
       // 2. Save dates
       if (formData.custom_dates && formData.custom_dates.length > 0) {
+        setStatusMsg('Guardando fechas...')
         const datesToInsert = formData.custom_dates.map(d => ({
           trip_id: trip.id,
           date: d.departure_date,
@@ -151,17 +198,21 @@ const Step10Finalize = () => {
 
         if (datesError) {
           console.error('Error guardando fechas:', datesError)
-          // We don't abort, the trip is created, but dates failed
         }
       }
 
+      clearTimeout(globalTimeout)
+      setStatusMsg('¡Publicada con éxito!')
       resetWizard()
       navigate('/dashboard/travesias')
     } catch (err) {
+      clearTimeout(globalTimeout)
       console.error('Error al publicar travesía:', err)
-      alert(err.message || 'Ocurrió un error al intentar publicar. Revisa la consola.')
+      const msg = err?.message || JSON.stringify(err) || 'Error desconocido'
+      alert(`Error al publicar: ${msg}`)
     } finally {
       setIsSaving(false)
+      setStatusMsg('')
     }
   }
 
@@ -183,7 +234,7 @@ const Step10Finalize = () => {
         </h2>
         <p className="step-subtitle" style={{ fontWeight: 500 }}>
           {isSaving 
-            ? 'Por favor, espera unos instantes mientras subimos tus fotos de alta calidad y guardamos los detalles. Esto puede demorar unos segundos...' 
+            ? (statusMsg || 'Procesando...') 
             : 'Revisamos que toda la información principal está lista. Puedes editar los detalles más tarde o crear una vista previa para ver cómo lucirá para tus futuros huéspedes.'}
         </p>
       </div>
@@ -206,7 +257,7 @@ const Step10Finalize = () => {
           {isSaving ? (
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span className="loading-spinner" style={{ width: '20px', height: '20px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block' }}></span> 
-              Subiendo fotos...
+              {statusMsg || 'Procesando...'}
             </span>
           ) : 'Publicar Travesía'}
         </button>
