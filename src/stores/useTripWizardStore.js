@@ -109,6 +109,15 @@ export const useTripWizardStore = create((set, get) => ({
     return { formData: { ...state.formData, images_meta: imagesMeta }};
   }),
 
+  getTotalPhotos: () => {
+    const imagesMeta = get().formData.images_meta;
+    let count = imagesMeta.portada ? 1 : 0;
+    ['camarote', 'actividad', 'comidas', 'paisaje'].forEach(cat => {
+      count += (imagesMeta[cat] || []).length;
+    });
+    return count;
+  },
+
   // Reset entirely
   resetWizard: () => set({ currentStep: 1, formData: { ...initialData } })
 }))

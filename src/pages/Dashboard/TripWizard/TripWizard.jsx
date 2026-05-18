@@ -127,14 +127,9 @@ const TripWizard = () => {
                 setErrorMsg('')
                 
                 if (currentStep === 4) {
-                  const currentData = useTripWizardStore.getState().formData;
-                  // Must have at least 5 photos
-                  let count = currentData.images_meta.portada ? 1 : 0
-                  ['camarote', 'actividad', 'comidas', 'paisaje'].forEach(cat => {
-                    count += (currentData.images_meta[cat] || []).length
-                  })
-                  if (count < 5) {
-                    setErrorMsg(`Debes subir al menos 5 fotos para continuar. Tienes ${count}.`)
+                  const currentCount = useTripWizardStore.getState().getTotalPhotos();
+                  if (currentCount < 5) {
+                    setErrorMsg(`Debes subir al menos 5 fotos para continuar. Tienes ${currentCount}.`)
                     return
                   }
                 }

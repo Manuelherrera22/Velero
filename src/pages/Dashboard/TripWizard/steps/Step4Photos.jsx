@@ -11,7 +11,7 @@ const PHOTO_CATEGORIES = [
 ]
 
 const Step4Photos = () => {
-  const { formData, addPhoto, removePhoto } = useTripWizardStore()
+  const { formData, addPhoto, removePhoto, getTotalPhotos } = useTripWizardStore()
   const fileInputRef = React.useRef(null)
   const [activeCategory, setActiveCategory] = React.useState(null)
 
@@ -38,14 +38,6 @@ const Step4Photos = () => {
     })
     
     e.target.value = null // reset
-  }
-
-  const getTotalPhotos = () => {
-    let count = formData.images_meta.portada ? 1 : 0
-    PHOTO_CATEGORIES.slice(1).forEach(cat => {
-      count += (formData.images_meta[cat.id] || []).length
-    })
-    return count
   }
 
   return (
