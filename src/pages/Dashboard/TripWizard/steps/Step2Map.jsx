@@ -35,6 +35,26 @@ const MapFlyTo = ({ center, zoom }) => {
 }
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
+const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY
+
+const loadGoogleMapsScript = (callback) => {
+  if (window.google && window.google.maps) {
+    callback()
+    return
+  }
+  const existingScript = document.getElementById('googleMapsScript')
+  if (existingScript) {
+    existingScript.addEventListener('load', callback)
+    return
+  }
+  const script = document.createElement('script')
+  script.id = 'googleMapsScript'
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_KEY}&libraries=places`
+  script.async = true
+  script.defer = true
+  script.onload = callback
+  document.head.appendChild(script)
+}
 
 const Step2Map = () => {
   const { formData, updateFormData } = useTripWizardStore()
@@ -46,6 +66,23 @@ const Step2Map = () => {
   const [mapZoom, setMapZoom] = useState(formData.coordinates ? 16 : 12)
   const debounceRef = useRef(null)
   const containerRef = useRef(null)
+  
+  const [googleServicesReady, setGoogleServicesReady] = useState(false)
+  const autocompleteService = useRef(null)
+  const geocoderService = useRef(null)
+
+  // Load Google Maps script
+  useEffect(() => {
+    if (!GOOGLE_MAPS_KEY) {
+      console.warn("Falta VITE_GOOGLE_MAPS_KEY en el .env")
+      return
+    }
+    loadGoogleMapsScript(() => {
+      autocompleteService.current = new window.google.maps.places.AutocompleteService()
+      geocoderService.current = new window.google.maps.Geocoder()
+      setGoogleServicesReady(true)
+    })
+  }, [])
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -58,27 +95,25 @@ const Step2Map = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Debounced autocomplete search
-  const fetchSuggestions = useCallback(async (query) => {
-    if (!query || query.length < 3 || !MAPBOX_TOKEN) {
+  // Debounced autocomplete search using Google Places API
+  const fetchSuggestions = useCallback((query) => {
+    if (!query || query.length < 3 || !googleServicesReady) {
       setSuggestions([])
       return
     }
 
-    try {
-      // proximity bias toward Buenos Aires metro area for better Argentine results
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&limit=5&language=es&proximity=-58.3816,-34.6037&country=ar`
-      )
-      const data = await response.json()
-      if (data && data.features) {
-        setSuggestions(data.features)
+    autocompleteService.current.getPlacePredictions({
+      input: query,
+      componentRestrictions: { country: 'ar' }, // Limitar a Argentina
+    }, (predictions, status) => {
+      if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+        setSuggestions(predictions)
         setShowSuggestions(true)
+      } else {
+        setSuggestions([])
       }
-    } catch (err) {
-      console.error('Autocomplete error:', err)
-    }
-  }, [])
+    })
+  }, [googleServicesReady])
 
   const handleInputChange = (e) => {
     const value = e.target.value
@@ -91,47 +126,60 @@ const Step2Map = () => {
     }, 300)
   }
 
-  const handleSelectSuggestion = (feature) => {
-    const [lng, lat] = feature.center
-    const newCoords = { lat, lng }
-    const placeName = feature.place_name
-
+  const handleSelectSuggestion = (prediction) => {
+    const placeName = prediction.description
     setSearchQuery(placeName)
-    setMapCenter(newCoords)
-    setMapZoom(17)
     setSuggestions([])
     setShowSuggestions(false)
 
-    // Auto-set the PIN and location in one click
-    updateFormData({
-      location: placeName,
-      coordinates: newCoords,
-      exact_location: placeName
+    // Use Geocoder to get exact Lat/Lng from the place_id
+    geocoderService.current.geocode({ placeId: prediction.place_id }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const location = results[0].geometry.location
+        const newCoords = { lat: location.lat(), lng: location.lng() }
+        
+        setMapCenter(newCoords)
+        setMapZoom(17)
+
+        // Auto-set the PIN and location in one click
+        updateFormData({
+          location: placeName,
+          coordinates: newCoords,
+          exact_location: placeName
+        })
+      }
     })
   }
 
-  // Fallback: manual search on Enter or button click
-  const handleManualSearch = async () => {
-    if (!searchQuery.trim() || !MAPBOX_TOKEN) return
+  // Fallback: manual search on Enter or button click using Google Geocoder
+  const handleManualSearch = () => {
+    if (!searchQuery.trim() || !googleServicesReady) return
     setSearching(true)
     setShowSuggestions(false)
-    try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&limit=1&language=es&country=ar&proximity=-58.3816,-34.6037`
-      )
-      const data = await response.json()
-      
-      if (data && data.features && data.features.length > 0) {
-        handleSelectSuggestion(data.features[0])
+    
+    geocoderService.current.geocode({ 
+      address: searchQuery,
+      componentRestrictions: { country: 'AR' }
+    }, (results, status) => {
+      setSearching(false)
+      if (status === 'OK' && results[0]) {
+        const placeName = results[0].formatted_address
+        const location = results[0].geometry.location
+        const newCoords = { lat: location.lat(), lng: location.lng() }
+        
+        setSearchQuery(placeName)
+        setMapCenter(newCoords)
+        setMapZoom(17)
+
+        updateFormData({
+          location: placeName,
+          coordinates: newCoords,
+          exact_location: placeName
+        })
       } else {
         alert("No se encontró la ubicación. Intenta con una dirección más específica.")
       }
-    } catch (error) {
-      console.error("Error buscando ubicación:", error)
-      alert("Hubo un error al buscar la ubicación.")
-    } finally {
-      setSearching(false)
-    }
+    })
   }
 
   // When clicking the map, fine-tune the pin position
@@ -166,7 +214,7 @@ const Step2Map = () => {
                 type="text"
                 className="input-control"
                 style={{ paddingLeft: '44px' }}
-                placeholder="Ej: Camino Escollera 1500, San Isidro"
+                placeholder="Ej: Club Náutico San Isidro"
                 value={searchQuery}
                 onChange={handleInputChange}
                 onKeyDown={(e) => e.key === 'Enter' && handleManualSearch()}
@@ -198,10 +246,10 @@ const Step2Map = () => {
               boxShadow: '0 16px 48px rgba(0,0,0,0.4)',
               overflow: 'hidden'
             }}>
-              {suggestions.map((feature, idx) => (
+              {suggestions.map((prediction, idx) => (
                 <button
-                  key={feature.id || idx}
-                  onClick={() => handleSelectSuggestion(feature)}
+                  key={prediction.place_id || idx}
+                  onClick={() => handleSelectSuggestion(prediction)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -223,7 +271,7 @@ const Step2Map = () => {
                 >
                   <MapPin size={16} style={{ flexShrink: 0, color: 'var(--color-accent-500)' }} />
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {feature.place_name}
+                    {prediction.description}
                   </span>
                 </button>
               ))}
@@ -231,11 +279,11 @@ const Step2Map = () => {
           )}
 
           <p className="step-subtitle" style={{ fontSize: '12px', marginTop: '4px' }}>
-            Escribí la dirección completa y seleccioná de la lista. El PIN se colocará automáticamente.
+            Escribí la dirección completa o el nombre del club y seleccioná de la lista (Desarrollado por Google Maps).
           </p>
         </div>
 
-        {/* Mapa interactivo */}
+        {/* Mapa interactivo visual */}
         <div className="step-section">
           
           <div style={{
