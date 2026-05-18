@@ -88,44 +88,44 @@ const Step5Services = () => {
               </div>
             )
           })}
-          {/* Custom Services Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 'var(--space-4)', alignItems: 'center', marginTop: 'var(--space-4)' }}>
-            <div style={{ gridColumn: 'span 8 / span 8', display: 'flex', gap: 'var(--space-2)' }}>
-              <input 
-                type="text" 
-                id="custom_service_input"
-                placeholder="Ej: Ropa blanca, Snorkel, Bebidas..." 
-                className="input-control" 
+        </div>
 
-                style={{ flex: 1, padding: 'var(--space-2)', fontSize: '13px' }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (e.target.value.trim()) {
-                      toggleService('included_services', e.target.value.trim());
-                      e.target.value = '';
-                    }
+        {/* Custom Services Row (Moved outside scroll area) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 'var(--space-4)', alignItems: 'center', marginTop: 'var(--space-4)', paddingTop: 'var(--space-4)', borderTop: '1px solid var(--border-color)' }}>
+          <div style={{ gridColumn: 'span 8 / span 8', display: 'flex', gap: 'var(--space-2)' }}>
+            <input 
+              type="text" 
+              id="custom_service_input"
+              placeholder="Ej: Ropa blanca, Snorkel, Bebidas..." 
+              className="input-control" 
+              style={{ flex: 1, padding: 'var(--space-2)', fontSize: '13px' }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (e.target.value.trim()) {
+                    toggleService('included_services', e.target.value.trim());
+                    e.target.value = '';
                   }
-                }}
-              />
-              <button 
-                type="button"
-                className="btn btn--ghost" 
-                style={{ padding: 'var(--space-2)' }}
-                onClick={(e) => {
-                  const input = document.getElementById('custom_service_input');
-                  if (input && input.value.trim()) {
-                    toggleService('included_services', input.value.trim());
-                    input.value = '';
-                  }
-                }}
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-            <div style={{ gridColumn: 'span 4 / span 4', fontSize: '11px', color: 'var(--text-muted)' }}>
-              Escribí y presioná enter para agregar.
-            </div>
+                }
+              }}
+            />
+            <button 
+              type="button"
+              className="btn btn--outline" 
+              style={{ padding: 'var(--space-2)', borderRadius: 'var(--radius-lg)' }}
+              onClick={(e) => {
+                const input = document.getElementById('custom_service_input');
+                if (input && input.value.trim()) {
+                  toggleService('included_services', input.value.trim());
+                  input.value = '';
+                }
+              }}
+            >
+              <Plus size={16} />
+            </button>
+          </div>
+          <div style={{ gridColumn: 'span 4 / span 4', fontSize: '11px', color: 'var(--text-muted)' }}>
+            Escribí y presioná enter o el botón + para agregar a la lista.
           </div>
         </div>
       </div>

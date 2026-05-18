@@ -311,7 +311,14 @@ const Step10Finalize = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
               <div style={{ backgroundColor: 'rgba(0,180,180,0.1)', padding: '16px', borderRadius: '12px' }}>
                 <p style={{ fontSize: '12px', color: 'var(--color-accent-400)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Precio por persona</p>
-                <p style={{ fontSize: '24px', fontWeight: 'bold' }}>${formData.price_per_person || 0}</p>
+                {formData.discount_percentage > 0 ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <p style={{ fontSize: '24px', fontWeight: 'bold' }}>${(formData.price_per_person * (1 - formData.discount_percentage / 100)).toFixed(2)}</p>
+                    <p style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-muted)', textDecoration: 'line-through' }}>${formData.price_per_person}</p>
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '24px', fontWeight: 'bold' }}>${formData.price_per_person || 0}</p>
+                )}
               </div>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '12px' }}>
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Capacidad</p>
