@@ -8,6 +8,43 @@ const Step10Finalize = () => {
   const [isSaving, setIsSaving] = useState(false)
   const navigate = useNavigate()
 
+  const compressImage = async (blobUrl) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => {
+        const MAX_WIDTH = 1200
+        const MAX_HEIGHT = 1200
+        let width = img.width
+        let height = img.height
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width
+            width = MAX_WIDTH
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height
+            height = MAX_HEIGHT
+          }
+        }
+
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, width, height)
+        
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob)
+          else reject(new Error('Canvas toBlob failed'))
+        }, 'image/jpeg', 0.8)
+      }
+      img.onerror = (err) => reject(err)
+      img.src = blobUrl
+    })
+  }
+
   const handleCreate = async () => {
     setIsSaving(true)
     try {
@@ -29,12 +66,12 @@ const Step10Finalize = () => {
 
       const uploadPromises = allImages.map(async (url) => {
         if (url.startsWith('blob:')) {
-           const response = await fetch(url)
-           const blob = await response.blob()
-           const ext = blob.type.split('/')[1] || 'jpg'
-           const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+           const blob = await compressImage(url)
+           const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`
            
-           const { error: uploadError } = await supabase.storage.from('trip-images').upload(fileName, blob)
+           const { error: uploadError } = await supabase.storage.from('trip-images').upload(fileName, blob, {
+             contentType: 'image/jpeg'
+           })
            if (uploadError) throw uploadError
            
            const { data: { publicUrl } } = supabase.storage.from('trip-images').getPublicUrl(fileName)
@@ -120,7 +157,12 @@ const Step10Finalize = () => {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', paddingTop: 'var(--space-8)' }}>
-        <button className="btn btn--outline" style={{ height: '56px', padding: '0 var(--space-8)', fontSize: '18px', borderRadius: 'var(--radius-xl)' }}>
+        <button 
+          className="btn btn--outline" 
+          style={{ height: '56px', padding: '0 var(--space-8)', fontSize: '18px', borderRadius: 'var(--radius-xl)' }}
+          onClick={() => alert("La vista previa estará disponible en la próxima actualización.")}
+          disabled={isSaving}
+        >
           Vista previa
         </button>
         <button 
