@@ -8,6 +8,7 @@ const Step10Finalize = () => {
   const { formData, resetWizard } = useTripWizardStore()
   const [isSaving, setIsSaving] = useState(false)
   const [statusMsg, setStatusMsg] = useState('')
+  const [showPreview, setShowPreview] = useState(false)
   const navigate = useNavigate()
 
   const compressImage = async (blobUrl) => {
@@ -120,10 +121,11 @@ const Step10Finalize = () => {
     }, 60000)
 
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      const { data: { session }, error: authError } = await supabase.auth.getSession()
+      const user = session?.user
       
       if (authError || !user) {
-        throw new Error('Debes estar autenticado para publicar.')
+        throw new Error('Debes estar autenticado para publicar. Por favor, iniciá sesión nuevamente.')
       }
 
       setStatusMsg('Preparando imágenes...')
@@ -243,7 +245,7 @@ const Step10Finalize = () => {
         <button 
           className="btn btn--outline" 
           style={{ height: '56px', padding: '0 var(--space-8)', fontSize: '18px', borderRadius: 'var(--radius-xl)' }}
-          onClick={() => alert("La vista previa estará disponible en la próxima actualización.")}
+          onClick={() => setShowPreview(true)}
           disabled={isSaving}
         >
           Vista previa
@@ -262,6 +264,74 @@ const Step10Finalize = () => {
           ) : 'Publicar Travesía'}
         </button>
       </div>
+
+      {showPreview && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--bg-primary)',
+            borderRadius: 'var(--radius-2xl)',
+            width: '100%',
+            maxWidth: '600px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            padding: '32px',
+            position: 'relative',
+            textAlign: 'left'
+          }}>
+            <button 
+              onClick={() => setShowPreview(false)}
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '8px' }}
+            >
+              Cerrar
+            </button>
+            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px', color: 'var(--color-primary-500)' }}>Vista Previa de tu Travesía</h2>
+            
+            {formData.images_meta?.portada ? (
+              <img src={formData.images_meta.portada} alt="Portada" style={{ width: '100%', height: '240px', objectFit: 'cover', borderRadius: '16px', marginBottom: '24px' }} />
+            ) : (
+              <div style={{ width: '100%', height: '240px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+                <p style={{ color: 'var(--text-muted)' }}>Sin foto de portada</p>
+              </div>
+            )}
+            
+            <h3 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' }}>{formData.title || 'Travesía sin título'}</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '16px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Navigation size={18} /> {formData.location || 'Sin ubicación seleccionada'}
+            </p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ backgroundColor: 'rgba(0,180,180,0.1)', padding: '16px', borderRadius: '12px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--color-accent-400)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Precio por persona</p>
+                <p style={{ fontSize: '24px', fontWeight: 'bold' }}>${formData.price_per_person || 0}</p>
+              </div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '12px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Capacidad</p>
+                <p style={{ fontSize: '24px', fontWeight: 'bold' }}>Hasta {formData.max_passengers || 6} pas.</p>
+              </div>
+            </div>
+
+            <h4 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Descripción</h4>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '24px' }}>{formData.description || 'Sin descripción'}</p>
+
+            <button 
+              className="btn btn--primary" 
+              style={{ width: '100%', height: '56px', fontSize: '18px', borderRadius: '12px' }}
+              onClick={() => setShowPreview(false)}
+            >
+              Continuar editando
+            </button>
+          </div>
+        </div>
+      )}
       <style>{`
         @keyframes pulse-custom {
           0%, 100% { opacity: 1; transform: scale(1); }

@@ -29,7 +29,7 @@ const Step8Pricing = () => {
       <div className="step-form">
         
         {/* Precios */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-6)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-6)', alignItems: 'end' }}>
           <div className="form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-1)', minHeight: '32px' }}>
               <label className="form-group__label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
