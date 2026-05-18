@@ -30,6 +30,7 @@ const initialData = {
   // Step 5: Services & Boat
   included_services: ['Seguro', 'Capitán', 'Salvavidas'],
   excluded_services: [],
+  custom_services: [],
   boat_id: null,
 
   // Step 6-7: TBD properties 
@@ -82,6 +83,20 @@ export const useTripWizardStore = create((set, get) => ({
           ...state.formData,
           [type]: isPresent ? arr.filter((s) => s !== serviceName) : [...arr, serviceName],
           [oppositeType]: state.formData[oppositeType].filter((s) => s !== serviceName)
+        }
+      };
+    });
+  },
+
+  addCustomService: (serviceName) => {
+    set((state) => {
+      const isAlreadyIncluded = state.formData.included_services.includes(serviceName);
+      return {
+        formData: {
+          ...state.formData,
+          custom_services: [...new Set([...(state.formData.custom_services || []), serviceName])],
+          included_services: isAlreadyIncluded ? state.formData.included_services : [...state.formData.included_services, serviceName],
+          excluded_services: state.formData.excluded_services.filter(s => s !== serviceName)
         }
       };
     });

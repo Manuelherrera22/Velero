@@ -57,7 +57,7 @@ const Step5Services = () => {
 
         {/* Matrix rows */}
         <div style={{ maxHeight: '300px', overflowY: 'auto', paddingTop: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', paddingRight: 'var(--space-2)' }} className="custom-scrollbar">
-          {[...new Set([...AVAILABLE_SERVICES, ...formData.included_services, ...formData.excluded_services])].map((service) => {
+          {[...new Set([...AVAILABLE_SERVICES, ...(formData.custom_services || []), ...formData.included_services, ...formData.excluded_services])].map((service) => {
             const isIncluded = formData.included_services.includes(service)
             const isExcluded = formData.excluded_services.includes(service)
             const isMandatory = service === 'Seguro' || service === 'Salvavidas'
@@ -103,7 +103,7 @@ const Step5Services = () => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   if (e.target.value.trim()) {
-                    toggleService('included_services', e.target.value.trim());
+                    useTripWizardStore.getState().addCustomService(e.target.value.trim());
                     e.target.value = '';
                   }
                 }
@@ -116,7 +116,7 @@ const Step5Services = () => {
               onClick={(e) => {
                 const input = document.getElementById('custom_service_input');
                 if (input && input.value.trim()) {
-                  toggleService('included_services', input.value.trim());
+                  useTripWizardStore.getState().addCustomService(input.value.trim());
                   input.value = '';
                 }
               }}
