@@ -179,7 +179,7 @@ const Step10Finalize = () => {
         .from('trips')
         .insert({
           captain_id: activeUser.id,
-          boat_id: formData.boat_id || null,
+          boat_id: (formData.boat_id && String(formData.boat_id).length > 20 && formData.boat_id !== 'NEW') ? formData.boat_id : null,
           title: formData.title || 'Travesía sin título',
           description: formData.description,
           location: formData.location || 'Sin ubicación',
