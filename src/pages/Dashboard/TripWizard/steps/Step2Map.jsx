@@ -44,12 +44,14 @@ const Step2Map = () => {
     if (!searchQuery.trim()) return
     setSearching(true)
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`)
+      const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN
+      if (!mapboxToken) throw new Error("Falta el token de Mapbox en las variables de entorno.")
+      
+      const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${mapboxToken}&limit=1&language=es`)
       const data = await response.json()
       
-      if (data && data.length > 0) {
-        const lat = parseFloat(data[0].lat)
-        const lng = parseFloat(data[0].lon)
+      if (data && data.features && data.features.length > 0) {
+        const [lng, lat] = data.features[0].center
         const newCoords = { lat, lng }
         
         setMapCenter(newCoords)
