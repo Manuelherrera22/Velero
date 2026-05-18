@@ -348,20 +348,20 @@
 }
 
 .dash-pane__empty--dashed {
-  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border: 2px dashed rgba(11, 171, 195, 0.25);
   border-radius: var(--radius-2xl);
-  background: rgba(255, 255, 255, 0.015);
+  background: linear-gradient(135deg, rgba(11, 171, 195, 0.04), rgba(16, 89, 203, 0.03));
 }
 
 .dash-pane__empty-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary, #FFFFFF);
   margin-bottom: var(--space-2);
 }
 
 .dash-pane__empty-desc {
-  color: var(--text-secondary, #94A3B8);
+  color: var(--text-secondary, #CBD5E1);
   margin-bottom: var(--space-6);
   max-width: 24rem;
   line-height: 1.6;

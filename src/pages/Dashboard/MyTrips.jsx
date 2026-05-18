@@ -76,7 +76,7 @@ export default function MyTrips() {
         {/* Empty state */}
         {!loading && trips.length === 0 && (
           <div className="dash-pane__empty dash-pane__empty--dashed">
-            <Compass size={64} style={{ color: 'rgba(255,255,255,0.1)', marginBottom: '16px' }} />
+            <Compass size={64} style={{ color: 'rgba(11, 171, 195, 0.3)', marginBottom: '16px' }} />
             <h3 className="dash-pane__empty-title">Aún no creaste travesías</h3>
             <p className="dash-pane__empty-desc">Tus aventuras náuticas aparecerán aquí ordenadas para que puedas gestionarlas fácilmente.</p>
             <button 
