@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 const initialData = {
   // Step 1: Details
@@ -50,8 +51,10 @@ const initialData = {
   custom_dates: [] // Local array before saving to DB
 }
 
-export const useTripWizardStore = create((set, get) => ({
-  currentStep: 1,
+export const useTripWizardStore = create(
+  persist(
+    (set, get) => ({
+      currentStep: 1,
   totalSteps: 8,
   formData: { ...initialData },
 
@@ -133,6 +136,18 @@ export const useTripWizardStore = create((set, get) => ({
     return count;
   },
 
-  // Reset entirely
-  resetWizard: () => set({ currentStep: 1, formData: { ...initialData } })
-}))
+      // Reset entirely
+      resetWizard: () => set({ currentStep: 1, formData: { ...initialData } })
+    }),
+    {
+      name: 'trip-wizard-draft',
+      partialize: (state) => ({
+        ...state,
+        formData: {
+          ...state.formData,
+          images_meta: { ...initialData.images_meta } // Don't persist blob URLs
+        }
+      })
+    }
+  )
+)
