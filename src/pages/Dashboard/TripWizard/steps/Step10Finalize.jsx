@@ -174,8 +174,8 @@ const Step10Finalize = () => {
 
       setStatusMsg('Guardando travesía...')
 
-      // 1. Save trip
-      const { data: trip, error: tripError } = await supabase
+      // 1. Save trip (with timeout to prevent infinite hangs)
+      const tripInsertPromise = supabase
         .from('trips')
         .insert({
           captain_id: activeUser.id,
@@ -193,6 +193,11 @@ const Step10Finalize = () => {
         .select()
         .single()
 
+      const { data: trip, error: tripError } = await Promise.race([
+        tripInsertPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('La base de datos (Supabase) tardó demasiado en responder al guardar la travesía.')), 15000))
+      ])
+
       if (tripError) throw tripError
 
       // 2. Save dates
@@ -206,9 +211,14 @@ const Step10Finalize = () => {
           available_spots: formData.max_passengers || 6
         }))
 
-        const { error: datesError } = await supabase
+        const datesInsertPromise = supabase
           .from('trip_dates')
           .insert(datesToInsert)
+
+        const { error: datesError } = await Promise.race([
+          datesInsertPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('La base de datos tardó demasiado en responder al guardar las fechas.')), 15000))
+        ])
 
         if (datesError) {
           console.error('Error guardando fechas:', datesError)
@@ -222,7 +232,16 @@ const Step10Finalize = () => {
     } catch (err) {
       clearTimeout(globalTimeout)
       console.error('Error al publicar travesía:', err)
-      const msg = err?.message || JSON.stringify(err) || 'Error desconocido'
+      
+      let msg = 'Error desconocido'
+      try {
+        if (err?.message) msg = err.message
+        else if (typeof err === 'string') msg = err
+        else msg = JSON.stringify(err)
+      } catch (e) {
+        msg = 'No se pudo leer el detalle del error'
+      }
+      
       alert(`Error al publicar: ${msg}`)
     } finally {
       setIsSaving(false)
