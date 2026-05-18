@@ -3,6 +3,7 @@ import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
 import { CheckCircle2, Navigation } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../../../lib/supabase.js'
+import useAuthStore from '../../../../stores/authStore'
 
 const Step10Finalize = () => {
   const { formData, resetWizard } = useTripWizardStore()
@@ -121,17 +122,21 @@ const Step10Finalize = () => {
     }, 60000)
 
     try {
-      const getSessionWithTimeout = () => {
-        return Promise.race([
-          supabase.auth.getSession(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout de sesión. Por favor, recargá la página (F5) e intentá de nuevo.')), 5000))
-        ])
+      let activeUser = useAuthStore.getState().user;
+      
+      if (!activeUser) {
+        // Fallback with Promise.race to avoid deadlock
+        const getSessionWithTimeout = () => {
+          return Promise.race([
+            supabase.auth.getSession(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout de sesión al intentar recuperar usuario. Por favor, recargá la página (F5).')), 3000))
+          ])
+        }
+        const { data: { session } } = await getSessionWithTimeout()
+        activeUser = session?.user
       }
-      
-      const { data: { session }, error: authError } = await getSessionWithTimeout()
-      const user = session?.user
-      
-      if (authError || !user) {
+
+      if (!activeUser) {
         throw new Error('Debes estar autenticado para publicar. Por favor, iniciá sesión nuevamente.')
       }
 
@@ -160,7 +165,7 @@ const Step10Finalize = () => {
         const uploadedBlobs = []
         for (let i = 0; i < blobImages.length; i++) {
           setStatusMsg(`Subiendo foto ${i + 1} de ${blobImages.length}...`)
-          const result = await uploadSingleImage(blobImages[i], user.id)
+          const result = await uploadSingleImage(blobImages[i], activeUser.id)
           if (result) uploadedBlobs.push(result)
         }
 
@@ -173,7 +178,7 @@ const Step10Finalize = () => {
       const { data: trip, error: tripError } = await supabase
         .from('trips')
         .insert({
-          captain_id: user.id,
+          captain_id: activeUser.id,
           boat_id: formData.boat_id || null,
           title: formData.title || 'Travesía sin título',
           description: formData.description,
