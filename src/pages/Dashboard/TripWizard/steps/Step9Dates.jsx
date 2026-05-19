@@ -5,7 +5,7 @@ import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/style.css'
 
 const Step9Dates = () => {
-  const { formData, updateFormData } = useTripWizardStore()
+  const { formData, updateFormData, hasBookings } = useTripWizardStore()
   
   const [selectedDates, setSelectedDates] = useState([])
   const [newDate, setNewDate] = useState({
@@ -33,7 +33,9 @@ const Step9Dates = () => {
         arrival_date: curArr.toISOString().split('T')[0],
         arrival_time: newDate.arrival_time,
         price_per_person: newDate.price_per_person,
-        full_boat_price: newDate.full_boat_price
+        full_boat_price: newDate.full_boat_price,
+        blocked_spots: 0,
+        available_spots: formData.max_passengers || 6
       })
     })
 
@@ -45,8 +47,17 @@ const Step9Dates = () => {
   }
 
   const handleRemoveDate = (id) => {
+    if (hasBookings) return;
     updateFormData({
       custom_dates: formData.custom_dates.filter(d => d.id !== id)
+    })
+  }
+
+  const handleUpdateBlockedSpots = (id, newBlockedSpots) => {
+    updateFormData({
+      custom_dates: formData.custom_dates.map(d => 
+        d.id === id ? { ...d, blocked_spots: parseInt(newBlockedSpots) || 0 } : d
+      )
     })
   }
 
@@ -64,8 +75,14 @@ const Step9Dates = () => {
 
       <div className="step-form">
         
+        {hasBookings && (
+          <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, marginBottom: 'var(--space-6)' }}>
+            ⚠️ Esta travesía ya tiene reservas. Solo puedes modificar las plazas bloqueadas para mantener la disponibilidad real. No puedes añadir ni eliminar fechas.
+          </div>
+        )}
+
         {/* Date Ingestion UI */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-6)', paddingBottom: 'var(--space-4)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-6)', paddingBottom: 'var(--space-4)', opacity: hasBookings ? 0.5 : 1, pointerEvents: hasBookings ? 'none' : 'auto' }}>
           
           {/* Calendar Picker */}
           <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'white', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
@@ -201,8 +218,22 @@ const Step9Dates = () => {
                         <p style={{ fontWeight: 'bold', color: 'var(--color-accent-500)' }}>$ {date.full_boat_price}</p>
                       </div>
                     )}
-                    <button 
-                      onClick={() => handleRemoveDate(date.id)}
+                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }} title="Lugares que vendiste por tu cuenta y ya no están disponibles en Kailu">
+                        Plazas Bloqueadas <Info size={12} style={{ display: 'inline', verticalAlign: 'middle' }}/>
+                      </label>
+                      <input 
+                        type="number" 
+                        min="0"
+                        max={formData.max_passengers || 6}
+                        value={date.blocked_spots || 0}
+                        onChange={(e) => handleUpdateBlockedSpots(date.id, e.target.value)}
+                        style={{ width: '60px', padding: '4px', textAlign: 'center', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 'bold' }}
+                      />
+                    </div>
+                    {!hasBookings && (
+                      <button 
+                        onClick={() => handleRemoveDate(date.id)}
                       className="date-remove-btn"
                       style={{
                         backgroundColor: 'transparent',
@@ -220,6 +251,7 @@ const Step9Dates = () => {
                     >
                       <Trash2 size={20}/>
                     </button>
+                    )}
                   </div>
                 </div>
               ))}

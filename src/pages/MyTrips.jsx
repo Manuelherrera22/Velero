@@ -49,7 +49,7 @@ export default function MyTrips() {
   const handleDownloadTicket = async (booking) => {
     const { generateTicketPDF } = await import('../utils/generateTicket')
     generateTicketPDF({
-      trip: booking.trip?.title || 'Travesía',
+      trip: booking.trip || {},
       date: booking.trip_date ? { date: booking.trip_date.date, start_time: booking.trip_date.start_time } : null,
       guests: booking.quantity,
       total: booking.total,

@@ -27,15 +27,18 @@ export default function TripDetail() {
   const [bookingMode, setBookingMode] = useState('shared') // 'shared' | 'private'
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
+  const isPrivateAllowed = trip?.metadata?.allow_full_boat || trip?.allow_full_boat;
+  const privatePrice = trip?.metadata?.full_boat_price || trip?.full_boat_price;
+
   useEffect(() => {
     if (trip) {
       const hasShared = trip.price_per_person > 0;
-      const hasPrivate = trip.allow_full_boat && trip.full_boat_price > 0;
+      const hasPrivate = isPrivateAllowed && privatePrice > 0;
       if (!hasShared && hasPrivate) {
         setBookingMode('private');
       }
     }
-  }, [trip]);
+  }, [trip, isPrivateAllowed, privatePrice]);
 
   useEffect(() => {
     fetchTrip(id)
@@ -116,7 +119,7 @@ export default function TripDetail() {
     const dateText = selectedDateObj
       ? `\nFecha: ${new Date(selectedDateObj.date + 'T12:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })} a las ${selectedDateObj.start_time?.slice(0, 5)}hs`
       : ''
-    const modeText = trip.allow_full_boat ? (bookingMode === 'private' ? ' (Navío exclusivo)' : ' (Lugares compartidos)') : ''
+    const modeText = isPrivateAllowed ? (bookingMode === 'private' ? ' (Navío exclusivo)' : ' (Lugares compartidos)') : ''
     const msg = `¡Hola! 👋 Me interesa la travesía *${trip.title}* en ${trip.location}${modeText}.${dateText}\nSomos ${guests} persona${guests > 1 ? 's' : ''}.\n\n¿Podrían darme más información?`
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`
   }
@@ -260,9 +263,9 @@ export default function TripDetail() {
                   </button>
                   <button 
                     className={`mode-btn ${bookingMode === 'private' ? 'mode-btn--active' : ''}`}
-                    style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'private' ? 'var(--color-primary-500)' : 'var(--color-neutral-100)', color: bookingMode === 'private' ? 'white' : 'var(--text-secondary)', border: bookingMode === 'private' ? '1px solid var(--color-primary-600)' : '1px solid var(--color-neutral-200)', cursor: (tripDates.length > 0 && trip.allow_full_boat && trip.full_boat_price > 0) ? 'pointer' : 'not-allowed', opacity: (tripDates.length > 0 && trip.allow_full_boat && trip.full_boat_price > 0) ? 1 : 0.5 }}
-                    onClick={() => { if (tripDates.length > 0 && trip.allow_full_boat && trip.full_boat_price > 0) setBookingMode('private') }}
-                    title={tripDates.length === 0 ? 'No hay fechas disponibles' : (!(trip.allow_full_boat && trip.full_boat_price > 0) ? 'El capitán no habilitó la opción de velero privado para esta travesía' : '')}
+                    style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px 8px', borderRadius: 'var(--radius-lg)', transition: 'all 0.2s', background: bookingMode === 'private' ? 'var(--color-primary-500)' : 'var(--color-neutral-100)', color: bookingMode === 'private' ? 'white' : 'var(--text-secondary)', border: bookingMode === 'private' ? '1px solid var(--color-primary-600)' : '1px solid var(--color-neutral-200)', cursor: (tripDates.length > 0 && isPrivateAllowed && privatePrice > 0) ? 'pointer' : 'not-allowed', opacity: (tripDates.length > 0 && isPrivateAllowed && privatePrice > 0) ? 1 : 0.5 }}
+                    onClick={() => { if (tripDates.length > 0 && isPrivateAllowed && privatePrice > 0) setBookingMode('private') }}
+                    title={tripDates.length === 0 ? 'No hay fechas disponibles' : (!(isPrivateAllowed && privatePrice > 0) ? 'El capitán no habilitó la opción de velero privado para esta travesía' : '')}
                   >
                     <span style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '4px' }}>Velero privado</span>
                     <span style={{ fontSize: '11px', fontWeight: 'normal', opacity: bookingMode === 'private' ? 0.9 : 0.6, textAlign: 'center', lineHeight: '1.2' }}>Reservás el velero completo</span>

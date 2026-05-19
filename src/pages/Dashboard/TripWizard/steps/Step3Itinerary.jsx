@@ -13,7 +13,7 @@ const PENSION_TYPES = [
 ]
 
 const Step3Itinerary = () => {
-  const { formData, updateFormData } = useTripWizardStore()
+  const { formData, updateFormData, hasBookings } = useTripWizardStore()
 
   const handleItineraryChange = (index, value) => {
     const newItinerary = [...formData.itinerary]
@@ -50,8 +50,14 @@ const Step3Itinerary = () => {
         </p>
       </div>
 
-      <div className="step-form">
+      <div className="step-form" style={{ opacity: hasBookings ? 0.6 : 1, pointerEvents: hasBookings ? 'none' : 'auto' }}>
         
+        {hasBookings && (
+          <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, marginBottom: 'var(--space-6)' }}>
+            ⚠️ Edición bloqueada. Esta travesía ya cuenta con reservas. Solo puedes modificar las plazas bloqueadas en el paso de "Fechas".
+          </div>
+        )}
+
         {/* Duración (Días y Noches) */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
           <div className="form-group" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)', textAlign: 'center' }}>

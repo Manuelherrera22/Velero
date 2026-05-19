@@ -11,7 +11,7 @@ const PHOTO_CATEGORIES = [
 ]
 
 const Step4Photos = () => {
-  const { formData, addPhoto, removePhoto, getTotalPhotos } = useTripWizardStore()
+  const { formData, addPhoto, removePhoto, getTotalPhotos, hasBookings } = useTripWizardStore()
   const fileInputRef = React.useRef(null)
   const [activeCategory, setActiveCategory] = React.useState(null)
 
@@ -59,8 +59,14 @@ const Step4Photos = () => {
           <p className="step-subtitle">
             Atrae a más pasajeros subiendo al menos 5 fotos que representen la experiencia de paisajes, actividades y la embarcación.
           </p>
+          
+          {hasBookings && (
+            <div style={{ marginTop: 'var(--space-4)', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500 }}>
+              ⚠️ Edición bloqueada. Esta travesía ya cuenta con reservas.
+            </div>
+          )}
         </div>
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', opacity: hasBookings ? 0.6 : 1, pointerEvents: hasBookings ? 'none' : 'auto' }}>
           <button 
             className="btn btn--outline" 
             style={{ borderRadius: '9999px' }}
@@ -74,7 +80,7 @@ const Step4Photos = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-4)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-4)', opacity: hasBookings ? 0.6 : 1, pointerEvents: hasBookings ? 'none' : 'auto' }}>
         
         {PHOTO_CATEGORIES.map((category) => {
           const isPortada = category.id === 'portada'

@@ -35,6 +35,8 @@ export default function ManageUsers() {
 
     if (!error) {
       setUsers(users.map(u => u.id === userId ? { ...u, is_verified: !currentStatus } : u))
+    } else {
+      alert('Error al verificar: ' + error.message)
     }
     setActionLoading(null)
   }

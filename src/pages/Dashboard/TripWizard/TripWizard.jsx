@@ -1,7 +1,8 @@
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { CheckCircle2, ChevronRight, Compass } from 'lucide-react'
+import { CheckCircle2, ChevronRight, Compass, Loader } from 'lucide-react'
 import { useTripWizardStore } from '../../../stores/useTripWizardStore'
+import supabase from '../../../lib/supabase'
 
 // Form Steps
 import Step1Details from './steps/Step1Details'
@@ -33,8 +34,60 @@ const TripWizard = () => {
   const [errorMsg, setErrorMsg] = React.useState('')
   
   const isEditing = id && id !== 'nueva'
+  const [isLoadingTrip, setIsLoadingTrip] = React.useState(isEditing)
+
+  React.useEffect(() => {
+    if (isEditing) {
+      const loadTripForEdit = async () => {
+        try {
+          setIsLoadingTrip(true)
+          
+          // Fetch trip
+          const { data: trip, error: tripError } = await supabase
+            .from('trips')
+            .select('*')
+            .eq('id', id)
+            .single()
+            
+          if (tripError) throw tripError
+
+          // Fetch dates
+          const { data: dates } = await supabase
+            .from('trip_dates')
+            .select('*')
+            .eq('trip_id', id)
+            
+          // Check for active bookings
+          const { count } = await supabase
+            .from('bookings')
+            .select('*', { count: 'exact', head: true })
+            .eq('trip_id', id)
+            .in('status', ['pending', 'confirmed', 'completed'])
+
+          useTripWizardStore.getState().initForEdit(trip, dates, count > 0)
+        } catch (error) {
+          console.error("Error loading trip for edit:", error)
+          setErrorMsg("Error cargando los datos de la travesía. Por favor, intenta de nuevo.")
+        } finally {
+          setIsLoadingTrip(false)
+        }
+      }
+      loadTripForEdit()
+    } else {
+      useTripWizardStore.getState().resetWizard()
+    }
+  }, [id, isEditing])
 
   const progressPercentage = (currentStep / totalSteps) * 100
+
+  if (isLoadingTrip) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: '1rem', color: 'var(--text-secondary)' }}>
+        <Loader size={32} className="spin" />
+        <p>Cargando travesía...</p>
+      </div>
+    )
+  }
 
   const renderStep = () => {
     switch(currentStep) {

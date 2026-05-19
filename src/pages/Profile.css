@@ -17,7 +17,11 @@
   width: 72px;
   height: 72px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--color-accent-600), var(--color-primary-600));
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-600),
+    var(--color-primary-600)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -148,8 +152,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error message */

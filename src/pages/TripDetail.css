@@ -214,7 +214,11 @@
   width: 48px;
   height: 48px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--color-accent-600), var(--color-primary-600));
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-600),
+    var(--color-primary-600)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -336,8 +340,12 @@
   background: rgba(11, 171, 195, 0.1);
 }
 
-.booking-card__date-day { font-weight: 600; }
-.booking-card__date-time { color: var(--text-secondary); }
+.booking-card__date-day {
+  font-weight: 600;
+}
+.booking-card__date-time {
+  color: var(--text-secondary);
+}
 .booking-card__date-spots {
   font-size: var(--text-xs);
   color: var(--color-accent-400);
@@ -544,7 +552,7 @@
   .trip-detail__title {
     font-size: var(--text-3xl);
   }
-  
+
   .trip-detail__meta {
     flex-direction: column;
     gap: var(--space-2);

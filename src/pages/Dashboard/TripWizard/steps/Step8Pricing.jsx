@@ -3,7 +3,7 @@ import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
 import { Info } from 'lucide-react'
 
 const Step8Pricing = () => {
-  const { formData, updateFormData } = useTripWizardStore()
+  const { formData, updateFormData, hasBookings } = useTripWizardStore()
 
   const handleTogglePaymentMethod = (method) => {
     const isPresent = formData.allowed_payment_methods.includes(method)
@@ -26,8 +26,14 @@ const Step8Pricing = () => {
         </p>
       </div>
 
-      <div className="step-form">
+      <div className="step-form" style={{ opacity: hasBookings ? 0.6 : 1, pointerEvents: hasBookings ? 'none' : 'auto' }}>
         
+        {hasBookings && (
+          <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, marginBottom: 'var(--space-6)' }}>
+            ⚠️ Edición bloqueada. Esta travesía ya cuenta con reservas. Solo puedes modificar las plazas bloqueadas en el paso de "Fechas".
+          </div>
+        )}
+
         {/* Precios */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-6)', alignItems: 'end' }}>
           <div className="form-group">

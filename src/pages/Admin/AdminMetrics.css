@@ -23,6 +23,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
 }
 
 .metrics-table__row {
@@ -31,6 +34,7 @@
   gap: var(--space-3);
   padding: var(--space-3) 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  min-width: max-content;
 }
 
 .metrics-table__row:last-child {

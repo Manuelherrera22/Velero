@@ -40,8 +40,8 @@ export default function AuthCallback() {
           const isSignup = hashParams.get('type') === 'signup'
 
           if (isRecovery) {
-            setStatus('Redirigiendo a tu perfil...')
-            setTimeout(() => navigate('/perfil?recover=true', { replace: true }), 1000)
+            setStatus('Redirigiendo a actualizar contraseña...')
+            setTimeout(() => navigate('/reset-password', { replace: true }), 1000)
             return
           }
 

@@ -98,10 +98,16 @@
 }
 
 @media (max-width: 1024px) {
-  .search-grid { grid-template-columns: repeat(2, 1fr); }
+  .search-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 640px) {
-  .search-grid { grid-template-columns: 1fr; }
-  .search-header__title { font-size: var(--text-3xl); }
+  .search-grid {
+    grid-template-columns: 1fr;
+  }
+  .search-header__title {
+    font-size: var(--text-3xl);
+  }
 }

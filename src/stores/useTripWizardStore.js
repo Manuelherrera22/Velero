@@ -57,6 +57,7 @@ export const useTripWizardStore = create(
       currentStep: 1,
   totalSteps: 8,
   formData: { ...initialData },
+  hasBookings: false,
 
   // Navigation
   nextStep: () => set((state) => ({ 
@@ -137,7 +138,29 @@ export const useTripWizardStore = create(
   },
 
       // Reset entirely
-      resetWizard: () => set({ currentStep: 1, formData: { ...initialData } })
+      resetWizard: () => set({ currentStep: 1, formData: { ...initialData }, hasBookings: false }),
+
+      // Init for Edit
+      initForEdit: (tripData, datesData, hasBookings = false) => {
+        const loadedData = tripData.metadata || { ...initialData };
+        
+        if (datesData && datesData.length > 0) {
+          loadedData.custom_dates = datesData.map(d => ({
+            id: d.id,
+            departure_date: d.date,
+            departure_time: d.start_time?.slice(0, 5) || '08:00',
+            arrival_time: d.end_time?.slice(0, 5) || '',
+            available_spots: d.available_spots,
+            blocked_spots: d.blocked_spots || 0
+          }));
+        }
+
+        set({
+          currentStep: 1,
+          formData: { ...initialData, ...loadedData, id: tripData.id },
+          hasBookings: hasBookings
+        });
+      }
     }),
     {
       name: 'trip-wizard-draft',

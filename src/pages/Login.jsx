@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { Mail, Phone, ArrowRight, Sailboat, Sparkles, Loader, Lock, Eye, EyeOff } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import supabase from '../lib/supabase'
@@ -30,20 +30,27 @@ export default function Login() {
     }
   }, [searchParams])
 
-  const { signInWithEmail, signInWithPhone, verifyPhoneOtp, error, clearError, isAuthenticated, profile } = useAuthStore()
+  const navigate = useNavigate()
+  
+  const user = useAuthStore(state => state.user)
+  const profile = useAuthStore(state => state.profile)
+  const isAuthenticated = !!user
+  const { signInWithEmail, signInWithPhone, verifyPhoneOtp, error, clearError } = useAuthStore()
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && profile) {
-      if (profile.role === 'publisher' || profile.role === 'admin') {
-        window.location.href = '/dashboard'
+      if (profile.role === 'admin') {
+        navigate('/admin')
+      } else if (profile.role === 'publisher') {
+        navigate('/dashboard')
       } else if (profile.role === 'affiliate') {
-        window.location.href = '/afiliado'
+        navigate('/afiliado')
       } else {
-        window.location.href = '/mis-viajes'
+        navigate('/mis-viajes')
       }
     }
-  }, [isAuthenticated, profile])
+  }, [isAuthenticated, profile, navigate])
 
   const handleResetPassword = async () => {
     if (!value) {

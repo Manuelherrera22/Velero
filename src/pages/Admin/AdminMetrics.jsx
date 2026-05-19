@@ -189,9 +189,9 @@ export default function AdminMetrics() {
     })
 
     csv += `\nÚltimas Reservas\n`
-    csv += `Estado,Travesía,Pasajero,Cantidad,Total\n`
+    csv += `ID,Estado,Travesía,Pasajero,Cantidad,Total\n`
     recentBookings.forEach(b => {
-      csv += `${b.status},"${b.trip?.title || '—'}","${b.guest_name || b.guest_email || ''}",${b.quantity},$${b.total?.toLocaleString('es-AR') || '0'}\n`
+      csv += `${b.id?.slice(0,8).toUpperCase()},${b.status},"${b.trip?.title || '—'}","${b.guest_name || b.guest_email || ''}",${b.quantity},$${b.total?.toLocaleString('es-AR') || '0'}\n`
     })
 
     // Download
@@ -410,7 +410,12 @@ export default function AdminMetrics() {
                   {b.status === 'pending' ? 'Pendiente' : b.status === 'confirmed' ? 'Confirmada' : b.status}
                 </span>
                 <div className="metrics-table__info">
-                  <strong>{b.trip?.title || '—'}</strong>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <strong>{b.trip?.title || '—'}</strong>
+                    <span style={{ fontSize: '10px', background: 'var(--color-primary-50)', color: 'var(--color-primary-600)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--color-primary-100)' }}>
+                      #{b.id?.slice(0, 8).toUpperCase()}
+                    </span>
+                  </div>
                   <span>{b.guest_name || b.guest_email || 'Usuario registrado'} · {b.quantity} pers.</span>
                 </div>
                 <span className="metrics-table__count" style={{ color: 'var(--color-accent-400)' }}>

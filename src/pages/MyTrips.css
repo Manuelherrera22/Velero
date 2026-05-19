@@ -95,7 +95,9 @@
   display: flex;
   border-radius: var(--radius-2xl);
   overflow: hidden;
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .boarding-pass:hover {

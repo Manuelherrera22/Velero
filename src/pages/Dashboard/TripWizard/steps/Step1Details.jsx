@@ -2,7 +2,7 @@ import React from 'react'
 import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
 
 const Step1Details = () => {
-  const { formData, updateFormData } = useTripWizardStore()
+  const { formData, updateFormData, hasBookings } = useTripWizardStore()
 
   const handleRoleChange = (role) => {
     updateFormData({ role_in_activity: role })
@@ -20,7 +20,14 @@ const Step1Details = () => {
         </p>
       </div>
 
-      <div className="step-form">
+      <div className="step-form" style={{ opacity: hasBookings ? 0.6 : 1, pointerEvents: hasBookings ? 'none' : 'auto' }}>
+        
+        {hasBookings && (
+          <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, marginBottom: 'var(--space-6)' }}>
+            ⚠️ Edición bloqueada. Esta travesía ya cuenta con reservas. Solo puedes modificar las plazas bloqueadas en el paso de "Fechas".
+          </div>
+        )}
+
         {/* Título */}
         <div className="form-group">
           <label className="form-group__label">

@@ -454,7 +454,7 @@ export default function Checkout() {
                 onClick={async () => {
                   const { generateTicketPDF } = await import('../utils/generateTicket')
                   generateTicketPDF({
-                    trip: trip.title,
+                    trip: trip,
                     date: selectedDate ? { date: selectedDate.date, start_time: selectedDate.start_time } : null,
                     guests,
                     total,

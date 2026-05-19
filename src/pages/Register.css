@@ -179,7 +179,7 @@
   .register-card {
     padding: var(--space-6) var(--space-4);
   }
-  
+
   .register-roles {
     grid-template-columns: 1fr;
   }

@@ -24,8 +24,9 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
   let qrDataUrl = null
   try {
     const { default: QRCode } = await import('qrcode')
+    const checkinUrl = `${window.location.origin}/checkin/${bookingId}`
     qrDataUrl = await QRCode.toDataURL(
-      `https://velero-ar.netlify.app/checkin/${bookingId}`,
+      checkinUrl,
       { width: 200, margin: 1, color: { dark: '#26C6C6', light: '#0A1628' } }
     )
   } catch (e) {
@@ -60,7 +61,7 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(13)
   doc.setFont('helvetica', 'bold')
-  doc.text((trip || 'Travesía').substring(0, 40), 16, 36)
+  doc.text((trip?.title || 'Travesía').substring(0, 40), 16, 36)
 
   // Passenger
   doc.setFontSize(7)

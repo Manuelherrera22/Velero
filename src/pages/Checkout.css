@@ -415,7 +415,7 @@
 
 .checkout-whatsapp-alt__divider::before,
 .checkout-whatsapp-alt__divider::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   width: calc(50% - 20px);
@@ -423,8 +423,12 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-.checkout-whatsapp-alt__divider::before { left: 0; }
-.checkout-whatsapp-alt__divider::after { right: 0; }
+.checkout-whatsapp-alt__divider::before {
+  left: 0;
+}
+.checkout-whatsapp-alt__divider::after {
+  right: 0;
+}
 
 /* ── Success Actions ── */
 .checkout-success__actions {

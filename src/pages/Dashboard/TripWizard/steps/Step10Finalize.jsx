@@ -110,7 +110,7 @@ const Step10Finalize = () => {
     }
   }
 
-  const handleCreate = async () => {
+  const handleCreate = async (isDraft = false) => {
     setIsSaving(true)
     setStatusMsg('Verificando sesión...')
 
@@ -170,28 +170,64 @@ const Step10Finalize = () => {
         }
 
         uploadedUrls = [...uploadedBlobs, ...regularImages]
+
+        // Replace blob URLs in images_meta so that they are saved as real URLs in metadata
+        let blobIndex = 0;
+        const replaceBlobs = (urlArray) => {
+          if (!urlArray) return [];
+          if (!Array.isArray(urlArray)) {
+            if (urlArray.startsWith('blob:')) {
+              return uploadedBlobs[blobIndex++] || urlArray;
+            }
+            return urlArray;
+          }
+          return urlArray.map(u => {
+            if (u.startsWith('blob:')) {
+              return uploadedBlobs[blobIndex++] || u;
+            }
+            return u;
+          });
+        };
+
+        formData.images_meta.portada = replaceBlobs(formData.images_meta.portada);
+        formData.images_meta.camarote = replaceBlobs(formData.images_meta.camarote);
+        formData.images_meta.actividad = replaceBlobs(formData.images_meta.actividad);
+        formData.images_meta.comidas = replaceBlobs(formData.images_meta.comidas);
+        formData.images_meta.paisaje = replaceBlobs(formData.images_meta.paisaje);
       }
 
       setStatusMsg('Guardando travesía...')
 
       // 1. Save trip (with timeout to prevent infinite hangs)
-      const tripInsertPromise = supabase
-        .from('trips')
-        .insert({
-          captain_id: activeUser.id,
-          boat_id: (formData.boat_id && String(formData.boat_id).length > 20 && formData.boat_id !== 'NEW') ? formData.boat_id : null,
-          title: formData.title || 'Travesía sin título',
-          description: formData.description,
-          location: formData.location || 'Sin ubicación',
-          capacity: formData.max_passengers || 6,
-          price_per_person: formData.price_per_person || 0,
-          status: 'published',
-          images: uploadedUrls,
-          tags: formData.tags || [],
-          metadata: formData
-        })
-        .select()
-        .single()
+      const tripData = {
+        captain_id: activeUser.id,
+        boat_id: (formData.boat_id && String(formData.boat_id).length > 20 && formData.boat_id !== 'NEW') ? formData.boat_id : null,
+        title: formData.title || 'Travesía sin título',
+        description: formData.description,
+        location: formData.location || 'Sin ubicación',
+        capacity: formData.max_passengers || 6,
+        price_per_person: formData.price_per_person || 0,
+        status: isDraft ? 'draft' : (formData.status === 'published' ? 'published' : 'pending'),
+        images: uploadedUrls,
+        tags: formData.tags || [],
+        metadata: formData
+      }
+
+      let tripInsertPromise;
+      if (formData.id) {
+        tripInsertPromise = supabase
+          .from('trips')
+          .update(tripData)
+          .eq('id', formData.id)
+          .select()
+          .single()
+      } else {
+        tripInsertPromise = supabase
+          .from('trips')
+          .insert(tripData)
+          .select()
+          .single()
+      }
 
       const { data: trip, error: tripError } = await Promise.race([
         tripInsertPromise,
@@ -203,17 +239,33 @@ const Step10Finalize = () => {
       // 2. Save dates
       if (formData.custom_dates && formData.custom_dates.length > 0) {
         setStatusMsg('Guardando fechas...')
-        const datesToInsert = formData.custom_dates.map(d => ({
-          trip_id: trip.id,
-          date: d.departure_date,
-          start_time: d.departure_time ? `${d.departure_time}:00` : '08:00:00',
-          end_time: d.arrival_time ? `${d.arrival_time}:00` : null,
-          available_spots: formData.max_passengers || 6
-        }))
+        
+        const datesToUpsert = formData.custom_dates.map(d => {
+          const isExisting = typeof d.id === 'string' && d.id.length > 20;
+          return {
+            ...(isExisting ? { id: d.id } : {}),
+            trip_id: trip.id,
+            date: d.departure_date,
+            start_time: d.departure_time ? (d.departure_time.length <= 5 ? `${d.departure_time}:00` : d.departure_time) : '08:00:00',
+            end_time: d.arrival_time ? (d.arrival_time.length <= 5 ? `${d.arrival_time}:00` : d.arrival_time) : null,
+            available_spots: formData.max_passengers || 6,
+            blocked_spots: d.blocked_spots || 0
+          }
+        })
+
+        // Borrar fechas eliminadas (solo si no estamos editando o si estamos editando y permitimos borrar)
+        if (formData.id) {
+          const keepIds = datesToUpsert.map(d => d.id).filter(Boolean)
+          if (keepIds.length > 0) {
+            await supabase.from('trip_dates').delete().eq('trip_id', trip.id).not('id', 'in', `(${keepIds.join(',')})`)
+          } else {
+            await supabase.from('trip_dates').delete().eq('trip_id', trip.id)
+          }
+        }
 
         const datesInsertPromise = supabase
           .from('trip_dates')
-          .insert(datesToInsert)
+          .upsert(datesToUpsert)
 
         const { error: datesError } = await Promise.race([
           datesInsertPromise,
@@ -282,9 +334,17 @@ const Step10Finalize = () => {
           Vista previa
         </button>
         <button 
+          className="btn btn--outline"
+          style={{ height: '56px', padding: '0 var(--space-8)', fontSize: '18px', borderRadius: 'var(--radius-xl)', borderColor: 'var(--color-primary-500)', color: 'var(--color-primary-500)' }}
+          onClick={() => handleCreate(true)}
+          disabled={isSaving}
+        >
+          {isSaving ? '...' : 'Guardar Borrador'}
+        </button>
+        <button 
           className="btn btn--accent"
           style={{ height: '56px', padding: '0 var(--space-12)', fontSize: '18px', borderRadius: 'var(--radius-xl)', boxShadow: '0 10px 25px rgba(0, 180, 180, 0.2)' }}
-          onClick={handleCreate}
+          onClick={() => handleCreate(false)}
           disabled={isSaving}
         >
           {isSaving ? (
