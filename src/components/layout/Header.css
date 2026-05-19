@@ -258,4 +258,16 @@
     margin-top: var(--space-2);
     width: 100%;
   }
+
+  .notifications__dropdown {
+    width: 100%;
+    right: auto;
+    top: auto;
+  }
+}
+
+.notifications__dropdown {
+  width: 300px;
+  right: -10px;
+  top: 100%;
 }

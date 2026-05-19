@@ -16,26 +16,32 @@ export default function ReviewTrips() {
 
   const fetchTrips = async () => {
     setLoading(true)
-    let query = supabase
-      .from('trips')
-      .select(`*, captain:profiles!captain_id(full_name, email)`)
-      .order('created_at', { ascending: false })
+    try {
+      let query = supabase
+        .from('trips')
+        .select(`*, captain:profiles!captain_id(full_name, email)`)
+        .order('created_at', { ascending: false })
 
-    if (filter !== 'all') {
-      query = query.eq('status', filter)
+      if (filter !== 'all') {
+        query = query.eq('status', filter)
+      }
+
+      const { data, error } = await query
+      if (error) throw error
+      
+      // Initialize discount inputs
+      const discounts = {}
+      data?.forEach(t => {
+        discounts[t.id] = t.metadata?.discount_percentage || ''
+      })
+      setDiscountInputs(discounts)
+      
+      setTrips(data || [])
+    } catch (e) {
+      console.error("Error fetching trips:", e)
+    } finally {
+      setLoading(false)
     }
-
-    const { data } = await query
-    
-    // Initialize discount inputs
-    const discounts = {}
-    data?.forEach(t => {
-      discounts[t.id] = t.metadata?.discount_percentage || ''
-    })
-    setDiscountInputs(discounts)
-    
-    setTrips(data || [])
-    setLoading(false)
   }
 
   const handleApprove = async (tripId) => {

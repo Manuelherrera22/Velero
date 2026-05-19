@@ -64,7 +64,7 @@ const Step5Services = () => {
 
         {/* Matrix rows */}
         <div style={{ maxHeight: '300px', overflowY: 'auto', paddingTop: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', paddingRight: 'var(--space-2)' }} className="custom-scrollbar">
-          {[...new Set([...AVAILABLE_SERVICES, ...(formData.custom_services || []), ...formData.included_services, ...formData.excluded_services])].map((service) => {
+          {[...new Set([...(formData.custom_services || []), ...AVAILABLE_SERVICES, ...formData.included_services, ...formData.excluded_services])].map((service) => {
             const isIncluded = formData.included_services.includes(service)
             const isExcluded = formData.excluded_services.includes(service)
             const isMandatory = service === 'Seguro' || service === 'Salvavidas'

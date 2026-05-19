@@ -12,18 +12,24 @@ export default function ManageUsers() {
 
   const fetchUsers = async () => {
     setLoading(true)
-    let query = supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
+    try {
+      let query = supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-    if (filter !== 'all') {
-      query = query.eq('role', filter)
+      if (filter !== 'all') {
+        query = query.eq('role', filter)
+      }
+
+      const { data, error } = await query
+      if (error) throw error
+      setUsers(data || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
     }
-
-    const { data } = await query
-    setUsers(data || [])
-    setLoading(false)
   }
 
   const toggleVerifyCaptain = async (userId, currentStatus) => {
@@ -37,6 +43,23 @@ export default function ManageUsers() {
       setUsers(users.map(u => u.id === userId ? { ...u, is_verified: !currentStatus } : u))
     } else {
       alert('Error al verificar: ' + error.message)
+    }
+    setActionLoading(null)
+  }
+
+  const handleExpelCaptain = async (userId) => {
+    if (!window.confirm("¿Seguro que deseas rechazar/expulsar a este capitán? Volverá a ser Pasajero.")) return;
+    
+    setActionLoading(userId)
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: 'viewer', is_verified: false })
+      .eq('id', userId)
+
+    if (!error) {
+      setUsers(users.filter(u => u.id !== userId)) // Eliminar de la vista actual o cambiar estado
+    } else {
+      alert('Error al expulsar: ' + error.message)
     }
     setActionLoading(null)
   }
@@ -110,20 +133,37 @@ export default function ManageUsers() {
                     </span>
 
                     {user.role === 'publisher' && (
-                      <button 
-                        className={`btn btn--sm ${user.is_verified ? 'btn--ghost' : 'btn--accent'}`}
-                        onClick={() => toggleVerifyCaptain(user.id, user.is_verified)}
-                        disabled={actionLoading === user.id}
-                        style={{ minWidth: '130px', color: user.is_verified ? 'var(--color-success)' : undefined }}
-                      >
-                        {actionLoading === user.id ? (
-                          <Loader size={14} className="spin" />
-                        ) : user.is_verified ? (
-                          <><CheckCircle size={14} /> Verificado</>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        {user.is_verified ? (
+                          <button 
+                            className="btn btn--sm btn--ghost"
+                            onClick={() => toggleVerifyCaptain(user.id, user.is_verified)}
+                            disabled={actionLoading === user.id}
+                            style={{ minWidth: '130px', color: 'var(--color-success)' }}
+                          >
+                            {actionLoading === user.id ? <Loader size={14} className="spin" /> : <><CheckCircle size={14} /> Verificado</>}
+                          </button>
                         ) : (
-                          <><XCircle size={14} /> Sin Verificar</>
+                          <>
+                            <button 
+                              className="btn btn--sm btn--accent"
+                              onClick={() => toggleVerifyCaptain(user.id, user.is_verified)}
+                              disabled={actionLoading === user.id}
+                              style={{ minWidth: '110px' }}
+                            >
+                              {actionLoading === user.id ? <Loader size={14} className="spin" /> : <><CheckCircle size={14} /> Verificar</>}
+                            </button>
+                            <button 
+                              className="btn btn--sm btn--outline"
+                              onClick={() => handleExpelCaptain(user.id)}
+                              disabled={actionLoading === user.id}
+                              style={{ minWidth: '110px', color: 'var(--color-error)' }}
+                            >
+                              {actionLoading === user.id ? <Loader size={14} className="spin" /> : <><XCircle size={14} /> Expulsar</>}
+                            </button>
+                          </>
                         )}
-                      </button>
+                      </div>
                     )}
                   </div>
                 </div>

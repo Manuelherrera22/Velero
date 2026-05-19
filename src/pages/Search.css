@@ -53,10 +53,17 @@
 /* Tags */
 .search-tags {
   display: flex;
-  flex-wrap: wrap;
   gap: var(--space-2);
-  justify-content: center;
   margin-bottom: var(--space-10);
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+  /* Hide scrollbar */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.search-tags::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
 }
 
 .search-tag {
@@ -70,6 +77,8 @@
   color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .search-tag:hover {

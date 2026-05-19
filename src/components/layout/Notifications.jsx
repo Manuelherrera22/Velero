@@ -144,7 +144,7 @@ export default function Notifications() {
       </button>
 
       {isOpen && (
-        <div className="header__dropdown glass animate-fade-in" style={{ width: '300px', right: '-10px', top: '100%', padding: '0', overflow: 'hidden' }}>
+        <div className="header__dropdown glass animate-fade-in notifications__dropdown" style={{ padding: '0', overflow: 'hidden' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <strong style={{ fontSize: '14px' }}>Notificaciones</strong>
             <button onClick={fetchNotifications} style={{ background: 'none', border: 'none', color: 'var(--color-accent-400)', fontSize: '12px', cursor: 'pointer' }}>Actualizar</button>
