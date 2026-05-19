@@ -78,14 +78,23 @@
 
 /* --- Responsive: Hide sidebar on mobile --- */
 @media (max-width: 768px) {
+  .dashboard {
+    padding-top: var(--space-4);
+  }
   .dashboard__layout {
     flex-direction: column;
+    gap: var(--space-4);
   }
 
   .dashboard__sidebar {
     width: 100%;
     min-width: unset;
     position: static;
+    padding: var(--space-4);
+  }
+
+  .dashboard__sidebar-title {
+    margin-bottom: var(--space-3);
   }
 
   .dashboard__nav {
@@ -146,7 +155,7 @@
 
 .dashboard__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: var(--space-6);
 }
 

@@ -222,6 +222,7 @@
     transition: transform var(--transition-slow);
     z-index: var(--z-header);
     border-left: 1px solid rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
   }
 
   .header__nav--open {
@@ -237,5 +238,24 @@
     margin-left: 0;
     margin-top: var(--space-4);
     justify-content: center;
+  }
+
+  .header__user-menu {
+    width: 100%;
+    margin-top: var(--space-2);
+  }
+
+  .header__user-btn {
+    width: 100%;
+    justify-content: center;
+    padding: var(--space-3);
+  }
+
+  .header__dropdown {
+    position: static;
+    box-shadow: none;
+    border: 1px solid rgba(0,0,0,0.05);
+    margin-top: var(--space-2);
+    width: 100%;
   }
 }

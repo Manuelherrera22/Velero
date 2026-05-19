@@ -20,7 +20,7 @@ export default function ManageHotels() {
   }, [])
 
   const fetchAffiliates = async () => {
-    const { data } = await supabase.from('profiles').select('id, full_name, email').eq('role', 'affiliate')
+    const { data } = await supabase.from('profiles').select('id, full_name, email').neq('role', 'admin')
     setAffiliates(data || [])
   }
 
@@ -37,7 +37,7 @@ export default function ManageHotels() {
   const handleCreate = async () => {
     if (!form.name) return
     setSaving(true)
-    await supabase.from('hotels').insert({
+    const { error } = await supabase.from('hotels').insert({
       name: form.name,
       location: form.location,
       contact_email: form.contact_email || null,
@@ -45,6 +45,12 @@ export default function ManageHotels() {
       commission_percent: parseFloat(form.commission_percent) || 10,
       owner_id: form.owner_id || null,
     })
+    
+    if (error) {
+      console.error("Error inserting hotel:", error)
+      alert("Hubo un error al crear el aliado: " + error.message)
+    }
+
     setSaving(false)
     setShowForm(false)
     setForm({ name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10, commission_type: 'percentage', owner_id: '' })
@@ -53,11 +59,18 @@ export default function ManageHotels() {
 
   const generateQR = async (hotelId) => {
     const code = `H${hotelId.slice(0, 6).toUpperCase()}${Date.now().toString(36).toUpperCase()}`
-    await supabase.from('qr_codes').insert({
+    const { error } = await supabase.from('qr_codes').insert({
       hotel_id: hotelId,
       code,
+      zone: 'General',
       is_active: true,
     })
+    
+    if (error) {
+      console.error("Error generating QR:", error)
+      alert("Hubo un error al generar el QR: " + error.message)
+    }
+    
     fetchHotels()
   }
 
