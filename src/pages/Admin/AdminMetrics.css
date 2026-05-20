@@ -8,6 +8,8 @@
 .metrics-table {
   padding: var(--space-6);
   border-radius: var(--radius-xl);
+  min-width: 0;
+  width: 100%;
 }
 
 .metrics-table__title {

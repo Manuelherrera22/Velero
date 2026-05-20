@@ -330,6 +330,8 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
   min-height: 70vh;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 @media (min-width: 768px) {
@@ -449,10 +451,17 @@
 /* ==============================
    DATA TABLE
    ============================== */
+.dash-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .dash-table {
   width: 100%;
   text-align: left;
   border-collapse: collapse;
+  min-width: 600px;
 }
 
 .dash-table thead tr {

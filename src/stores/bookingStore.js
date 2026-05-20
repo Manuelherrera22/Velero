@@ -37,6 +37,26 @@ const useBookingStore = create((set, get) => ({
         await supabase.from('booking_addons').insert(addonInserts)
       }
 
+      // Increment coupon uses if applicable
+      if (bookingInsert.coupon_id) {
+        try {
+          const { data: couponData } = await supabase
+            .from('coupons')
+            .select('current_uses')
+            .eq('id', bookingInsert.coupon_id)
+            .single()
+
+          if (couponData) {
+            await supabase
+              .from('coupons')
+              .update({ current_uses: (couponData.current_uses || 0) + 1 })
+              .eq('id', bookingInsert.coupon_id)
+          }
+        } catch (err) {
+          console.error("No se pudo actualizar el uso del cupón:", err)
+        }
+      }
+
       set({ currentBooking: data, loading: false })
       return { success: true, data }
     } catch (error) {
