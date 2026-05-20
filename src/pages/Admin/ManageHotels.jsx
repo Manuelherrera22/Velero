@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Building2, Plus, X, Save, Loader, MapPin, QrCode, Percent, Copy, Check, DollarSign } from 'lucide-react'
+import { Building2, Plus, X, Save, Loader, MapPin, QrCode, Percent, Copy, Check, DollarSign, Download } from 'lucide-react'
+import { QRCodeCanvas } from 'qrcode.react'
 import supabase from '../../lib/supabase'
 
 export default function ManageHotels() {
@@ -92,6 +93,17 @@ export default function ManageHotels() {
     navigator.clipboard.writeText(url)
     setCopiedId(code)
     setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  const downloadQR = (code) => {
+    const canvas = document.getElementById(`qr-canvas-${code}`)
+    if (canvas) {
+      const url = canvas.toDataURL('image/png')
+      const link = document.createElement('a')
+      link.download = `Kailu-QR-${code}.png`
+      link.href = url
+      link.click()
+    }
   }
 
   const updateField = (f, v) => setForm(p => ({ ...p, [f]: v }))
@@ -221,9 +233,23 @@ export default function ManageHotels() {
                       {qr.scan_count} scans
                     </span>
                   </div>
-                  <button className="btn btn--ghost btn--sm" onClick={() => copyQRLink(qr.code)} style={{ padding: '4px 8px' }}>
-                    {copiedId === qr.code ? <><Check size={12} /> Copiado</> : <><Copy size={12} /> Link</>}
-                  </button>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <div style={{ display: 'none' }}>
+                      <QRCodeCanvas 
+                        id={`qr-canvas-${qr.code}`} 
+                        value={`${window.location.origin}/qr?code=${qr.code}`} 
+                        size={500} 
+                        level={"H"} 
+                        includeMargin={true}
+                      />
+                    </div>
+                    <button className="btn btn--ghost btn--sm" onClick={() => downloadQR(qr.code)} style={{ padding: '4px 8px' }} title="Descargar QR">
+                      <Download size={12} />
+                    </button>
+                    <button className="btn btn--ghost btn--sm" onClick={() => copyQRLink(qr.code)} style={{ padding: '4px 8px' }} title="Copiar Enlace">
+                      {copiedId === qr.code ? <><Check size={12} /> Copiado</> : <><Copy size={12} /> Link</>}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
