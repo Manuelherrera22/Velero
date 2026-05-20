@@ -241,9 +241,9 @@ export default function ManageHotels() {
                         size={500} 
                         level={"H"} 
                         includeMargin={true}
-                        fgColor="#0BABC3"
+                        fgColor="#0f172a"
                         imageSettings={{
-                          src: "/favicon.svg",
+                          src: "/logo-kailu.jpg",
                           height: 120,
                           width: 120,
                           excavate: true,
