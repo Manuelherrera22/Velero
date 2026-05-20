@@ -58,7 +58,8 @@ export default function ManageHotels() {
   }
 
   const generateQR = async (hotelId) => {
-    const code = `H${hotelId.slice(0, 6).toUpperCase()}${Date.now().toString(36).toUpperCase()}`
+    const hotelIdStr = String(hotelId)
+    const code = `H${hotelIdStr.slice(0, 6).toUpperCase()}${Date.now().toString(36).toUpperCase()}`
     const { error } = await supabase.from('qr_codes').insert({
       hotel_id: hotelId,
       code,
