@@ -15,9 +15,15 @@ export default function ManageCoupons() {
 
   const fetchCoupons = async () => {
     setLoading(true)
-    const { data } = await supabase.from('coupons').select('*').order('created_at', { ascending: false })
-    setCoupons(data || [])
-    setLoading(false)
+    try {
+      const { data, error } = await supabase.from('coupons').select('*').order('created_at', { ascending: false })
+      if (error) throw error
+      setCoupons(data || [])
+    } catch (err) {
+      console.error("Error fetching coupons:", err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Helper: format date avoiding timezone offset (UTC midnight → Argentina = day before)

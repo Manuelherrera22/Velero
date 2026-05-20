@@ -20,18 +20,30 @@ export default function ManageHotels() {
   }, [])
 
   const fetchAffiliates = async () => {
-    const { data } = await supabase.from('profiles').select('id, full_name, email').neq('role', 'admin')
-    setAffiliates(data || [])
+    try {
+      const { data, error } = await supabase.from('profiles').select('id, full_name, email').neq('role', 'admin')
+      if (error) throw error
+      setAffiliates(data || [])
+    } catch (err) {
+      console.error("Error fetching affiliates:", err)
+    }
   }
 
   const fetchHotels = async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('hotels')
-      .select('*, qr_codes(*)')
-      .order('created_at', { ascending: false })
-    setHotels(data || [])
-    setLoading(false)
+    try {
+      const { data, error } = await supabase
+        .from('hotels')
+        .select('*, qr_codes(*)')
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      setHotels(data || [])
+    } catch (err) {
+      console.error("Error fetching hotels:", err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleCreate = async () => {
