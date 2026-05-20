@@ -18,7 +18,7 @@ export default function AffiliateHome() {
   const fetchMetrics = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) throw new Error("No user")
 
       // Get user's hotel(s)
       const { data: hotels } = await supabase

@@ -9,15 +9,18 @@
 }
 
 .header--scrolled {
-  background: rgba(
-    248,
-    245,
-    240,
-    0.85
-  ); /* Light color to match initial page background */
-  backdrop-filter: blur(20px);
+  background: rgba(248, 245, 240, 0.9);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+.header--scrolled::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: -1;
 }
 
 .header__inner {

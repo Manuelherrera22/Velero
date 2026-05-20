@@ -208,9 +208,8 @@ const useAuthStore = create((set, get) => ({
     // Clear state immediately to avoid UI freezing
     set({ user: null, session: null, profile: null })
     try {
-      // Fire and forget server-side signout
-      supabase.auth.signOut({ scope: 'local' })
-      supabase.auth.signOut().catch(() => {})
+      await supabase.auth.signOut()
+      localStorage.clear()
     } catch (err) {
       console.error('Signout error:', err)
     }
