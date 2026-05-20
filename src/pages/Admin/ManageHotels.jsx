@@ -241,6 +241,13 @@ export default function ManageHotels() {
                         size={500} 
                         level={"H"} 
                         includeMargin={true}
+                        fgColor="#0BABC3"
+                        imageSettings={{
+                          src: "/favicon.svg",
+                          height: 120,
+                          width: 120,
+                          excavate: true,
+                        }}
                       />
                     </div>
                     <button className="btn btn--ghost btn--sm" onClick={() => downloadQR(qr.code)} style={{ padding: '4px 8px' }} title="Descargar QR">
