@@ -78,9 +78,9 @@ export default function TripDetail() {
   // Dynamic Pricing based on Mode + selected time slot override
   const selectedDateObj = tripDates.find(d => d.id === selectedDate)
   const basePriceOriginal = bookingMode === 'private'
-    ? (selectedDateObj?.full_boat_price_override || trip.full_boat_price)
-    : (selectedDateObj?.price_per_person_override || trip.price_per_person)
-  const discountMultiplier = trip.discount_percentage ? (1 - trip.discount_percentage / 100) : 1
+    ? (selectedDateObj?.full_boat_price_override || trip.full_boat_price || trip.metadata?.full_boat_price)
+    : (selectedDateObj?.price_per_person_override || trip.price_per_person || trip.metadata?.price_per_person)
+  const discountMultiplier = trip.discount_percentage ? (1 - trip.discount_percentage / 100) : (trip.metadata?.discount_percentage ? (1 - trip.metadata.discount_percentage / 100) : 1)
   const basePrice = basePriceOriginal * discountMultiplier
 
   const subtotal = bookingMode === 'private' ? basePrice : (basePrice || 0) * guests
@@ -301,7 +301,7 @@ export default function TripDetail() {
                   📅 Elegí día y horario
                 </label>
                 {tripDates.length > 0 ? (
-                  <div className="booking-card__dates custom-scrollbar" style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '8px' }}>
+                  <div className="booking-card__dates custom-scrollbar" style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '8px', WebkitOverflowScrolling: 'touch' }}>
                     {Object.entries(datesByDay).map(([dayKey, slots]) => (
                       <div key={dayKey} className="booking-card__day-group">
                         <div className="booking-card__day-label">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { QrCode, Plus, Check, Copy, Loader, MapPin } from 'lucide-react'
+import { QrCode, Plus, Check, Copy, Loader, MapPin, Download } from 'lucide-react'
+import { QRCodeCanvas } from 'qrcode.react'
 import supabase from '../../lib/supabase'
 
 export default function AffiliateQRs() {
@@ -61,6 +62,18 @@ export default function AffiliateQRs() {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
+  const downloadQR = (code) => {
+    const canvas = document.getElementById(`qr-canvas-${code}`)
+    if (!canvas) return
+    const pngUrl = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
+    let downloadLink = document.createElement("a")
+    downloadLink.href = pngUrl
+    downloadLink.download = `kailu-qr-${code}.png`
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    document.body.removeChild(downloadLink)
+  }
+
   if (loading) {
     return <div className="protected-loading"><p>Cargando tus códigos QR...</p></div>
   }
@@ -93,7 +106,7 @@ export default function AffiliateQRs() {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <span className="coupon-card__code" style={{ fontSize: '11px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.2)' }}>
-                  Comisión: {hotel.commission_percent}%
+                  Comisión: {hotel.commission_type === 'percentage' ? '' : '$'}{hotel.commission_percent}{hotel.commission_type === 'percentage' ? '%' : ''}
                 </span>
               </div>
             </div>
@@ -122,6 +135,26 @@ export default function AffiliateQRs() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '8px' }}>
+                        <div style={{ display: 'none' }}>
+                          <QRCodeCanvas 
+                            id={`qr-canvas-${qr.code}`} 
+                            value={`${window.location.origin}/qr?code=${qr.code}`} 
+                            size={1024}
+                            level={"H"}
+                            includeMargin={true}
+                            bgColor={"#ffffff"}
+                            fgColor={"#0f172a"}
+                            imageSettings={{
+                              src: "/logo-kailu.jpg",
+                              height: 120,
+                              width: 120,
+                              excavate: true,
+                            }}
+                          />
+                        </div>
+                        <button className="btn btn--ghost btn--sm" onClick={() => downloadQR(qr.code)} style={{ padding: '6px 12px' }}>
+                          <Download size={14} /> Descargar
+                        </button>
                         <button className="btn btn--ghost btn--sm" onClick={() => copyQRLink(qr.code)} style={{ padding: '6px 12px' }}>
                           {copiedId === qr.code ? <><Check size={14} /> Copiado</> : <><Copy size={14} /> Link</>}
                         </button>

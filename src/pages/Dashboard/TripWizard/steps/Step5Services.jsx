@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
+import useBoatStore from '../../../../stores/boatStore'
 import { Anchor, HelpCircle, Plus } from 'lucide-react'
 
 const AVAILABLE_SERVICES = [
@@ -17,12 +18,21 @@ const AVAILABLE_SERVICES = [
   'Equipo de snorkel'
 ]
 
-const MOCK_BOATS = [
-  { id: 1, name: 'Duende (Velero 34 pies)' }
-]
-
 const Step5Services = () => {
-  const { formData, toggleService, updateFormData, hasBookings } = useTripWizardStore()
+  const { formData, toggleService, updateFormData, hasBookings, addCustomService } = useTripWizardStore()
+  const [customServiceInput, setCustomServiceInput] = React.useState('')
+  const { boats, fetchMyBoats } = useBoatStore()
+
+  React.useEffect(() => {
+    fetchMyBoats()
+  }, [])
+
+  const handleAddCustomService = () => {
+    if (customServiceInput.trim()) {
+      addCustomService(customServiceInput.trim())
+      setCustomServiceInput('')
+    }
+  }
 
   return (
     <div className="step-container">
@@ -106,13 +116,12 @@ const Step5Services = () => {
               placeholder="Ej: Ropa blanca, Snorkel, Bebidas..." 
               className="input-control" 
               style={{ flex: 1, padding: 'var(--space-2)', fontSize: '13px' }}
+              value={customServiceInput}
+              onChange={(e) => setCustomServiceInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
-                  if (e.target.value.trim()) {
-                    useTripWizardStore.getState().addCustomService(e.target.value.trim());
-                    e.target.value = '';
-                  }
+                  handleAddCustomService();
                 }
               }}
             />
@@ -120,13 +129,7 @@ const Step5Services = () => {
               type="button"
               className="btn btn--outline" 
               style={{ padding: 'var(--space-2)', borderRadius: 'var(--radius-lg)' }}
-              onClick={(e) => {
-                const input = document.getElementById('custom_service_input');
-                if (input && input.value.trim()) {
-                  useTripWizardStore.getState().addCustomService(input.value.trim());
-                  input.value = '';
-                }
-              }}
+              onClick={handleAddCustomService}
             >
               <Plus size={16} />
             </button>
@@ -155,8 +158,8 @@ const Step5Services = () => {
           onChange={(e) => updateFormData({ boat_id: e.target.value })}
         >
           <option value="" disabled>Seleccione embarcación...</option>
-          {MOCK_BOATS.map(b => (
-            <option key={b.id} value={b.id}>{b.name}</option>
+          {boats.map(b => (
+            <option key={b.id} value={b.id}>{b.name} {b.model ? `(${b.model})` : ''}</option>
           ))}
           <option value="NEW" style={{ fontWeight: 'bold', color: 'var(--color-accent-500)' }}>
             ✨ Agregar nueva embarcación

@@ -215,7 +215,7 @@ export default function ManageHotels() {
                 </p>
               </div>
               <span className="coupon-card__code" style={{ fontSize: '11px' }}>
-                <Percent size={12} /> {hotel.commission_percent}%
+                {hotel.commission_type === 'percentage' ? <Percent size={12} /> : '$'}{hotel.commission_percent}{hotel.commission_type === 'percentage' ? '%' : ''}
               </span>
             </div>
 

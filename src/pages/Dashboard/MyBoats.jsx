@@ -112,8 +112,8 @@ export default function MyBoats() {
               <thead>
                 <tr>
                   <th>Alias de la Embarcación</th>
-                  <th className="dash-table__hide-mobile">Creado</th>
-                  <th className="dash-table__hide-mobile">Modificado</th>
+                  <th className="dash-table__hide-mobile">Fecha de alta</th>
+                  <th className="dash-table__hide-mobile">Última edición</th>
                   <th style={{ textAlign: 'right', paddingRight: '24px' }}>Acciones</th>
                 </tr>
               </thead>
