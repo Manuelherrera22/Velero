@@ -34,7 +34,7 @@ export default function Dashboard() {
               <Route index element={<Navigate to="travesias" replace />} />
               <Route path="travesias" element={<MyTrips />} />
               <Route path="travesias/nueva" element={<TripWizard />} />
-              <Route path="travesias/:tripId/editar" element={<TripWizard />} />
+              <Route path="travesias/:id/editar" element={<TripWizard />} />
               <Route path="embarcaciones" element={<MyBoats />} />
               <Route path="reservas" element={<Bookings />} />
             </Routes>

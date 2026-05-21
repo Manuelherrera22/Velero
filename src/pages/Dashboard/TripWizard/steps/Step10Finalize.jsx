@@ -294,7 +294,7 @@ const Step10Finalize = () => {
         msg = 'No se pudo leer el detalle del error'
       }
       
-      alert(`Error al publicar: ${msg}`)
+      alert(`Ocurrió un problema al guardar: ${msg}\nPor favor, contacta a soporte si el problema persiste.`)
     } finally {
       setIsSaving(false)
       setStatusMsg('')
