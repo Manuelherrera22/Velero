@@ -21,7 +21,7 @@ const AVAILABLE_SERVICES = [
 const Step5Services = () => {
   const { formData, toggleService, updateFormData, hasBookings, addCustomService } = useTripWizardStore()
   const [customServiceInput, setCustomServiceInput] = React.useState('')
-  const { boats, fetchMyBoats } = useBoatStore()
+  const { boats, loading, fetchMyBoats } = useBoatStore()
 
   React.useEffect(() => {
     fetchMyBoats()
@@ -156,14 +156,19 @@ const Step5Services = () => {
           style={{ fontWeight: 500, opacity: hasBookings ? 0.6 : 1, pointerEvents: hasBookings ? 'none' : 'auto' }}
           value={formData.boat_id || ''}
           onChange={(e) => updateFormData({ boat_id: e.target.value })}
+          disabled={loading}
         >
-          <option value="" disabled>Seleccione embarcación...</option>
+          <option value="" disabled>
+            {loading ? 'Cargando embarcaciones...' : 'Seleccione embarcación...'}
+          </option>
           {boats.map(b => (
             <option key={b.id} value={b.id}>{b.name} {b.model ? `(${b.model})` : ''}</option>
           ))}
-          <option value="NEW" style={{ fontWeight: 'bold', color: 'var(--color-accent-500)' }}>
-            ✨ Agregar nueva embarcación
-          </option>
+          {!loading && (
+            <option value="NEW" style={{ fontWeight: 'bold', color: 'var(--color-accent-500)' }}>
+              ✨ Agregar nueva embarcación
+            </option>
+          )}
         </select>
 
         {formData.boat_id === 'NEW' && (
