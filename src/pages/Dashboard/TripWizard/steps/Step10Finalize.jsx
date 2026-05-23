@@ -16,22 +16,25 @@ const Step10Finalize = () => {
     return new Promise((resolve, reject) => {
       let isSettled = false;
 
-      const fallbackToRaw = async () => {
-        if (isSettled) return;
-        isSettled = true;
-        try {
-          const res = await fetch(blobUrl);
-          const blob = await res.blob();
-          resolve(blob);
-        } catch (e) {
-          reject(e);
-        }
-      };
-
       const timeoutId = setTimeout(() => {
         console.warn('[compressImage] Timeout reached, falling back to raw blob')
         fallbackToRaw();
       }, 5000);
+
+      const fallbackToRaw = async () => {
+        if (isSettled) return;
+        isSettled = true;
+        try {
+          const controller = new AbortController();
+          const fetchTimeout = setTimeout(() => controller.abort(), 5000);
+          const res = await fetch(blobUrl, { signal: controller.signal });
+          clearTimeout(fetchTimeout);
+          const blob = await res.blob();
+          resolve(blob);
+        } catch (e) {
+          reject(new Error("La imagen caducó o no pudo ser leída por inactividad. Por favor, vuelve al Paso 4 y súbela nuevamente."));
+        }
+      };
 
       const img = new Image()
       img.onload = () => {
@@ -79,35 +82,40 @@ const Step10Finalize = () => {
     })
   }
 
-  // Upload a single image with a 15-second timeout
+  // Upload a single image with a 15-second strict timeout
   const uploadSingleImage = async (url, userId) => {
     if (!url.startsWith('blob:')) return url
 
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 15000)
-
-    try {
-      const blob = await compressImage(url)
-      const ext = blob.type === 'image/png' ? 'png' : 'jpg'
-      const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
-      
-      const { error: uploadError } = await supabase.storage
-        .from('trip-images')
-        .upload(fileName, blob, {
-          contentType: blob.type || 'image/jpeg',
-          upsert: true
-        })
-      
-      clearTimeout(timeout)
-      if (uploadError) throw uploadError
-      
-      const { data: { publicUrl } } = supabase.storage.from('trip-images').getPublicUrl(fileName)
-      return publicUrl
-    } catch (e) {
-      clearTimeout(timeout)
-      console.error('[uploadSingleImage] Failed:', e)
+    return Promise.race([
+      new Promise(async (resolve, reject) => {
+        try {
+          const blob = await compressImage(url)
+          const ext = blob.type === 'image/png' ? 'png' : 'jpg'
+          const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+          
+          const { error: uploadError } = await supabase.storage
+            .from('trip-images')
+            .upload(fileName, blob, {
+              contentType: blob.type || 'image/jpeg',
+              upsert: true
+            })
+          
+          if (uploadError) throw uploadError
+          
+          const { data } = supabase.storage
+            .from('trip-images')
+            .getPublicUrl(fileName)
+            
+          resolve(data.publicUrl)
+        } catch (err) {
+          reject(err)
+        }
+      }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado al subir una imagen (verifique su conexión).')), 15000))
+    ]).catch(err => {
+      console.error('[uploadSingleImage] Failed:', err)
       return null // skip this image instead of crashing everything
-    }
+    })
   }
 
   const handleCreate = async (isDraft = false) => {

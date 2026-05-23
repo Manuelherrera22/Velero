@@ -90,12 +90,30 @@ const Step9Dates = () => {
               1. Seleccionar días de salida
               <Info size={16} color="var(--text-muted)" />
             </label>
+
+            {(formData.duration_days || 1) > 1 && (
+              <div style={{ backgroundColor: 'rgba(0, 180, 180, 0.05)', border: '1px solid rgba(0, 180, 180, 0.2)', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: 'var(--color-primary-700)', marginBottom: 'var(--space-4)', width: '100%', textAlign: 'left' }}>
+                <strong>Viaje de {formData.duration_days} días:</strong> Haz clic <b>únicamente en el día de zarpe (salida)</b>. El sistema bloqueará automáticamente los días posteriores que dura la travesía.
+              </div>
+            )}
+
             <div style={{ transform: 'scale(0.95)', transformOrigin: 'top center' }}>
               <DayPicker
                 mode="multiple"
                 selected={selectedDates}
                 onSelect={setSelectedDates}
-                disabled={{ before: new Date() }}
+                disabled={[
+                  { before: new Date() },
+                  ...selectedDates.flatMap(date => {
+                    const days = formData.duration_days || 1;
+                    if (days <= 1) return [];
+                    const from = new Date(date);
+                    from.setDate(from.getDate() + 1);
+                    const to = new Date(date);
+                    to.setDate(to.getDate() + (days - 1));
+                    return [{ from, to }];
+                  })
+                ]}
               />
             </div>
           </div>
