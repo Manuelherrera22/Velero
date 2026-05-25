@@ -96,22 +96,41 @@ const Step2Map = () => {
   }, [])
 
   // Debounced autocomplete search using Google Places API
+  // Países habilitados para búsqueda
+  const ALLOWED_COUNTRIES = ['ar', 'uy', 'br']
+
   const fetchSuggestions = useCallback((query) => {
     if (!query || query.length < 3 || !googleServicesReady) {
       setSuggestions([])
       return
     }
 
-    autocompleteService.current.getPlacePredictions({
-      input: query,
-      componentRestrictions: { country: 'ar' }, // Limitar a Argentina
-    }, (predictions, status) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-        setSuggestions(predictions)
-        setShowSuggestions(true)
-      } else {
-        setSuggestions([])
-      }
+    // Lanzar una búsqueda por cada país y combinar resultados
+    const promises = ALLOWED_COUNTRIES.map(country =>
+      new Promise((resolve) => {
+        autocompleteService.current.getPlacePredictions({
+          input: query,
+          componentRestrictions: { country }
+        }, (predictions, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+            resolve(predictions)
+          } else {
+            resolve([])
+          }
+        })
+      })
+    )
+
+    Promise.all(promises).then(results => {
+      // Combinar y eliminar duplicados por place_id
+      const seen = new Set()
+      const merged = results.flat().filter(p => {
+        if (seen.has(p.place_id)) return false
+        seen.add(p.place_id)
+        return true
+      })
+      setSuggestions(merged)
+      setShowSuggestions(merged.length > 0)
     })
   }, [googleServicesReady])
 
@@ -159,7 +178,7 @@ const Step2Map = () => {
     
     geocoderService.current.geocode({ 
       address: searchQuery,
-      componentRestrictions: { country: 'AR' }
+      region: 'ar' // Sesgo regional, no bloquea otros países
     }, (results, status) => {
       setSearching(false)
       if (status === 'OK' && results[0]) {

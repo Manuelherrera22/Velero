@@ -38,11 +38,27 @@ const Step8Pricing = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-6)', alignItems: 'end' }}>
           <div className="form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-1)', minHeight: '32px' }}>
-              <label className="form-group__label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <label className="form-group__label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--space-2)', color: formData.allow_individual_booking !== false ? 'var(--text-primary)' : 'var(--text-muted)', transition: 'color 0.3s ease' }}>
                 Precio por pasajero
                 <div title="El costo individual base al reservar lugares compartidos." style={{ cursor: 'help' }}>
                   <Info size={16} color="var(--text-muted)" />
                 </div>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', backgroundColor: 'rgba(0, 0, 0, 0.02)', padding: '2px 8px', borderRadius: '9999px', border: '1px solid var(--border-color)', cursor: 'pointer' }}>
+                <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Permitir por pasajero</span>
+                <input 
+                  type="checkbox" 
+                  style={{ width: '28px', height: '14px', accentColor: 'var(--color-primary-500)' }}
+                  checked={formData.allow_individual_booking !== false}
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    updateFormData({ 
+                      allow_individual_booking: isChecked,
+                      price_per_person: isChecked ? formData.price_per_person : 0 
+                    });
+                  }}
+                />
               </label>
             </div>
             <div className="input-with-icon">
@@ -51,8 +67,9 @@ const Step8Pricing = () => {
                 type="number"
                 min="0"
                 step="0.01"
+                disabled={formData.allow_individual_booking === false}
                 className="input-control"
-                style={{ paddingLeft: '40px', fontWeight: 'bold' }}
+                style={{ paddingLeft: '40px', fontWeight: 'bold', opacity: formData.allow_individual_booking !== false ? 1 : 0.5 }}
                 value={formData.price_per_person || ''}
                 onChange={(e) => updateFormData({ price_per_person: parseFloat(e.target.value) || 0 })}
               />

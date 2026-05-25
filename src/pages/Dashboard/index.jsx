@@ -1,5 +1,5 @@
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom'
-import { Sailboat, Ship, CalendarCheck, BarChart3, Plus } from 'lucide-react'
+import { Anchor, Sailboat, CalendarCheck, BarChart3, Plus } from 'lucide-react'
 import MyTrips from './MyTrips'
 import TripWizard from './TripWizard/TripWizard'
 import MyBoats from './MyBoats'
@@ -14,14 +14,14 @@ export default function Dashboard() {
           {/* Sidebar */}
           <aside className="dashboard__sidebar glass">
             <h2 className="dashboard__sidebar-title">
-              <Sailboat size={20} /> Dashboard
+              <Anchor size={20} /> Tu panel
             </h2>
             <nav className="dashboard__nav">
               <NavLink to="/dashboard/travesias" className={({ isActive }) => `dashboard__nav-item ${isActive ? 'dashboard__nav-item--active' : ''}`}>
                 <CalendarCheck size={18} /> Mis Travesías
               </NavLink>
               <NavLink to="/dashboard/embarcaciones" className={({ isActive }) => `dashboard__nav-item ${isActive ? 'dashboard__nav-item--active' : ''}`}>
-                <Ship size={18} /> Embarcaciones
+                <Sailboat size={18} /> Embarcaciones
               </NavLink>
               <NavLink to="/dashboard/reservas" className={({ isActive }) => `dashboard__nav-item ${isActive ? 'dashboard__nav-item--active' : ''}`}>
                 <BarChart3 size={18} /> Reservas

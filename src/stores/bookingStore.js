@@ -76,7 +76,7 @@ const useBookingStore = create((set, get) => ({
         .from('bookings')
         .select(`
           *,
-          trip:trips!trip_id(id, title, location, images),
+          trip:trips!trip_id(id, title, location, boat:boats!boat_id(name)),
           trip_date:trip_dates!trip_date_id(date, start_time)
         `)
         .eq('user_id', user.id)
@@ -115,7 +115,7 @@ const useBookingStore = create((set, get) => ({
         .from('bookings')
         .select(`
           *,
-          trip:trips!trip_id(id, title, location),
+          trip:trips!trip_id(id, title, location, boat:boats!boat_id(name)),
           trip_date:trip_dates!trip_date_id(date, start_time),
           user:profiles!user_id(full_name, email, phone)
         `)

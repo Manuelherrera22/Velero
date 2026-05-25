@@ -111,23 +111,15 @@ const Step10Finalize = () => {
           reject(err)
         }
       }),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado al subir una imagen (verifique su conexión).')), 15000))
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado al subir una imagen (verifique su conexión).')), 30000))
     ]).catch(err => {
       console.error('[uploadSingleImage] Failed:', err)
-      return null // skip this image instead of crashing everything
     })
   }
 
   const handleCreate = async (isDraft = false) => {
     setIsSaving(true)
     setStatusMsg('Verificando sesión...')
-
-    // Global 60-second timeout
-    const globalTimeout = setTimeout(() => {
-      setIsSaving(false)
-      setStatusMsg('')
-      alert('El proceso tardó demasiado. Revisá tu conexión a internet e intentá de nuevo. Si el problema persiste, contacta soporte.')
-    }, 60000)
 
     try {
       let activeUser = useAuthStore.getState().user;
@@ -169,13 +161,14 @@ const Step10Finalize = () => {
           setStatusMsg(`Subiendo ${blobImages.length} foto(s)...`)
         }
 
-        // Upload blob images one by one with status updates
-        const uploadedBlobs = []
-        for (let i = 0; i < blobImages.length; i++) {
-          setStatusMsg(`Subiendo foto ${i + 1} de ${blobImages.length}...`)
-          const result = await uploadSingleImage(blobImages[i], activeUser.id)
-          if (result) uploadedBlobs.push(result)
-        }
+        // Upload blob images concurrently
+        const uploadPromises = blobImages.map(async (img, i) => {
+          setStatusMsg(`Subiendo foto(s)...`)
+          const result = await uploadSingleImage(img, activeUser.id)
+          return result
+        })
+        const results = await Promise.all(uploadPromises)
+        const uploadedBlobs = results.filter(Boolean)
 
         uploadedUrls = [...uploadedBlobs, ...regularImages]
 
@@ -225,7 +218,7 @@ const Step10Finalize = () => {
         allowed_payment_methods: formData.allowed_payment_methods || ['PayPal'],
         requires_full_payment: formData.requires_full_payment !== false,
         itinerary: formData.itinerary || [],
-        status: isDraft ? 'draft' : (formData.status === 'published' ? 'published' : 'pending'),
+        status: isDraft ? 'draft' : 'published',
         images: uploadedUrls,
         tags: formData.tags || [],
         metadata: formData
@@ -295,12 +288,10 @@ const Step10Finalize = () => {
         }
       }
 
-      clearTimeout(globalTimeout)
       setStatusMsg('¡Publicada con éxito!')
       resetWizard()
       navigate('/dashboard/travesias')
     } catch (err) {
-      clearTimeout(globalTimeout)
       console.error('Error al publicar travesía:', err)
       
       let msg = 'Error desconocido'
@@ -422,11 +413,17 @@ const Step10Finalize = () => {
                 <p style={{ fontSize: '12px', color: 'var(--color-accent-400)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Precio por persona</p>
                 {formData.discount_percentage > 0 ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <p style={{ fontSize: '24px', fontWeight: 'bold' }}>${(formData.price_per_person * (1 - formData.discount_percentage / 100)).toFixed(2)}</p>
-                    <p style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-muted)', textDecoration: 'line-through' }}>${formData.price_per_person}</p>
+                    <p style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                      $ {(formData.price_per_person * (1 - formData.discount_percentage / 100)).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                      $ {Number(formData.price_per_person || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
                   </div>
                 ) : (
-                  <p style={{ fontSize: '24px', fontWeight: 'bold' }}>${formData.price_per_person || 0}</p>
+                  <p style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                    $ {Number(formData.price_per_person || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
                 )}
               </div>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '12px' }}>

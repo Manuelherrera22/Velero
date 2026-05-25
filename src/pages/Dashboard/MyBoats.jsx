@@ -11,6 +11,7 @@ export default function MyBoats() {
   const [activeMenuId, setActiveMenuId] = useState(null)
   const [isCreating, setIsCreating] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [editingBoatId, setEditingBoatId] = useState(null)
   const [newBoat, setNewBoat] = useState({ name: '', model: '', type: 'velero', length_m: '', cabins: '', bathrooms: '' })
 
   useEffect(() => { 
@@ -38,7 +39,7 @@ export default function MyBoats() {
     setActiveMenuId(null)
   }
 
-  const handleCreate = async () => {
+  const handleSave = async () => {
     if (!newBoat.name || !newBoat.type) return
     setCreating(true)
     const data = { 
@@ -47,13 +48,57 @@ export default function MyBoats() {
       cabins: newBoat.cabins ? parseInt(newBoat.cabins) : 0,
       bathrooms: newBoat.bathrooms ? parseInt(newBoat.bathrooms) : 0
     }
-    const result = await createBoat(data)
+    
+    let result;
+    if (editingBoatId) {
+      result = await useBoatStore.getState().updateBoat(editingBoatId, data)
+    } else {
+      result = await createBoat(data)
+    }
+    
     setCreating(false)
     if (result.success) {
       setIsCreating(false)
+      setEditingBoatId(null)
       setNewBoat({ name: '', model: '', type: 'velero', length_m: '', cabins: '', bathrooms: '' })
     } else {
-      alert("Error al crear: " + result.error)
+      alert("Error al guardar: " + result.error)
+    }
+  }
+
+  const openCreateModal = () => {
+    setEditingBoatId(null)
+    setNewBoat({ name: '', model: '', type: 'velero', length_m: '', cabins: '', bathrooms: '' })
+    setIsCreating(true)
+  }
+
+  const openEditModal = (boat) => {
+    setEditingBoatId(boat.id)
+    setNewBoat({ 
+      name: boat.name || '', 
+      model: boat.model || '', 
+      type: boat.type || 'velero', 
+      length_m: boat.length_m || '', 
+      cabins: boat.cabins || '', 
+      bathrooms: boat.bathrooms || '' 
+    })
+    setIsCreating(true)
+  }
+
+  const handleCopyBoat = async (boat) => {
+    setCreating(true)
+    const data = { 
+      name: boat.name + ' (Copia)', 
+      model: boat.model, 
+      type: boat.type, 
+      length_m: boat.length_m, 
+      cabins: boat.cabins, 
+      bathrooms: boat.bathrooms 
+    }
+    const result = await createBoat(data)
+    setCreating(false)
+    if (!result.success) {
+      alert("Error al copiar: " + result.error)
     }
   }
 
@@ -75,7 +120,7 @@ export default function MyBoats() {
           <button 
             className="btn btn--accent"
             style={{ padding: '12px 24px', fontSize: '0.95rem', borderRadius: 'var(--radius-xl)' }}
-            onClick={() => setIsCreating(true)}
+            onClick={openCreateModal}
           >
             <Plus size={18} /> Agregar embarcación
           </button>
@@ -98,7 +143,7 @@ export default function MyBoats() {
             <button 
               className="btn btn--outline"
               style={{ borderRadius: '9999px', padding: '12px 32px', marginTop: '8px' }}
-              onClick={() => setIsCreating(true)}
+              onClick={openCreateModal}
             >
               Crear mi embarcación
             </button>
@@ -113,7 +158,6 @@ export default function MyBoats() {
                 <tr>
                   <th>Alias de la Embarcación</th>
                   <th className="dash-table__hide-mobile">Fecha de alta</th>
-                  <th className="dash-table__hide-mobile">Última edición</th>
                   <th style={{ textAlign: 'right', paddingRight: '24px' }}>Acciones</th>
                 </tr>
               </thead>
@@ -131,13 +175,12 @@ export default function MyBoats() {
                     </td>
 
                     <td className="dash-table__hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{formatDate(boat.created_at)}</td>
-                    <td className="dash-table__hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{formatDate(boat.updated_at)}</td>
 
                     <td style={{ textAlign: 'right', paddingRight: '24px', position: 'relative' }}>
                       {/* Desktop inline actions */}
                       <div className="dash-table__inline-actions">
-                        <button className="dash-table__action-link">Copiar</button>
-                        <button className="dash-table__action-link">Editar</button>
+                        <button className="dash-table__action-link" onClick={() => handleCopyBoat(boat)}>Copiar</button>
+                        <button className="dash-table__action-link" onClick={() => openEditModal(boat)}>Editar</button>
                         <button 
                           className="dash-table__action-link dash-table__action-link--danger"
                           onClick={(e) => {
@@ -163,8 +206,8 @@ export default function MyBoats() {
 
                         {activeMenuId === boat.id && (
                           <div className="dash-dropdown" onClick={(e) => e.stopPropagation()}>
-                            <button className="dash-dropdown__item">Copiar</button>
-                            <button className="dash-dropdown__item">Editar</button>
+                            <button className="dash-dropdown__item" onClick={() => { handleCopyBoat(boat); setActiveMenuId(null); }}>Copiar</button>
+                            <button className="dash-dropdown__item" onClick={() => { openEditModal(boat); setActiveMenuId(null); }}>Editar</button>
                             <button 
                               className="dash-dropdown__item dash-dropdown__item--danger"
                               onClick={() => {
@@ -219,7 +262,7 @@ export default function MyBoats() {
         <div className="dash-modal-overlay">
           <div className="dash-modal animate-fade-in" style={{ textAlign: 'left', padding: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h3 className="dash-modal__title" style={{ margin: 0 }}>Agregar Embarcación</h3>
+              <h3 className="dash-modal__title" style={{ margin: 0 }}>{editingBoatId ? 'Editar Embarcación' : 'Agregar Embarcación'}</h3>
               <button onClick={() => setIsCreating(false)} className="btn btn--ghost btn--sm" style={{ padding: '8px' }}>
                 <X size={20} />
               </button>
@@ -256,6 +299,7 @@ export default function MyBoats() {
                 >
                   <option value="velero">Velero</option>
                   <option value="catamaran">Catamarán</option>
+                  <option value="otro">Otro</option>
                 </select>
               </div>
               <div className="input-group">
@@ -300,7 +344,7 @@ export default function MyBoats() {
               <button onClick={() => setIsCreating(false)} className="btn btn--ghost">
                 Cancelar
               </button>
-              <button onClick={handleCreate} className="btn btn--accent" disabled={!newBoat.name || !newBoat.type || creating}>
+              <button onClick={handleSave} disabled={creating} className="btn btn--primary">
                 {creating ? 'Guardando...' : 'Guardar Embarcación'}
               </button>
             </div>

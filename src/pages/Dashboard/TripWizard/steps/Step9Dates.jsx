@@ -197,7 +197,7 @@ const Step9Dates = () => {
               >
                 <CalendarIcon size={20} />
                 {(!selectedDates || selectedDates.length === 0) 
-                  ? 'Selecciona fechas en el calendario' 
+                  ? 'Primero elige un día en el calendario' 
                   : `Añadir ${selectedDates.length} fecha${selectedDates.length > 1 ? 's' : ''}`}
               </button>
             </div>

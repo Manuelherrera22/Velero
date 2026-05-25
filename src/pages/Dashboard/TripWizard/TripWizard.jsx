@@ -1,5 +1,5 @@
 import React from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { CheckCircle2, ChevronRight, Compass, Loader } from 'lucide-react'
 import { useTripWizardStore } from '../../../stores/useTripWizardStore'
 import supabase from '../../../lib/supabase'
@@ -33,20 +33,24 @@ const TripWizard = () => {
   const { currentStep, totalSteps, nextStep, prevStep } = useTripWizardStore()
   const [errorMsg, setErrorMsg] = React.useState('')
   
+  const location = useLocation()
+  const copyFromId = location.state?.copyFromId
   const isEditing = id && id !== 'nueva'
-  const [isLoadingTrip, setIsLoadingTrip] = React.useState(isEditing)
+  const isCopying = !!copyFromId
+  const [isLoadingTrip, setIsLoadingTrip] = React.useState(isEditing || isCopying)
 
   React.useEffect(() => {
-    if (isEditing) {
+    if (isEditing || isCopying) {
       const loadTripForEdit = async () => {
         try {
           setIsLoadingTrip(true)
+          const targetId = isEditing ? id : copyFromId
           
           // Fetch trip
           const { data: trip, error: tripError } = await supabase
             .from('trips')
             .select('*')
-            .eq('id', id)
+            .eq('id', targetId)
             .single()
             
           if (tripError) throw tripError
@@ -55,18 +59,22 @@ const TripWizard = () => {
           const { data: dates } = await supabase
             .from('trip_dates')
             .select('*')
-            .eq('trip_id', id)
+            .eq('trip_id', targetId)
             
-          // Check for active bookings
-          const { count } = await supabase
-            .from('bookings')
-            .select('*', { count: 'exact', head: true })
-            .eq('trip_id', id)
-            .in('status', ['pending', 'confirmed', 'completed'])
+          if (isEditing) {
+            // Check for active bookings
+            const { count } = await supabase
+              .from('bookings')
+              .select('*', { count: 'exact', head: true })
+              .eq('trip_id', targetId)
+              .in('status', ['pending', 'confirmed', 'completed'])
 
-          useTripWizardStore.getState().initForEdit(trip, dates, count > 0)
+            useTripWizardStore.getState().initForEdit(trip, dates, count > 0)
+          } else {
+            useTripWizardStore.getState().copyFromTrip(trip, dates)
+          }
         } catch (error) {
-          console.error("Error loading trip for edit:", error)
+          console.error("Error loading trip data:", error)
           setErrorMsg("Error cargando los datos de la travesía. Por favor, intenta de nuevo.")
         } finally {
           setIsLoadingTrip(false)
@@ -76,7 +84,7 @@ const TripWizard = () => {
     } else {
       useTripWizardStore.getState().resetWizard()
     }
-  }, [id, isEditing])
+  }, [id, isEditing, isCopying, copyFromId])
 
   const progressPercentage = (currentStep / totalSteps) * 100
 
@@ -189,8 +197,11 @@ const TripWizard = () => {
                   }
                   if (currentStep === 6) {
                     const currentData = useTripWizardStore.getState().formData;
-                    if (!currentData.price_per_person || currentData.price_per_person <= 0) {
-                      setErrorMsg('Debes ingresar un precio por pasajero mayor a 0 para continuar.')
+                    const hasPassengerPrice = currentData.price_per_person > 0;
+                    const hasFullBoatPrice = currentData.allow_full_boat && currentData.full_boat_price > 0;
+
+                    if (!hasPassengerPrice && !hasFullBoatPrice) {
+                      setErrorMsg('Debes ingresar al menos un precio por pasajero o un precio por barco completo mayor a 0.')
                       return
                     }
                   }

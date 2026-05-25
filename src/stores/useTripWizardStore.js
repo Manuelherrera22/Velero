@@ -160,6 +160,27 @@ export const useTripWizardStore = create(
           formData: { ...initialData, ...loadedData, id: tripData.id },
           hasBookings: hasBookings
         });
+      },
+
+      copyFromTrip: (tripData, datesData) => {
+        const loadedData = tripData.metadata || { ...initialData };
+        
+        if (datesData && datesData.length > 0) {
+          loadedData.custom_dates = datesData.map(d => ({
+            id: crypto.randomUUID(), // New UUIDs for dates
+            departure_date: d.date,
+            departure_time: d.start_time?.slice(0, 5) || '08:00',
+            arrival_time: d.end_time?.slice(0, 5) || '',
+            available_spots: d.available_spots,
+            blocked_spots: d.blocked_spots || 0
+          }));
+        }
+
+        set({
+          currentStep: 1,
+          formData: { ...initialData, ...loadedData, id: null, title: loadedData.title ? loadedData.title + ' (Copia)' : '' },
+          hasBookings: false
+        });
       }
     }),
     {
