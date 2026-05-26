@@ -129,8 +129,9 @@ export default function Checkout() {
   // Gross total before any discount
   const grossTotal = subtotalOriginal + addonsTotal
 
-  // Trip Promotional Discount (%)
-  const tripDiscountAmount = trip?.discount_percentage ? (grossTotal * (trip.discount_percentage / 100)) : 0
+  // Trip Promotional Discount (%) — stored in metadata
+  const tripDiscountPercent = trip?.metadata?.discount_percentage || 0
+  const tripDiscountAmount = tripDiscountPercent > 0 ? (grossTotal * (tripDiscountPercent / 100)) : 0
 
   // Coupon Discount
   const couponDiscountAmount = coupon
@@ -861,11 +862,17 @@ export default function Checkout() {
                 {selectedDate && ` · ${new Date(selectedDate.date + 'T12:00:00').toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' })} · ${selectedDate.start_time?.slice(0, 5)}hs`}
               </span>
             </div>
+
             <div className="checkout-summary__lines">
+              {/* Precio unitario */}
               <div className="checkout-summary__line">
-                <span>{formatPrice(basePriceOriginal)} × {mode === 'private' ? '1 navío' : `${guests} persona${guests > 1 ? 's' : ''}`}</span>
+                <span>
+                  {formatPrice(basePriceOriginal)} × {mode === 'private' ? '1 barco completo' : `${guests} persona${guests > 1 ? 's' : ''}`}
+                </span>
                 <span>{formatPrice(subtotalOriginal)}</span>
               </div>
+
+              {/* Addons */}
               {tripAddons.filter(a => selectedAddons[a.id] > 0).map(a => (
                 <div key={a.id} className="checkout-summary__line">
                   <span>{a.name} × {selectedAddons[a.id]}</span>
@@ -873,38 +880,65 @@ export default function Checkout() {
                 </div>
               ))}
             </div>
-            <div className="checkout-summary__total" style={{ flexDirection: 'column', gap: '4px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
-                <span>Subtotal de la experiencia</span>
+
+            <div className="checkout-summary__total" style={{ flexDirection: 'column', gap: '0' }}>
+              {/* Subtotal */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '8px 0', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
+                <span>Subtotal</span>
                 <span>{formatPrice(grossTotal)}</span>
               </div>
-              
-              {totalDiscount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 'var(--text-md)', color: 'var(--color-success)', marginTop: '4px' }}>
-                  <span>Descuento {trip?.discount_percentage ? `${trip.discount_percentage}%` : ''} {coupon ? `(${coupon.code})` : ''}</span>
-                  <span>- {formatPrice(totalDiscount)}</span>
+
+              {/* Descuento promocional */}
+              {tripDiscountPercent > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)' }}>
+                  <span>🏷️ Descuento promocional ({tripDiscountPercent}%)</span>
+                  <span>− {formatPrice(Math.round(tripDiscountAmount))}</span>
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: 'var(--text-md)', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                <span>Tasa de servicio (3%)</span>
-                <span>{formatPrice(serviceFeeAmount)}</span>
+              {/* Descuento cupón */}
+              {coupon && couponDiscountAmount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)' }}>
+                  <span>🎟️ Cupón {coupon.code} ({coupon.type === 'percentage' ? `${coupon.value}%` : formatPrice(coupon.value)})</span>
+                  <span>− {formatPrice(Math.round(couponDiscountAmount))}</span>
+                </div>
+              )}
+
+              {/* Total experiencia (después de descuentos) */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '10px 0', borderTop: '1px solid var(--border-color)', marginTop: '4px', fontWeight: 600 }}>
+                <span>Total de la experiencia</span>
+                <span>{formatPrice(Math.round(total))}</span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '12px', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
-                <span style={{ fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
-                  {isAdvancePayment ? 'Total a pagar (Cobro online)' : 'Total a pagar'}
+              {/* Tasa de servicio */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '6px 0', fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)' }}>
+                <span>Tasa de servicio Kailu (3%)</span>
+                <span>{formatPrice(Math.round(serviceFeeAmount))}</span>
+              </div>
+
+              {/* TOTAL FINAL */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '12px', borderTop: '2px solid var(--color-primary)', paddingTop: '12px' }}>
+                <span style={{ fontSize: 'var(--text-lg)', fontWeight: 'bold' }}>
+                  {isAdvancePayment ? '💳 Pagás ahora online' : '💳 Total a pagar'}
                 </span>
-                <strong style={{ fontSize: 'var(--text-xl)', color: 'var(--accent-color, var(--color-primary))' }}>
-                  {formatPrice(advanceAmount)}
+                <strong style={{ fontSize: 'var(--text-xl)', color: 'var(--color-primary)' }}>
+                  {formatPrice(Math.round(advanceAmount))}
                 </strong>
               </div>
               
               {isAdvancePayment && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '8px', fontSize: 'var(--text-md)', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)', padding: '8px', borderRadius: '8px' }}>
-                  <span>Saldo a abonar en puerto</span>
-                  <strong>{formatPrice(remainingAmount)}</strong>
-                </div>
+                <>
+                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '4px', lineHeight: 1.4 }}>
+                    Incluye anticipo ({Math.round(kailuCommission * 100)}%) + tasa de servicio (3%)
+                  </p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '10px', fontSize: 'var(--text-md)', backgroundColor: 'rgba(245, 158, 11, 0.08)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+                    <span>🤝 Saldo a abonar al capitán</span>
+                    <strong>{formatPrice(Math.round(remainingAmount))}</strong>
+                  </div>
+                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '4px', lineHeight: 1.4 }}>
+                    Se abona directamente al capitán antes de zarpar
+                  </p>
+                </>
               )}
             </div>
           </div>
