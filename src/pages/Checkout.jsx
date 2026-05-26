@@ -446,10 +446,10 @@ export default function Checkout() {
                 <span>Personas</span>
                 <strong>{guests}</strong>
               </div>
-              {discount > 0 && (
+              {totalDiscount > 0 && (
                 <div className="checkout-success__line">
                   <span>Descuento</span>
-                  <strong style={{ color: 'var(--color-success)' }}>-{formatPrice(discount)}</strong>
+                  <strong style={{ color: 'var(--color-success)' }}>-{formatPrice(totalDiscount)}</strong>
                 </div>
               )}
               <div className="checkout-success__line checkout-success__total">

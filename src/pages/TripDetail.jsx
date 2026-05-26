@@ -80,7 +80,8 @@ export default function TripDetail() {
   const basePriceOriginal = bookingMode === 'private'
     ? (selectedDateObj?.full_boat_price_override || trip.full_boat_price || trip.metadata?.full_boat_price)
     : (selectedDateObj?.price_per_person_override || trip.price_per_person || trip.metadata?.price_per_person)
-  const discountMultiplier = trip.discount_percentage ? (1 - trip.discount_percentage / 100) : (trip.metadata?.discount_percentage ? (1 - trip.metadata.discount_percentage / 100) : 1)
+  const discountPercent = trip?.metadata?.discount_percentage || trip?.discount_percentage || 0
+  const discountMultiplier = discountPercent > 0 ? (1 - discountPercent / 100) : 1
   const basePrice = basePriceOriginal * discountMultiplier
 
   const subtotal = bookingMode === 'private' ? basePrice : (basePrice || 0) * guests

@@ -199,7 +199,7 @@ const TripWizard = () => {
               Atrás
             </button>
             
-            {currentStep < 8 && (
+            {currentStep < totalSteps && (
               <button
                 onClick={() => {
                   setErrorMsg('')
@@ -211,7 +211,7 @@ const TripWizard = () => {
                       return
                     }
                   }
-                  if (currentStep === 6) {
+                  if (currentStep === 7) {
                     const currentData = useTripWizardStore.getState().formData;
                     const hasPassengerPrice = currentData.price_per_person > 0;
                     const hasFullBoatPrice = currentData.allow_full_boat && currentData.full_boat_price > 0;

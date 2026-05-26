@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
-import { Plus, Trash2, Wine, DollarSign, FileText } from 'lucide-react'
+import { Plus, Trash2, Wine, FileText } from 'lucide-react'
 
 const Step6Addons = () => {
   const { formData, addAddon, removeAddon, updateAddon, hasBookings } = useTripWizardStore()
