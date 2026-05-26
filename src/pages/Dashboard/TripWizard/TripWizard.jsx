@@ -2,6 +2,7 @@ import React from 'react'
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, ChevronRight, Compass, Loader } from 'lucide-react'
 import { useTripWizardStore } from '../../../stores/useTripWizardStore'
+import useBoatStore from '../../../stores/boatStore'
 import supabase from '../../../lib/supabase'
 
 // Form Steps
@@ -99,7 +100,15 @@ const TripWizard = () => {
     } else {
       useTripWizardStore.getState().resetWizard()
     }
+
+    // Prefetch boats so they are ready by Step 5
+    useBoatStore.getState().fetchMyBoats()
   }, [id, isEditing, isCopying, copyFromId])
+
+  // Scroll to top when changing steps
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [currentStep])
 
   const progressPercentage = (currentStep / totalSteps) * 100
 
