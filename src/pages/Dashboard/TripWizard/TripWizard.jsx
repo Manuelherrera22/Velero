@@ -10,6 +10,7 @@ import Step2Map from './steps/Step2Map'
 import Step3Itinerary from './steps/Step3Itinerary'
 import Step4Photos from './steps/Step4Photos'
 import Step5Services from './steps/Step5Services'
+import Step6Addons from './steps/Step6Addons'
 import Step8Pricing from './steps/Step8Pricing'
 import Step9Dates from './steps/Step9Dates'
 import Step10Finalize from './steps/Step10Finalize'
@@ -22,9 +23,10 @@ const STEPS_CONFIG = [
   { id: 3, label: 'Itinerario' },
   { id: 4, label: 'Fotos' },
   { id: 5, label: 'Servicios' },
-  { id: 6, label: 'Precios' },
-  { id: 7, label: 'Fechas' },
-  { id: 8, label: 'Finalizar' }
+  { id: 6, label: 'Adicionales' },
+  { id: 7, label: 'Precios' },
+  { id: 8, label: 'Fechas' },
+  { id: 9, label: 'Finalizar' }
 ]
 
 const TripWizard = () => {
@@ -62,6 +64,13 @@ const TripWizard = () => {
             .from('trip_dates')
             .select('*')
             .eq('trip_id', targetId)
+
+          // Fetch addons
+          const { data: addons } = await supabase
+            .from('trip_addons')
+            .select('*')
+            .eq('trip_id', targetId)
+            .eq('is_active', true)
             
           if (isEditing) {
             // Check for active bookings
@@ -71,9 +80,9 @@ const TripWizard = () => {
               .eq('trip_id', targetId)
               .in('status', ['pending', 'confirmed', 'completed'])
 
-            useTripWizardStore.getState().initForEdit(trip, dates, count > 0)
+            useTripWizardStore.getState().initForEdit(trip, dates, count > 0, addons)
           } else {
-            useTripWizardStore.getState().copyFromTrip(trip, dates)
+            useTripWizardStore.getState().copyFromTrip(trip, dates, addons)
           }
         } catch (error) {
           console.error("Error loading trip data:", error)
@@ -110,9 +119,10 @@ const TripWizard = () => {
       case 3: return <Step3Itinerary />
       case 4: return <Step4Photos />
       case 5: return <Step5Services />
-      case 6: return <Step8Pricing />
-      case 7: return <Step9Dates />
-      case 8: return <Step10Finalize />
+      case 6: return <Step6Addons />
+      case 7: return <Step8Pricing />
+      case 8: return <Step9Dates />
+      case 9: return <Step10Finalize />
       default:
         return <div>Paso {currentStep} en construcción...</div>
     }

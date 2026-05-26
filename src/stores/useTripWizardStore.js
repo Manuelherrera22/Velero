@@ -34,7 +34,8 @@ const initialData = {
   custom_services: [],
   boat_id: null,
 
-  // Step 6-7: TBD properties 
+  // Step 6: Addons/Extras
+  addons: [], // [{ id, name, description, price }]
   tags: [],
 
   // Step 8: Price & Limits
@@ -55,7 +56,7 @@ export const useTripWizardStore = create(
   persist(
     (set, get) => ({
       currentStep: 1,
-  totalSteps: 8,
+  totalSteps: 9,
   formData: { ...initialData },
   hasBookings: false,
 
@@ -106,6 +107,28 @@ export const useTripWizardStore = create(
     });
   },
 
+  // Addons Management
+  addAddon: (addon) => set((state) => ({
+    formData: {
+      ...state.formData,
+      addons: [...(state.formData.addons || []), addon]
+    }
+  })),
+
+  removeAddon: (addonId) => set((state) => ({
+    formData: {
+      ...state.formData,
+      addons: (state.formData.addons || []).filter(a => a.id !== addonId)
+    }
+  })),
+
+  updateAddon: (addonId, updates) => set((state) => ({
+    formData: {
+      ...state.formData,
+      addons: (state.formData.addons || []).map(a => a.id === addonId ? { ...a, ...updates } : a)
+    }
+  })),
+
   // Photos Meta Management
   addPhoto: (category, url) => set((state) => {
     const imagesMeta = { ...state.formData.images_meta };
@@ -154,7 +177,7 @@ export const useTripWizardStore = create(
       resetWizard: () => set({ currentStep: 1, formData: { ...initialData }, hasBookings: false }),
 
       // Init for Edit
-      initForEdit: (tripData, datesData, hasBookings = false) => {
+      initForEdit: (tripData, datesData, hasBookings = false, addonsData = []) => {
         const loadedData = tripData.metadata || { ...initialData };
         
         if (datesData && datesData.length > 0) {
@@ -191,6 +214,16 @@ export const useTripWizardStore = create(
           });
         }
 
+        // Load addons from DB
+        if (addonsData && addonsData.length > 0) {
+          loadedData.addons = addonsData.map(a => ({
+            id: a.id,
+            name: a.name,
+            description: a.description || '',
+            price: a.price
+          }));
+        }
+
         set({
           currentStep: 1,
           formData: { ...initialData, ...loadedData, id: tripData.id },
@@ -198,17 +231,27 @@ export const useTripWizardStore = create(
         });
       },
 
-      copyFromTrip: (tripData, datesData) => {
+      copyFromTrip: (tripData, datesData, addonsData = []) => {
         const loadedData = tripData.metadata || { ...initialData };
         
         if (datesData && datesData.length > 0) {
           loadedData.custom_dates = datesData.map(d => ({
-            id: crypto.randomUUID(), // New UUIDs for dates
+            id: crypto.randomUUID(),
             departure_date: d.date,
             departure_time: d.start_time?.slice(0, 5) || '08:00',
             arrival_time: d.end_time?.slice(0, 5) || '',
             available_spots: d.available_spots,
             blocked_spots: d.blocked_spots || 0
+          }));
+        }
+
+        // Copy addons with new IDs
+        if (addonsData && addonsData.length > 0) {
+          loadedData.addons = addonsData.map(a => ({
+            id: `new_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+            name: a.name,
+            description: a.description || '',
+            price: a.price
           }));
         }
 
@@ -218,6 +261,7 @@ export const useTripWizardStore = create(
           hasBookings: false
         });
       }
+
     }),
     {
       name: 'trip-wizard-draft',

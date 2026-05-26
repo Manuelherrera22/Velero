@@ -126,24 +126,31 @@ export default function Checkout() {
   const subtotalOriginal = mode === 'private' ? basePriceOriginal : basePriceOriginal * guests
   const addonsTotal = tripAddons.reduce((sum, a) => sum + (selectedAddons[a.id] || 0) * a.price, 0)
   
-  // Gross total before any discount
-  const grossTotal = subtotalOriginal + addonsTotal
-
+  // Discounts apply ONLY to the experience price, NOT to addons
   // Trip Promotional Discount (%) — stored in metadata
   const tripDiscountPercent = trip?.metadata?.discount_percentage || 0
-  const tripDiscountAmount = tripDiscountPercent > 0 ? (grossTotal * (tripDiscountPercent / 100)) : 0
+  const tripDiscountAmount = tripDiscountPercent > 0 ? (subtotalOriginal * (tripDiscountPercent / 100)) : 0
 
-  // Coupon Discount
+  // Subtotal 1: experience after captain's discount
+  const subtotalAfterCaptainDiscount = subtotalOriginal - tripDiscountAmount
+
+  // Coupon Discount — applied to Subtotal 1 (still without addons)
   const couponDiscountAmount = coupon
     ? coupon.type === 'percentage'
-      ? (grossTotal - tripDiscountAmount) * (coupon.value / 100)
-      : Math.min(coupon.value, grossTotal - tripDiscountAmount)
+      ? subtotalAfterCaptainDiscount * (coupon.value / 100)
+      : Math.min(coupon.value, subtotalAfterCaptainDiscount)
     : 0
 
   const totalDiscount = tripDiscountAmount + couponDiscountAmount
   
-  // Net subtotal (Subtotal - Discounts)
-  const total = grossTotal - totalDiscount
+  // Subtotal 2: experience after all discounts
+  const subtotalAfterDiscounts = subtotalOriginal - totalDiscount
+
+  // Final total: discounted experience + addons (addons are NEVER discounted)
+  const total = subtotalAfterDiscounts + addonsTotal
+
+  // Gross total for display purposes
+  const grossTotal = subtotalOriginal + addonsTotal
 
   // Service Fee (3% over Net subtotal)
   const serviceFeePercent = 0.03;
@@ -882,17 +889,25 @@ export default function Checkout() {
             </div>
 
             <div className="checkout-summary__total" style={{ flexDirection: 'column', gap: '0' }}>
-              {/* Subtotal */}
+              {/* Valor de la experiencia */}
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '8px 0', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
-                <span>Subtotal</span>
-                <span>{formatPrice(grossTotal)}</span>
+                <span>Valor de la experiencia</span>
+                <span>{formatPrice(subtotalOriginal)}</span>
               </div>
 
-              {/* Descuento promocional */}
+              {/* Descuento del capitán */}
               {tripDiscountPercent > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)' }}>
-                  <span>🏷️ Descuento promocional ({tripDiscountPercent}%)</span>
+                  <span>🏷️ Descuento del capitán ({tripDiscountPercent}%)</span>
                   <span>− {formatPrice(Math.round(tripDiscountAmount))}</span>
+                </div>
+              )}
+
+              {/* Subtotal 1 after captain discount */}
+              {tripDiscountPercent > 0 && coupon && couponDiscountAmount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '4px 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                  <span>Subtotal 1</span>
+                  <span>{formatPrice(Math.round(subtotalAfterCaptainDiscount))}</span>
                 </div>
               )}
 
@@ -904,9 +919,23 @@ export default function Checkout() {
                 </div>
               )}
 
-              {/* Total experiencia (después de descuentos) */}
+              {/* Adicionales (sin descuento) */}
+              {addonsTotal > 0 && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '4px 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', fontStyle: 'italic', borderTop: '1px dashed var(--border-color)', marginTop: '4px' }}>
+                    <span>Subtotal experiencia</span>
+                    <span>{formatPrice(Math.round(subtotalAfterDiscounts))}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '4px 0', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
+                    <span>🎁 Adicionales</span>
+                    <span>{formatPrice(Math.round(addonsTotal))}</span>
+                  </div>
+                </>
+              )}
+
+              {/* Total (experiencia descontada + adicionales) */}
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '10px 0', borderTop: '1px solid var(--border-color)', marginTop: '4px', fontWeight: 600 }}>
-                <span>Total de la experiencia</span>
+                <span>Subtotal</span>
                 <span>{formatPrice(Math.round(total))}</span>
               </div>
 

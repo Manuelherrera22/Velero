@@ -281,6 +281,36 @@ const Step10Finalize = () => {
         }
       }
 
+      // 3. Save addons
+      if (formData.addons && formData.addons.length > 0) {
+        setStatusMsg('Guardando adicionales...')
+
+        // Delete all existing addons for this trip first
+        if (formData.id) {
+          await supabase.from('trip_addons').delete().eq('trip_id', trip.id)
+        }
+
+        // Insert all current addons
+        const addonsToInsert = formData.addons.map(a => ({
+          trip_id: trip.id,
+          name: a.name,
+          description: a.description || '',
+          price: a.price,
+          is_active: true
+        }))
+
+        const { error: addonsError } = await supabase
+          .from('trip_addons')
+          .insert(addonsToInsert)
+
+        if (addonsError) {
+          console.error('Error guardando adicionales:', addonsError)
+        }
+      } else if (formData.id) {
+        // If editing and no addons, remove all existing ones
+        await supabase.from('trip_addons').delete().eq('trip_id', trip.id)
+      }
+
       setStatusMsg('¡Publicada con éxito!')
       resetWizard()
       navigate('/dashboard/travesias')

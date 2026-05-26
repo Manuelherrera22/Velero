@@ -146,7 +146,7 @@ export default function MyTrips() {
                           <div className="dash-dropdown" onClick={(e) => e.stopPropagation()}>
                             <button className="dash-dropdown__item" onClick={() => navigate('/dashboard/travesias/nueva', { state: { copyFromId: trip.id } })}>Copiar</button>
                             <button className="dash-dropdown__item" onClick={() => navigate(`/dashboard/travesias/${trip.id}/editar`)}>Editar</button>
-                            <button className="dash-dropdown__item" onClick={() => navigate(`/dashboard/travesias/${trip.id}/editar?step=7`)}>Editar fecha y hora</button>
+                            <button className="dash-dropdown__item" onClick={() => navigate(`/dashboard/travesias/${trip.id}/editar?step=8`)}>Editar fecha y hora</button>
                             <button 
                               className="dash-dropdown__item dash-dropdown__item--danger"
                               onClick={() => {
