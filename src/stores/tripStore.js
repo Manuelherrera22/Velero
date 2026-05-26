@@ -166,7 +166,8 @@ const useTripStore = create((set, get) => ({
   fetchMyTrips: async () => {
     set({ loading: true, error: null })
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+      const user = session?.user
       if (!user) throw new Error('No autenticado')
 
       const { data, error } = await supabase
@@ -191,7 +192,8 @@ const useTripStore = create((set, get) => ({
   createTrip: async (tripData) => {
     set({ loading: true, error: null })
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+      const user = session?.user
       if (!user) throw new Error('No autenticado')
 
       const { data, error } = await supabase

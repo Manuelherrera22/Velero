@@ -51,7 +51,8 @@ export default function ManageCoupons() {
     if (!form.code || !form.value) return
     setSaving(true)
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
 
     // Append T12:00:00 to dates to prevent timezone rollback
     await supabase.from('coupons').insert({

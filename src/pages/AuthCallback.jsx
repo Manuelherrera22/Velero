@@ -47,7 +47,8 @@ export default function AuthCallback() {
 
           // Helper to get redirect path based on role
           const getRedirectPath = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
+            const { data: { session: innerSession } } = await supabase.auth.getSession()
+            const user = innerSession?.user
             if (user) {
               const { data: profile } = await supabase
                 .from('profiles')
@@ -85,7 +86,8 @@ export default function AuthCallback() {
           setStatus('¡Sesión activa! Redirigiendo...')
           
           // Helper to get redirect path based on role
-          const { data: { user } } = await supabase.auth.getUser()
+          const { data: { session: activeSession } } = await supabase.auth.getSession()
+          const user = activeSession?.user
           let redirectTo = '/mis-viajes'
           if (user) {
             const { data: profile } = await supabase

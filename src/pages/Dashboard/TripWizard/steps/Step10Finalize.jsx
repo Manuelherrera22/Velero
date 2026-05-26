@@ -82,39 +82,49 @@ const Step10Finalize = () => {
     })
   }
 
-  // Upload a single image with a 15-second strict timeout
-  const uploadSingleImage = async (url, userId) => {
+  // Upload a single image with retry logic for slow connections
+  const uploadSingleImage = async (url, userId, attempt = 1) => {
     if (!url.startsWith('blob:')) return url
+    const MAX_ATTEMPTS = 2
+    const TIMEOUT_MS = 90000 // 90 seconds for slow connections
 
-    return Promise.race([
-      new Promise(async (resolve, reject) => {
-        try {
-          const blob = await compressImage(url)
-          const ext = blob.type === 'image/png' ? 'png' : 'jpg'
-          const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
-          
-          const { error: uploadError } = await supabase.storage
-            .from('trip-images')
-            .upload(fileName, blob, {
-              contentType: blob.type || 'image/jpeg',
-              upsert: true
-            })
-          
-          if (uploadError) throw uploadError
-          
-          const { data } = supabase.storage
-            .from('trip-images')
-            .getPublicUrl(fileName)
+    try {
+      return await Promise.race([
+        new Promise(async (resolve, reject) => {
+          try {
+            const blob = await compressImage(url)
+            const ext = blob.type === 'image/png' ? 'png' : 'jpg'
+            const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
             
-          resolve(data.publicUrl)
-        } catch (err) {
-          reject(err)
-        }
-      }),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado al subir una imagen (verifique su conexión).')), 30000))
-    ]).catch(err => {
-      console.error('[uploadSingleImage] Failed:', err)
-    })
+            const { error: uploadError } = await supabase.storage
+              .from('trip-images')
+              .upload(fileName, blob, {
+                contentType: blob.type || 'image/jpeg',
+                upsert: true
+              })
+            
+            if (uploadError) throw uploadError
+            
+            const { data } = supabase.storage
+              .from('trip-images')
+              .getPublicUrl(fileName)
+              
+            resolve(data.publicUrl)
+          } catch (err) {
+            reject(err)
+          }
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado al subir una imagen.')), TIMEOUT_MS))
+      ])
+    } catch (err) {
+      if (attempt < MAX_ATTEMPTS) {
+        console.warn(`[uploadSingleImage] Intento ${attempt} falló, reintentando...`)
+        setStatusMsg(`Reintentando subida de foto...`)
+        return uploadSingleImage(url, userId, attempt + 1)
+      }
+      console.error('[uploadSingleImage] Failed after retries:', err)
+      return null // Skip this image instead of crashing
+    }
   }
 
   const handleCreate = async (isDraft = false) => {

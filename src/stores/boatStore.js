@@ -10,10 +10,8 @@ const useBoatStore = create((set, get) => ({
   fetchMyBoats: async () => {
     set({ loading: true, error: null })
     try {
-      const { data: { user } } = await Promise.race([
-        supabase.auth.getUser(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado al verificar la sesión')), 10000))
-      ])
+      const { data: { session } } = await supabase.auth.getSession()
+      const user = session?.user
       if (!user) {
         set({ boats: [], loading: false })
         return []
@@ -40,7 +38,8 @@ const useBoatStore = create((set, get) => ({
   createBoat: async (boatData) => {
     set({ loading: true, error: null })
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+      const user = session?.user
       if (!user) throw new Error('No autenticado')
 
       const { data, error } = await supabase

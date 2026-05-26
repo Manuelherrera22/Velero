@@ -12,7 +12,8 @@ export default function AffiliateCommissions() {
 
   const fetchCommissions = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+      const user = session?.user
       if (!user) return
 
       // Get user's hotel QRs

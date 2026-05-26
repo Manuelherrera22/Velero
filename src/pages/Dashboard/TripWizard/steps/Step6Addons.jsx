@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
-import { Plus, Trash2, Wine, FileText } from 'lucide-react'
+import { Plus, Trash2, Package, FileText } from 'lucide-react'
 
 const Step6Addons = () => {
   const { formData, addAddon, removeAddon, updateAddon, hasBookings } = useTripWizardStore()
@@ -48,7 +48,7 @@ const Step6Addons = () => {
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px', display: 'block', fontWeight: 'bold' }}>Nombre *</label>
             <div className="input-with-icon">
-              <Wine className="input-icon" size={16} />
+              <Package className="input-icon" size={16} />
               <input
                 type="text"
                 className="input-control"
@@ -112,7 +112,7 @@ const Step6Addons = () => {
 
         {addons.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 'var(--space-8) 0', color: 'var(--text-muted)' }}>
-            <Wine size={40} style={{ opacity: 0.3, marginBottom: 'var(--space-2)' }} />
+            <Package size={40} style={{ opacity: 0.3, marginBottom: 'var(--space-2)' }} />
             <p>Aún no agregaste adicionales.</p>
             <p style={{ fontSize: '13px', marginTop: '4px' }}>Los adicionales son opcionales para los pasajeros y se suman al precio base.</p>
           </div>
