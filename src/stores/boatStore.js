@@ -11,7 +11,10 @@ const useBoatStore = create((set, get) => ({
     set({ loading: true, error: null })
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No autenticado')
+      if (!user) {
+        set({ boats: [], loading: false })
+        return []
+      }
 
       const { data, error } = await supabase
         .from('boats')
@@ -23,7 +26,8 @@ const useBoatStore = create((set, get) => ({
       set({ boats: data || [], loading: false })
       return data || []
     } catch (error) {
-      set({ error: error.message, loading: false })
+      console.error('Error fetching boats:', error)
+      set({ error: error.message, boats: [], loading: false })
       return []
     }
   },

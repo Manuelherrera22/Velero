@@ -66,7 +66,7 @@ export default function Checkout() {
         const parsed = JSON.parse(savedState)
         if (parsed.passengers && parsed.passengers.length > 0) setPassengers(parsed.passengers)
         if (parsed.formData && parsed.formData.name) setFormData(parsed.formData)
-        if (parsed.selectedAddons) setSelectedAddons(parsed.selectedAddons)
+        // Note: selectedAddons comes from URL params and cannot be restored via state setter
       } catch (err) {
         console.error('Error parsing session storage', err)
       }
