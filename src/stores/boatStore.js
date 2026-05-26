@@ -10,7 +10,10 @@ const useBoatStore = create((set, get) => ({
   fetchMyBoats: async () => {
     set({ loading: true, error: null })
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user } } = await Promise.race([
+        supabase.auth.getUser(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado al verificar la sesión')), 10000))
+      ])
       if (!user) {
         set({ boats: [], loading: false })
         return []
@@ -21,6 +24,7 @@ const useBoatStore = create((set, get) => ({
         .select('*')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false })
+        .abortSignal(AbortSignal.timeout(15000))
 
       if (error) throw error
       set({ boats: data || [], loading: false })
