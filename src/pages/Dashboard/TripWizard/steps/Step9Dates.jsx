@@ -115,7 +115,15 @@ const Step9Dates = () => {
   }
 
   const formatDateShort = (dateStr) => {
-    return new Date(dateStr + 'T12:00:00').toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' })
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  }
+
+  const formatDateLong = (dateStr) => {
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  }
+
+  const formatPrice = (value) => {
+    return Number(value || 0).toLocaleString('es-AR')
   }
 
   return (
@@ -320,42 +328,54 @@ const Step9Dates = () => {
               {formData.custom_dates.map(date => (
                 <div key={date.id} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)', transition: 'border-color 0.3s ease' }} className="date-row-hover">
                   <div style={{ flex: '1 1 300px', marginBottom: 'var(--space-2)' }} className="date-info-container">
-                    <p style={{ fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: 'var(--space-1)' }}>
-                      {date.departure_date === date.arrival_date 
-                        ? `📅 ${formatDateShort(date.departure_date)}`
-                        : `📅 ${formatDateShort(date.departure_date)} → ${formatDateShort(date.arrival_date)}`
-                      }
-                    </p>
+                    {date.departure_date === date.arrival_date ? (
+                      <p style={{ fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: 'var(--space-1)' }}>
+                        📅 {formatDateLong(date.departure_date)}
+                      </p>
+                    ) : (
+                      <div style={{ marginBottom: 'var(--space-1)' }}>
+                        <p style={{ fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '11px', padding: '1px 6px', backgroundColor: 'rgba(0, 180, 180, 0.15)', borderRadius: '4px', color: 'var(--color-primary-700)', fontWeight: 700 }}>ZARPE</span>
+                          {formatDateLong(date.departure_date)} {date.departure_time ? `a las ${date.departure_time}hs` : ''}
+                        </p>
+                        <p style={{ fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                          <span style={{ fontSize: '11px', padding: '1px 6px', backgroundColor: 'rgba(245, 158, 11, 0.15)', borderRadius: '4px', color: '#b45309', fontWeight: 700 }}>REGRESO</span>
+                          {formatDateLong(date.arrival_date)} {date.arrival_time ? `a las ${date.arrival_time}hs` : ''}
+                        </p>
+                      </div>
+                    )}
                     {/* Show all dates in sequence */}
                     {date.all_dates && date.all_dates.length > 2 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
                         {date.all_dates.map((d, i) => (
                           <span key={i} style={{ 
                             fontSize: '11px', 
-                            padding: '1px 6px', 
-                            backgroundColor: 'rgba(0, 180, 180, 0.1)', 
+                            padding: '2px 8px', 
+                            backgroundColor: i === 0 ? 'rgba(0, 180, 180, 0.15)' : i === date.all_dates.length - 1 ? 'rgba(245, 158, 11, 0.15)' : 'rgba(0, 0, 0, 0.05)', 
                             borderRadius: '4px', 
-                            color: 'var(--color-primary-700)',
+                            color: i === 0 ? 'var(--color-primary-700)' : i === date.all_dates.length - 1 ? '#b45309' : 'var(--text-secondary)',
                             fontWeight: 500
                           }}>
-                            {formatDateShort(d)}
+                            Día {i + 1}: {formatDateShort(d)}
                           </span>
                         ))}
                       </div>
                     )}
-                    <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      Salida: {date.departure_time || '--:--'} | Llegada: {date.arrival_time || '--:--'}
-                    </p>
+                    {date.departure_date === date.arrival_date && (
+                      <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                        ⛵ Salida: {date.departure_time || '--:--'}hs | 🏠 Regreso: {date.arrival_time || '--:--'}hs
+                      </p>
+                    )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-6)' }}>
                     <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>Pasajero</p>
-                      <p style={{ fontWeight: 'bold', color: 'var(--color-primary-500)' }}>$ {date.price_per_person}</p>
+                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>Por persona</p>
+                      <p style={{ fontWeight: 'bold', color: 'var(--color-primary-500)', fontSize: '16px' }}>$ {formatPrice(date.price_per_person)}</p>
                     </div>
                     {formData.allow_full_boat && (
                       <div style={{ textAlign: 'right' }}>
-                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>Barco</p>
-                        <p style={{ fontWeight: 'bold', color: 'var(--color-accent-500)' }}>$ {date.full_boat_price}</p>
+                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>Barco completo</p>
+                        <p style={{ fontWeight: 'bold', color: 'var(--color-accent-500)', fontSize: '16px' }}>$ {formatPrice(date.full_boat_price)}</p>
                       </div>
                     )}
                     {showBlockedSpots && (
