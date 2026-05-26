@@ -155,8 +155,30 @@ export default function QRLanding() {
                     <Star size={14} fill="currentColor" /> —
                   </div>
                   <div className="card__price">
+                    {trip.metadata?.discount_percentage > 0 && (
+                      <span style={{ 
+                        fontSize: '0.7rem', 
+                        background: 'var(--color-accent-500)', 
+                        color: 'white', 
+                        padding: '2px 6px', 
+                        borderRadius: '4px', 
+                        fontWeight: 700, 
+                        marginRight: '6px' 
+                      }}>
+                        -{trip.metadata.discount_percentage}%
+                      </span>
+                    )}
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontWeight: 'normal', marginRight: '4px' }}>Desde</span>
-                    {formatPrice(trip.price_per_person, trip.currency)}
+                    {trip.metadata?.discount_percentage > 0 ? (
+                      <>
+                        <span style={{ textDecoration: 'line-through', color: 'var(--text-tertiary)', fontSize: '0.85rem', marginRight: '4px' }}>
+                          {formatPrice(trip.price_per_person, trip.currency)}
+                        </span>
+                        {formatPrice(Math.round(trip.price_per_person * (1 - trip.metadata.discount_percentage / 100)), trip.currency)}
+                      </>
+                    ) : (
+                      formatPrice(trip.price_per_person, trip.currency)
+                    )}
                     <span>/persona</span>
                   </div>
                 </div>
