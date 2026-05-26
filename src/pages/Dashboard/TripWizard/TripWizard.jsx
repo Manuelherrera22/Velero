@@ -1,5 +1,5 @@
 import React from 'react'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, ChevronRight, Compass, Loader } from 'lucide-react'
 import { useTripWizardStore } from '../../../stores/useTripWizardStore'
 import supabase from '../../../lib/supabase'
@@ -34,7 +34,9 @@ const TripWizard = () => {
   const [errorMsg, setErrorMsg] = React.useState('')
   
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const copyFromId = location.state?.copyFromId
+  const initialStep = parseInt(searchParams.get('step')) || location.state?.initialStep || null
   const isEditing = id && id !== 'nueva'
   const isCopying = !!copyFromId
   const [isLoadingTrip, setIsLoadingTrip] = React.useState(isEditing || isCopying)
@@ -78,6 +80,10 @@ const TripWizard = () => {
           setErrorMsg("Error cargando los datos de la travesía. Por favor, intenta de nuevo.")
         } finally {
           setIsLoadingTrip(false)
+          // Jump to requested step if specified via ?step=N or state.initialStep
+          if (initialStep && initialStep >= 1 && initialStep <= totalSteps) {
+            setTimeout(() => useTripWizardStore.getState().setStep(initialStep), 50)
+          }
         }
       }
       loadTripForEdit()

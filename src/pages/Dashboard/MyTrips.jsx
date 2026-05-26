@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Plus, MoreVertical, Compass, AlertCircle } from 'lucide-react'
 import useTripStore from '../../stores/tripStore'
-import { useTripWizardStore } from '../../stores/useTripWizardStore'
 import './Dashboard.css'
 
 export default function MyTrips() {
@@ -147,7 +146,7 @@ export default function MyTrips() {
                           <div className="dash-dropdown" onClick={(e) => e.stopPropagation()}>
                             <button className="dash-dropdown__item" onClick={() => navigate('/dashboard/travesias/nueva', { state: { copyFromId: trip.id } })}>Copiar</button>
                             <button className="dash-dropdown__item" onClick={() => navigate(`/dashboard/travesias/${trip.id}/editar`)}>Editar</button>
-                            <button className="dash-dropdown__item" onClick={() => { useTripStore.getState(); /* Hack to ensure store exists if needed */ navigate(`/dashboard/travesias/${trip.id}/editar`); setTimeout(() => { useTripWizardStore.getState().currentStep = 7 }, 500) }}>Editar fecha y hora</button>
+                            <button className="dash-dropdown__item" onClick={() => navigate(`/dashboard/travesias/${trip.id}/editar?step=7`)}>Editar fecha y hora</button>
                             <button 
                               className="dash-dropdown__item dash-dropdown__item--danger"
                               onClick={() => {
