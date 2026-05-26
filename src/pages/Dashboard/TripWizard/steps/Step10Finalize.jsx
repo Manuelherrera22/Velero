@@ -171,37 +171,28 @@ const Step10Finalize = () => {
         const uploadedBlobs = results.filter(Boolean)
 
         uploadedUrls = [...uploadedBlobs, ...regularImages]
-
-        // Replace blob URLs in images_meta so that they are saved as real URLs in metadata
-        let blobIndex = 0;
-        const replaceBlobs = (urlArray) => {
-          if (!urlArray) return [];
-          if (!Array.isArray(urlArray)) {
-            if (urlArray.startsWith('blob:')) {
-              return uploadedBlobs[blobIndex++] || urlArray;
-            }
-            return urlArray;
-          }
-          return urlArray.map(u => {
-            if (u.startsWith('blob:')) {
-              return uploadedBlobs[blobIndex++] || u;
-            }
-            return u;
-          });
-        };
-
-        formData.images_meta.portada = replaceBlobs(formData.images_meta.portada);
-        formData.images_meta.camarote = replaceBlobs(formData.images_meta.camarote);
-        formData.images_meta.actividad = replaceBlobs(formData.images_meta.actividad);
-        formData.images_meta.comidas = replaceBlobs(formData.images_meta.comidas);
-        formData.images_meta.paisaje = replaceBlobs(formData.images_meta.paisaje);
       }
 
       // Validate boat_id: must be a valid UUID or null
       const isValidUUID = (val) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val)
       const cleanBoatId = (formData.boat_id && formData.boat_id !== 'NEW' && isValidUUID(String(formData.boat_id))) ? formData.boat_id : null
 
-      // 1. Save trip (with timeout to prevent infinite hangs)
+      setStatusMsg('Guardando travesía...')
+
+      // Clean metadata: remove blob URLs and store only real URLs to reduce payload size
+      const cleanMetadata = { ...formData }
+      // Replace images_meta blobs with uploaded URLs
+      cleanMetadata.images_meta = {
+        portada: typeof formData.images_meta.portada === 'string' && !formData.images_meta.portada.startsWith('blob:') ? formData.images_meta.portada : (uploadedUrls[0] || ''),
+        camarote: (formData.images_meta.camarote || []).filter(u => !u.startsWith('blob:')),
+        actividad: (formData.images_meta.actividad || []).filter(u => !u.startsWith('blob:')),
+        comidas: (formData.images_meta.comidas || []).filter(u => !u.startsWith('blob:')),
+        paisaje: (formData.images_meta.paisaje || []).filter(u => !u.startsWith('blob:'))
+      }
+      // Remove boat_id if invalid to prevent FK issues in metadata
+      if (!cleanBoatId) delete cleanMetadata.boat_id
+
+      // 1. Save trip (with 60s timeout for slow connections)
       const tripData = {
         captain_id: activeUser.id,
         boat_id: cleanBoatId,
@@ -223,7 +214,7 @@ const Step10Finalize = () => {
         status: isDraft ? 'draft' : 'published',
         images: uploadedUrls,
         tags: formData.tags || [],
-        metadata: formData
+        metadata: cleanMetadata
       }
 
       let tripInsertPromise;
@@ -244,7 +235,7 @@ const Step10Finalize = () => {
 
       const { data: trip, error: tripError } = await Promise.race([
         tripInsertPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('La base de datos (Supabase) tardó demasiado en responder al guardar la travesía.')), 15000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('La base de datos tardó demasiado. Verificá tu conexión a internet e intentá nuevamente.')), 60000))
       ])
 
       if (tripError) throw tripError
@@ -282,7 +273,7 @@ const Step10Finalize = () => {
 
         const { error: datesError } = await Promise.race([
           datesInsertPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('La base de datos tardó demasiado en responder al guardar las fechas.')), 15000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('La base de datos tardó demasiado al guardar las fechas. Verificá tu conexión.')), 60000))
         ])
 
         if (datesError) {

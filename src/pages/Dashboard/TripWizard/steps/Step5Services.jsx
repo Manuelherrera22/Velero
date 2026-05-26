@@ -1,7 +1,8 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
 import useBoatStore from '../../../../stores/boatStore'
-import { Anchor, HelpCircle, Plus } from 'lucide-react'
+import { Anchor, HelpCircle, Plus, ExternalLink } from 'lucide-react'
 
 const AVAILABLE_SERVICES = [
   'Seguro',
@@ -22,6 +23,7 @@ const Step5Services = () => {
   const { formData, toggleService, updateFormData, hasBookings, addCustomService } = useTripWizardStore()
   const [customServiceInput, setCustomServiceInput] = React.useState('')
   const { boats, loading, fetchMyBoats } = useBoatStore()
+  const navigate = useNavigate()
 
   React.useEffect(() => {
     fetchMyBoats()
@@ -183,8 +185,14 @@ const Step5Services = () => {
             <h4 style={{ fontWeight: 'bold', color: 'var(--color-accent-500)', marginBottom: 'var(--space-2)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
               <Anchor size={20}/> Crear Embarcación
             </h4>
-            <p className="step-subtitle" style={{ marginBottom: 'var(--space-4)' }}>Guarda la travesía temporalmente para agregar el barco nuevo en una pestaña externa, o completa el mini-formulario aquí (Coming Soon).</p>
-            <button className="btn btn--accent" style={{ width: '100%' }}>Configurar barco ahora</button>
+            <p className="step-subtitle" style={{ marginBottom: 'var(--space-4)' }}>Vas a ser redirigido a la sección de embarcaciones para crear tu barco. Cuando vuelvas, lo podrás seleccionar de la lista.</p>
+            <button 
+              className="btn btn--accent" 
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              onClick={() => navigate('/dashboard/embarcaciones')}
+            >
+              <ExternalLink size={16} /> Ir a crear embarcación
+            </button>
           </div>
         )}
 
