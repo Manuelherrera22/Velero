@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Eye, Check, X, MapPin, Users, AlertCircle, Loader, Percent, Save } from 'lucide-react'
+import { Eye, Check, X, MapPin, Users, AlertCircle, Loader } from 'lucide-react'
 import supabase from '../../lib/supabase'
 
 export default function ReviewTrips() {
@@ -10,7 +10,6 @@ export default function ReviewTrips() {
   const [rejectId, setRejectId] = useState(null)
   const [rejectReason, setRejectReason] = useState('')
   const [actionLoading, setActionLoading] = useState(null)
-  const [discountInputs, setDiscountInputs] = useState({})
 
   useEffect(() => { fetchTrips() }, [filter])
 
@@ -28,14 +27,6 @@ export default function ReviewTrips() {
 
       const { data, error } = await query
       if (error) throw error
-      
-      // Initialize discount inputs
-      const discounts = {}
-      data?.forEach(t => {
-        discounts[t.id] = t.metadata?.discount_percentage || ''
-      })
-      setDiscountInputs(discounts)
-      
       setTrips(data || [])
     } catch (e) {
       console.error("Error fetching trips:", e)
@@ -46,34 +37,36 @@ export default function ReviewTrips() {
 
   const handleApprove = async (tripId) => {
     setActionLoading(tripId)
-    await supabase.from('trips').update({ status: 'published' }).eq('id', tripId)
-    await fetchTrips()
-    setActionLoading(null)
+    try {
+      const { error } = await supabase.from('trips').update({ status: 'published' }).eq('id', tripId)
+      if (error) throw error
+      await fetchTrips()
+    } catch (err) {
+      console.error('Error al aprobar:', err)
+      alert(`Error al aprobar la travesía: ${err.message || 'Error desconocido'}.\n\nAsegurate de que tu cuenta tenga rol "admin" en la tabla profiles.`)
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   const handleReject = async (tripId) => {
-    if (!rejectReason.trim()) return
+    if (!rejectReason.trim()) {
+      alert('Debes ingresar un motivo para rechazar la travesía.')
+      return
+    }
     setActionLoading(tripId)
-    await supabase.from('trips').update({ status: 'rejected', rejection_reason: rejectReason }).eq('id', tripId)
-    setRejectId(null)
-    setRejectReason('')
-    await fetchTrips()
-    setActionLoading(null)
-  }
-
-  const handleDiscountChange = (tripId, value) => {
-    setDiscountInputs(prev => ({ ...prev, [tripId]: value }))
-  }
-
-  const handleSaveDiscount = async (trip) => {
-    setActionLoading(`discount-${trip.id}`)
-    const newValue = parseInt(discountInputs[trip.id]) || 0
-    const newMetadata = { ...(trip.metadata || {}), discount_percentage: newValue }
-    
-    await supabase.from('trips').update({ metadata: newMetadata }).eq('id', trip.id)
-    
-    setTrips(trips.map(t => t.id === trip.id ? { ...t, metadata: newMetadata } : t))
-    setActionLoading(null)
+    try {
+      const { error } = await supabase.from('trips').update({ status: 'rejected', rejection_reason: rejectReason }).eq('id', tripId)
+      if (error) throw error
+      setRejectId(null)
+      setRejectReason('')
+      await fetchTrips()
+    } catch (err) {
+      console.error('Error al rechazar:', err)
+      alert(`Error al rechazar la travesía: ${err.message || 'Error desconocido'}.\n\nAsegurate de que tu cuenta tenga rol "admin" en la tabla profiles.`)
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   const formatPrice = (p, c) => c === 'EUR' ? `€${p}` : `$${p?.toLocaleString('es-AR')}`
@@ -135,34 +128,9 @@ export default function ReviewTrips() {
               </div>
             )}
 
-            <div className="item-card__footer" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '12px' }}>
+            <div className="item-card__footer">
               <span><Users size={14} style={{ verticalAlign: '-2px' }} /> {trip.capacity} pers. · {trip.tags?.join(', ') || '—'}</span>
               <span style={{ color: 'var(--color-accent-400)', fontWeight: 600 }}>{formatPrice(trip.price_per_person, trip.currency)}/pers.</span>
-            </div>
-
-            {/* Discount Management */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '8px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}><Percent size={14} style={{ verticalAlign: '-2px', marginRight: '4px' }}/> Descuento aplicado:</span>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input 
-                  type="number" 
-                  min="0" 
-                  max="100" 
-                  className="input" 
-                  style={{ width: '80px', padding: '4px 8px', minHeight: '32px' }} 
-                  placeholder="%" 
-                  value={discountInputs[trip.id] || ''} 
-                  onChange={(e) => handleDiscountChange(trip.id, e.target.value)} 
-                />
-                <button 
-                  className="btn btn--outline btn--sm" 
-                  style={{ minHeight: '32px', padding: '0 12px' }}
-                  onClick={() => handleSaveDiscount(trip)}
-                  disabled={actionLoading === `discount-${trip.id}` || parseInt(discountInputs[trip.id] || 0) === (trip.metadata?.discount_percentage || 0)}
-                >
-                  {actionLoading === `discount-${trip.id}` ? <Loader size={14} className="spin" /> : <Save size={14} />}
-                </button>
-              </div>
             </div>
 
             {trip.status === 'pending' && (
@@ -171,7 +139,7 @@ export default function ReviewTrips() {
                   <div className="admin-reject-input">
                     <input className="input" placeholder="Motivo del rechazo..." value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} autoFocus />
                     <div className="admin-action-row">
-                      <button className="btn btn--ghost btn--sm" style={{ flex: 1 }} onClick={() => setRejectId(null)}>Cancelar</button>
+                      <button className="btn btn--ghost btn--sm" style={{ flex: 1 }} onClick={() => { setRejectId(null); setRejectReason('') }}>Cancelar</button>
                       <button className="btn btn--accent btn--sm" style={{ flex: 1, background: 'var(--color-error)' }} onClick={() => handleReject(trip.id)} disabled={actionLoading === trip.id}>
                         {actionLoading === trip.id ? <Loader size={14} className="spin" /> : 'Confirmar Rechazo'}
                       </button>
