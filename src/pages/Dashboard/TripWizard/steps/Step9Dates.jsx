@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
-import { Calendar as CalendarIcon, Clock, Info, Trash2 } from 'lucide-react'
+import { Calendar as CalendarIcon, Clock, Info, Trash2, Lock, Unlock } from 'lucide-react'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/style.css'
 
@@ -8,6 +8,7 @@ const Step9Dates = () => {
   const { formData, updateFormData, hasBookings } = useTripWizardStore()
   
   const [selectedDates, setSelectedDates] = useState([])
+  const [showBlockedSpots, setShowBlockedSpots] = useState(false)
   const [newDate, setNewDate] = useState({
     departure_time: '',
     arrival_time: '',
@@ -15,7 +16,9 @@ const Step9Dates = () => {
     full_boat_price: formData.full_boat_price || 0,
   })
 
-  // Helper: generate all dates between two dates (inclusive)
+  const durationDays = formData.duration_days || 1
+
+  // Helper: generate all dates in a range (inclusive)
   const getDatesInRange = (start, end) => {
     const dates = []
     const current = new Date(start)
@@ -27,51 +30,67 @@ const Step9Dates = () => {
     return dates
   }
 
-  // Handle calendar selection: supports both individual clicks and range
-  const handleCalendarSelect = (value) => {
-    if (!value) {
+  // When duration > 1: user clicks ONE date, system auto-selects N consecutive days
+  const handleSingleClickAutoRange = (date) => {
+    if (!date) {
       setSelectedDates([])
       return
     }
-
-    // If range mode returned a range object { from, to }
-    if (value.from && value.to) {
-      const allDates = getDatesInRange(value.from, value.to)
-      setSelectedDates(allDates)
-    } else if (value.from && !value.to) {
-      // Partial range selection (only start picked so far)
-      setSelectedDates([value.from])
-    } else if (Array.isArray(value)) {
-      // Multiple mode
-      setSelectedDates(value)
-    } else {
-      setSelectedDates([value])
+    // Generate durationDays consecutive dates starting from the clicked date
+    const range = []
+    for (let i = 0; i < durationDays; i++) {
+      const d = new Date(date)
+      d.setDate(d.getDate() + i)
+      range.push(d)
     }
+    setSelectedDates(range)
+  }
+
+  // For duration=1: multiple mode
+  const handleMultiSelect = (dates) => {
+    setSelectedDates(dates || [])
   }
 
   const handleAddDate = () => {
     if (!selectedDates || selectedDates.length === 0) return
 
     const newDates = []
-    const durationDays = formData.duration_days || 1
     
-    selectedDates.forEach((date, i) => {
-      const curDep = new Date(date)
-      const curArr = new Date(date)
-      curArr.setDate(curArr.getDate() + (durationDays - 1))
+    if (durationDays > 1) {
+      // In auto-range mode: create ONE trip entry spanning all selected days
+      const sortedDates = [...selectedDates].sort((a, b) => a - b)
+      const departure = sortedDates[0]
+      const arrival = sortedDates[sortedDates.length - 1]
       
       newDates.push({
-        id: Date.now() + i,
-        departure_date: curDep.toISOString().split('T')[0],
+        id: Date.now(),
+        departure_date: departure.toISOString().split('T')[0],
         departure_time: newDate.departure_time,
-        arrival_date: curArr.toISOString().split('T')[0],
+        arrival_date: arrival.toISOString().split('T')[0],
         arrival_time: newDate.arrival_time,
         price_per_person: newDate.price_per_person,
         full_boat_price: newDate.full_boat_price,
         blocked_spots: 0,
-        available_spots: formData.max_passengers || 6
+        available_spots: formData.max_passengers || 6,
+        all_dates: sortedDates.map(d => d.toISOString().split('T')[0])
       })
-    })
+    } else {
+      // For 1-day trips: each selected date = one entry
+      selectedDates.forEach((date, i) => {
+        const curDep = new Date(date)
+        newDates.push({
+          id: Date.now() + i,
+          departure_date: curDep.toISOString().split('T')[0],
+          departure_time: newDate.departure_time,
+          arrival_date: curDep.toISOString().split('T')[0],
+          arrival_time: newDate.arrival_time,
+          price_per_person: newDate.price_per_person,
+          full_boat_price: newDate.full_boat_price,
+          blocked_spots: 0,
+          available_spots: formData.max_passengers || 6
+        })
+      })
+    }
 
     updateFormData({
       custom_dates: [...formData.custom_dates, ...newDates]
@@ -95,23 +114,9 @@ const Step9Dates = () => {
     })
   }
 
-  // For the DayPicker: determine which dates are already booked as departure days
-  // and disable the duration-following days
-  const disabledDays = [
-    { before: new Date() },
-    ...selectedDates.flatMap(date => {
-      const days = formData.duration_days || 1;
-      if (days <= 1) return [];
-      const from = new Date(date);
-      from.setDate(from.getDate() + 1);
-      const to = new Date(date);
-      to.setDate(to.getDate() + (days - 1));
-      return [{ from, to }];
-    })
-  ]
-
-  const durationDays = formData.duration_days || 1
-  const useRangeMode = durationDays > 1
+  const formatDateShort = (dateStr) => {
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' })
+  }
 
   return (
     <div className="step-container">
@@ -121,8 +126,8 @@ const Step9Dates = () => {
           Agregar fechas a la travesía
         </h2>
         <p className="step-subtitle">
-          {useRangeMode 
-            ? `Seleccioná un rango de días en el calendario. Cada día dentro del rango se creará como una fecha de salida independiente (travesía de ${durationDays} días).`
+          {durationDays > 1 
+            ? `Hacé clic en el día de zarpe y el sistema marcará automáticamente los ${durationDays} días de la travesía.`
             : 'Selecciona en el calendario los días de salida, configura los horarios y añade las fechas.'
           }
         </p>
@@ -132,7 +137,7 @@ const Step9Dates = () => {
         
         {hasBookings && (
           <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, marginBottom: 'var(--space-6)' }}>
-            ⚠️ Esta travesía ya tiene reservas. Solo puedes modificar las plazas bloqueadas para mantener la disponibilidad real. No puedes añadir ni eliminar fechas.
+            ⚠️ Esta travesía ya tiene reservas. Solo puedes modificar las plazas bloqueadas.
           </div>
         )}
 
@@ -146,35 +151,56 @@ const Step9Dates = () => {
               <Info size={16} color="var(--text-muted)" />
             </label>
 
-            {useRangeMode && (
+            {durationDays > 1 && (
               <div style={{ backgroundColor: 'rgba(0, 180, 180, 0.05)', border: '1px solid rgba(0, 180, 180, 0.2)', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: 'var(--color-primary-700)', marginBottom: 'var(--space-4)', width: '100%', textAlign: 'left' }}>
-                <strong>Travesía de {durationDays} días:</strong> Seleccioná un rango de fechas. Cada día del rango se creará como una <b>fecha de salida independiente</b>, y el sistema calculará automáticamente el día de regreso.
+                <strong>Travesía de {durationDays} días:</strong> Hacé clic en el <b>día de zarpe</b>. El sistema marcará automáticamente los {durationDays} días consecutivos.
               </div>
             )}
 
             <div style={{ transform: 'scale(0.95)', transformOrigin: 'top center' }}>
-              <DayPicker
-                mode={useRangeMode ? 'range' : 'multiple'}
-                selected={useRangeMode 
-                  ? (selectedDates.length >= 2 
-                    ? { from: selectedDates[0], to: selectedDates[selectedDates.length - 1] }
-                    : selectedDates.length === 1 
-                      ? { from: selectedDates[0], to: undefined }
-                      : undefined
-                    )
-                  : selectedDates
-                }
-                onSelect={useRangeMode ? handleCalendarSelect : setSelectedDates}
-                disabled={[{ before: new Date() }]}
-              />
+              {durationDays > 1 ? (
+                <DayPicker
+                  mode="single"
+                  selected={selectedDates[0] || undefined}
+                  onSelect={handleSingleClickAutoRange}
+                  disabled={[{ before: new Date() }]}
+                  modifiers={{
+                    rangeHighlight: selectedDates
+                  }}
+                  modifiersStyles={{
+                    rangeHighlight: {
+                      backgroundColor: 'rgba(0, 180, 180, 0.15)',
+                      borderRadius: '4px'
+                    }
+                  }}
+                />
+              ) : (
+                <DayPicker
+                  mode="multiple"
+                  selected={selectedDates}
+                  onSelect={handleMultiSelect}
+                  disabled={[{ before: new Date() }]}
+                />
+              )}
             </div>
 
             {selectedDates.length > 0 && (
-              <div style={{ width: '100%', padding: '8px 12px', backgroundColor: 'rgba(0, 180, 180, 0.08)', borderRadius: '8px', fontSize: '13px', color: 'var(--color-primary-700)', marginTop: 'var(--space-2)' }}>
-                ✅ {selectedDates.length} fecha{selectedDates.length > 1 ? 's' : ''} de salida seleccionada{selectedDates.length > 1 ? 's' : ''}
-                {useRangeMode && selectedDates.length > 1 && (
-                  <span> ({selectedDates[0].toLocaleDateString('es', { day: 'numeric', month: 'short' })} al {selectedDates[selectedDates.length-1].toLocaleDateString('es', { day: 'numeric', month: 'short' })})</span>
-                )}
+              <div style={{ width: '100%', padding: '10px 12px', backgroundColor: 'rgba(0, 180, 180, 0.08)', borderRadius: '8px', fontSize: '13px', color: 'var(--color-primary-700)', marginTop: 'var(--space-2)' }}>
+                <strong>✅ {durationDays > 1 ? 'Secuencia seleccionada:' : `${selectedDates.length} fecha${selectedDates.length > 1 ? 's' : ''} seleccionada${selectedDates.length > 1 ? 's' : ''}:`}</strong>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
+                  {selectedDates.map((d, i) => (
+                    <span key={i} style={{ 
+                      display: 'inline-block', 
+                      padding: '2px 8px', 
+                      backgroundColor: 'rgba(0, 180, 180, 0.15)', 
+                      borderRadius: '4px', 
+                      fontSize: '12px',
+                      fontWeight: 600
+                    }}>
+                      {d.toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' })}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -259,7 +285,9 @@ const Step9Dates = () => {
                 <CalendarIcon size={20} />
                 {(!selectedDates || selectedDates.length === 0) 
                   ? 'Primero elige un día en el calendario' 
-                  : `Añadir ${selectedDates.length} fecha${selectedDates.length > 1 ? 's' : ''}`}
+                  : durationDays > 1
+                    ? `Añadir travesía (${selectedDates.length} días)`
+                    : `Añadir ${selectedDates.length} fecha${selectedDates.length > 1 ? 's' : ''}`}
               </button>
             </div>
 
@@ -268,7 +296,20 @@ const Step9Dates = () => {
 
         {/* Table of added dates */}
         <div style={{ backgroundColor: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-2xl)', padding: 'var(--space-6)', marginTop: 'var(--space-8)' }}>
-          <h3 style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: 'var(--space-4)', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 'var(--space-2)' }}>Fechas añadidas</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)', borderBottom: '1px solid var(--border-color)', paddingBottom: 'var(--space-2)' }}>
+            <h3 style={{ fontWeight: 'bold', fontSize: '18px', color: 'var(--text-primary)' }}>Fechas añadidas</h3>
+            
+            {formData.custom_dates.length > 0 && (
+              <button 
+                onClick={() => setShowBlockedSpots(!showBlockedSpots)}
+                className="btn btn--ghost btn--sm"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: showBlockedSpots ? 'var(--color-accent-500)' : 'var(--text-muted)' }}
+              >
+                {showBlockedSpots ? <Lock size={14} /> : <Unlock size={14} />}
+                {showBlockedSpots ? 'Ocultar plazas bloqueadas' : 'Gestionar plazas bloqueadas'}
+              </button>
+            )}
+          </div>
           
           {formData.custom_dates.length === 0 ? (
             <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 'var(--space-8) 0' }}>
@@ -278,14 +319,31 @@ const Step9Dates = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
               {formData.custom_dates.map(date => (
                 <div key={date.id} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-xl)', transition: 'border-color 0.3s ease' }} className="date-row-hover">
-                  <div style={{ flex: '1 1 300px', marginBottom: 'var(--space-4)' }} className="date-info-container">
+                  <div style={{ flex: '1 1 300px', marginBottom: 'var(--space-2)' }} className="date-info-container">
                     <p style={{ fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: 'var(--space-1)' }}>
                       {date.departure_date === date.arrival_date 
-                        ? `📅 ${date.departure_date}`
-                        : `📅 Del ${date.departure_date} al ${date.arrival_date}`
+                        ? `📅 ${formatDateShort(date.departure_date)}`
+                        : `📅 ${formatDateShort(date.departure_date)} → ${formatDateShort(date.arrival_date)}`
                       }
                     </p>
-                    <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
+                    {/* Show all dates in sequence */}
+                    {date.all_dates && date.all_dates.length > 2 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+                        {date.all_dates.map((d, i) => (
+                          <span key={i} style={{ 
+                            fontSize: '11px', 
+                            padding: '1px 6px', 
+                            backgroundColor: 'rgba(0, 180, 180, 0.1)', 
+                            borderRadius: '4px', 
+                            color: 'var(--color-primary-700)',
+                            fontWeight: 500
+                          }}>
+                            {formatDateShort(d)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '4px' }}>
                       Salida: {date.departure_time || '--:--'} | Llegada: {date.arrival_time || '--:--'}
                     </p>
                   </div>
@@ -300,19 +358,21 @@ const Step9Dates = () => {
                         <p style={{ fontWeight: 'bold', color: 'var(--color-accent-500)' }}>$ {date.full_boat_price}</p>
                       </div>
                     )}
-                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }} title="Lugares que vendiste por tu cuenta y ya no están disponibles en Kailu">
-                        Plazas Bloqueadas <Info size={12} style={{ display: 'inline', verticalAlign: 'middle' }}/>
-                      </label>
-                      <input 
-                        type="number" 
-                        min="0"
-                        max={formData.max_passengers || 6}
-                        value={date.blocked_spots || 0}
-                        onChange={(e) => handleUpdateBlockedSpots(date.id, e.target.value)}
-                        style={{ width: '60px', padding: '4px', textAlign: 'center', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 'bold' }}
-                      />
-                    </div>
+                    {showBlockedSpots && (
+                      <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }} title="Lugares que vendiste por tu cuenta y ya no están disponibles en Kailu">
+                          Bloqueadas <Info size={12} style={{ display: 'inline', verticalAlign: 'middle' }}/>
+                        </label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          max={formData.max_passengers || 6}
+                          value={date.blocked_spots || 0}
+                          onChange={(e) => handleUpdateBlockedSpots(date.id, e.target.value)}
+                          style={{ width: '60px', padding: '4px', textAlign: 'center', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 'bold' }}
+                        />
+                      </div>
+                    )}
                     {!hasBookings && (
                       <button 
                         onClick={() => handleRemoveDate(date.id)}

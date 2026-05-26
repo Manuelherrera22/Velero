@@ -128,6 +128,19 @@ export const useTripWizardStore = create(
     return { formData: { ...state.formData, images_meta: imagesMeta }};
   }),
 
+  // Replace a blob URL with a real uploaded URL (used by eager upload)
+  replacePhoto: (category, oldUrl, newUrl) => set((state) => {
+    const imagesMeta = { ...state.formData.images_meta };
+    if (category === 'portada') {
+      if (imagesMeta.portada === oldUrl) {
+        imagesMeta.portada = newUrl;
+      }
+    } else {
+      imagesMeta[category] = (imagesMeta[category] || []).map(u => u === oldUrl ? newUrl : u);
+    }
+    return { formData: { ...state.formData, images_meta: imagesMeta }};
+  }),
+
   getTotalPhotos: () => {
     const imagesMeta = get().formData.images_meta;
     let count = imagesMeta.portada ? 1 : 0;
@@ -145,14 +158,37 @@ export const useTripWizardStore = create(
         const loadedData = tripData.metadata || { ...initialData };
         
         if (datesData && datesData.length > 0) {
-          loadedData.custom_dates = datesData.map(d => ({
-            id: d.id,
-            departure_date: d.date,
-            departure_time: d.start_time?.slice(0, 5) || '08:00',
-            arrival_time: d.end_time?.slice(0, 5) || '',
-            available_spots: d.available_spots,
-            blocked_spots: d.blocked_spots || 0
-          }));
+          const durationDays = loadedData.duration_days || 1;
+          loadedData.custom_dates = datesData.map(d => {
+            const depDate = d.date;
+            const arrDate = new Date(depDate + 'T12:00:00');
+            arrDate.setDate(arrDate.getDate() + (durationDays - 1));
+            const arrDateStr = arrDate.toISOString().split('T')[0];
+            
+            // Generate all_dates array for multi-day trips
+            let allDates = undefined;
+            if (durationDays > 1) {
+              allDates = [];
+              const cur = new Date(depDate + 'T12:00:00');
+              for (let i = 0; i < durationDays; i++) {
+                allDates.push(cur.toISOString().split('T')[0]);
+                cur.setDate(cur.getDate() + 1);
+              }
+            }
+            
+            return {
+              id: d.id,
+              departure_date: depDate,
+              arrival_date: arrDateStr,
+              departure_time: d.start_time?.slice(0, 5) || '08:00',
+              arrival_time: d.end_time?.slice(0, 5) || '',
+              price_per_person: d.price_per_person_override || loadedData.price_per_person || 0,
+              full_boat_price: d.full_boat_price_override || loadedData.full_boat_price || 0,
+              available_spots: d.available_spots,
+              blocked_spots: d.blocked_spots || 0,
+              all_dates: allDates
+            };
+          });
         }
 
         set({
