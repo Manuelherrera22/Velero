@@ -197,12 +197,14 @@ const Step10Finalize = () => {
         formData.images_meta.paisaje = replaceBlobs(formData.images_meta.paisaje);
       }
 
-      setStatusMsg('Guardando travesía...')
+      // Validate boat_id: must be a valid UUID or null
+      const isValidUUID = (val) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val)
+      const cleanBoatId = (formData.boat_id && formData.boat_id !== 'NEW' && isValidUUID(String(formData.boat_id))) ? formData.boat_id : null
 
       // 1. Save trip (with timeout to prevent infinite hangs)
       const tripData = {
         captain_id: activeUser.id,
-        boat_id: (formData.boat_id && String(formData.boat_id).length > 20 && formData.boat_id !== 'NEW') ? formData.boat_id : null,
+        boat_id: cleanBoatId,
         title: formData.title || 'Travesía sin título',
         description: formData.description,
         location: formData.location || 'Sin ubicación',

@@ -230,14 +230,38 @@ export default function TripDetail() {
               </div>
             )}
             
-            {(trip.cancellation_policy || trip.pension_type) && (
+            {(trip.cancellation_policy || trip.pension_type || trip.min_passengers) && (
               <div className="trip-detail__section" style={{ background: 'var(--color-bg-secondary)', padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)' }}>
-                <h2>Políticas y Reglas</h2>
-                <ul style={{ paddingLeft: '20px', color: 'var(--text-secondary)', marginTop: '10px' }}>
-                  {trip.pension_type && <li><strong>Pensión:</strong> {trip.pension_type}</li>}
-                  {trip.cancellation_policy && <li><strong>Cancelación:</strong> Política {trip.cancellation_policy}</li>}
-                  {trip.min_passengers && <li><strong>Pasajeros mínimos:</strong> Requiere {trip.min_passengers} pasajeros para zarpar.</li>}
-                </ul>
+                <h2>Información adicional</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+                  {trip.pension_type && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-secondary)' }}>
+                      <span style={{ fontSize: '18px' }}>🍽️</span>
+                      <div>
+                        <p style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)' }}>Régimen de comidas</p>
+                        <p style={{ fontSize: '13px' }}>{trip.pension_type}</p>
+                      </div>
+                    </div>
+                  )}
+                  {trip.min_passengers && trip.min_passengers > 1 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-secondary)' }}>
+                      <span style={{ fontSize: '18px' }}>👥</span>
+                      <div>
+                        <p style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)' }}>Mínimo de pasajeros</p>
+                        <p style={{ fontSize: '13px' }}>Se necesitan al menos {trip.min_passengers} pasajeros para confirmar la salida.</p>
+                      </div>
+                    </div>
+                  )}
+                  {trip.cancellation_policy && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-secondary)' }}>
+                      <span style={{ fontSize: '18px' }}>📋</span>
+                      <div>
+                        <p style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)' }}>Cancelación</p>
+                        <p style={{ fontSize: '13px' }}>{trip.cancellation_policy}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
