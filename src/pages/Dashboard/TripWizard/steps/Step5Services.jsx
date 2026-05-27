@@ -22,7 +22,7 @@ const AVAILABLE_SERVICES = [
 const Step5Services = () => {
   const { formData, toggleService, updateFormData, hasBookings, addCustomService } = useTripWizardStore()
   const [customServiceInput, setCustomServiceInput] = React.useState('')
-  const { boats, loading, fetchMyBoats } = useBoatStore()
+  const { boats, loading, error, fetchMyBoats } = useBoatStore()
   const navigate = useNavigate()
 
   React.useEffect(() => {
@@ -153,25 +153,85 @@ const Step5Services = () => {
           </div>
         </div>
 
-        <select 
-          className="input-control"
-          style={{ fontWeight: 500, opacity: hasBookings ? 0.6 : 1, pointerEvents: hasBookings ? 'none' : 'auto' }}
-          value={formData.boat_id || ''}
-          onChange={(e) => updateFormData({ boat_id: e.target.value })}
-          disabled={loading}
-        >
-          <option value="" disabled>
-            {loading ? 'Cargando embarcaciones...' : 'Seleccione embarcación...'}
-          </option>
-          {boats.map(b => (
-            <option key={b.id} value={b.id}>{b.name} {b.model ? `(${b.model})` : ''}</option>
-          ))}
-          {!loading && (
-            <option value="NEW" style={{ fontWeight: 'bold', color: 'var(--color-accent-500)' }}>
-              ✨ Agregar nueva embarcación
-            </option>
-          )}
-        </select>
+        {/* Error state with retry */}
+        {error && (
+          <div style={{ 
+            backgroundColor: 'rgba(239, 68, 68, 0.08)', 
+            border: '1px solid rgba(239, 68, 68, 0.3)', 
+            borderRadius: 'var(--radius-xl)', 
+            padding: 'var(--space-4)', 
+            marginBottom: 'var(--space-4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 'var(--space-4)'
+          }}>
+            <p style={{ color: '#ef4444', fontSize: '14px', margin: 0 }}>
+              No se pudieron cargar las embarcaciones. Verifica tu conexion.
+            </p>
+            <button 
+              className="btn btn--outline btn--sm" 
+              style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+              onClick={() => fetchMyBoats()}
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
+
+        {loading ? (
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 'var(--space-3)', 
+            padding: 'var(--space-4)', 
+            backgroundColor: 'rgba(0, 180, 180, 0.05)', 
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid rgba(0, 180, 180, 0.15)'
+          }}>
+            <div className="spin" style={{ width: '20px', height: '20px', border: '2px solid rgba(0,180,180,0.2)', borderTop: '2px solid var(--color-primary-500)', borderRadius: '50%' }} />
+            <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Buscando tus embarcaciones...</span>
+          </div>
+        ) : (
+          <>
+            <select 
+              className="input-control"
+              style={{ fontWeight: 500, opacity: hasBookings ? 0.6 : 1, pointerEvents: hasBookings ? 'none' : 'auto' }}
+              value={formData.boat_id || ''}
+              onChange={(e) => updateFormData({ boat_id: e.target.value })}
+            >
+              <option value="" disabled>
+                {boats.length === 0 ? 'No hay embarcaciones -- Crea una primero' : 'Seleccione embarcacion...'}
+              </option>
+              {boats.map(b => (
+                <option key={b.id} value={b.id}>{b.name} {b.model ? `(${b.model})` : ''}</option>
+              ))}
+              <option value="NEW" style={{ fontWeight: 'bold', color: 'var(--color-accent-500)' }}>
+                + Agregar nueva embarcacion
+              </option>
+            </select>
+
+            {boats.length === 0 && !loading && (
+              <div style={{ 
+                marginTop: 'var(--space-3)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 'var(--space-3)' 
+              }}>
+                <button 
+                  className="btn btn--ghost btn--sm" 
+                  style={{ fontSize: '13px', color: 'var(--color-primary-500)' }}
+                  onClick={() => fetchMyBoats()}
+                >
+                  Recargar lista
+                </button>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Si acabas de crear una, hace clic en "Recargar lista"
+                </span>
+              </div>
+            )}
+          </>
+        )}
 
         {formData.boat_id === 'NEW' && (
           <div style={{ 
@@ -183,15 +243,15 @@ const Step5Services = () => {
             animation: 'fadeIn 0.3s ease-out'
           }}>
             <h4 style={{ fontWeight: 'bold', color: 'var(--color-accent-500)', marginBottom: 'var(--space-2)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-              <Anchor size={20}/> Crear Embarcación
+              <Anchor size={20}/> Crear Embarcacion
             </h4>
-            <p className="step-subtitle" style={{ marginBottom: 'var(--space-4)' }}>Vas a ser redirigido a la sección de embarcaciones para crear tu barco. Cuando vuelvas, lo podrás seleccionar de la lista.</p>
+            <p className="step-subtitle" style={{ marginBottom: 'var(--space-4)' }}>Vas a ser redirigido a la seccion de embarcaciones para crear tu barco. Cuando vuelvas, lo podras seleccionar de la lista.</p>
             <button 
               className="btn btn--accent" 
               style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               onClick={() => navigate('/dashboard/embarcaciones')}
             >
-              <ExternalLink size={16} /> Ir a crear embarcación
+              <ExternalLink size={16} /> Ir a crear embarcacion
             </button>
           </div>
         )}

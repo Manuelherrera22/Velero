@@ -1,19 +1,44 @@
 import { create } from 'zustand'
 import supabase from '../lib/supabase'
 
+// Helper: wait until supabase has a session (or timeout)
+const waitForSession = async (maxWaitMs = 5000) => {
+  // First try: instant check
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session?.user) return session.user
+
+  // If no session yet, wait for auth state change
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      sub.unsubscribe()
+      resolve(null)
+    }, maxWaitMs)
+
+    const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        clearTimeout(timeout)
+        sub.unsubscribe()
+        resolve(session.user)
+      }
+    })
+  })
+}
+
 const useBoatStore = create((set, get) => ({
   boats: [],
   loading: false,
   error: null,
+  _initialized: false,
 
-  // Fetch boats for the current user
+  // Fetch boats for the current user — waits for auth if needed
   fetchMyBoats: async () => {
     set({ loading: true, error: null })
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const user = session?.user
+      // Wait for user to be available (handles race condition on page load)
+      const user = await waitForSession(6000)
       if (!user) {
-        set({ boats: [], loading: false })
+        console.warn('[BoatStore] No session after waiting — boats will be empty')
+        set({ boats: [], loading: false, _initialized: true })
         return []
       }
 
@@ -25,11 +50,11 @@ const useBoatStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(15000))
 
       if (error) throw error
-      set({ boats: data || [], loading: false })
+      set({ boats: data || [], loading: false, _initialized: true })
       return data || []
     } catch (error) {
       console.error('Error fetching boats:', error)
-      set({ error: error.message, boats: [], loading: false })
+      set({ error: error.message, boats: [], loading: false, _initialized: true })
       return []
     }
   },
