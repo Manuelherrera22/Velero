@@ -3,25 +3,42 @@ import supabase from '../lib/supabase'
 
 // Helper: wait until supabase has a session (or timeout)
 const waitForSession = async (maxWaitMs = 5000) => {
-  // First try: instant check
-  const { data: { session } } = await supabase.auth.getSession()
-  if (session?.user) return session.user
+  try {
+    // First try: instant check
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user) return session.user
 
-  // If no session yet, wait for auth state change
-  return new Promise((resolve) => {
-    const timeout = setTimeout(() => {
-      sub.unsubscribe()
-      resolve(null)
-    }, maxWaitMs)
+    // If no session yet, wait for auth state change
+    return new Promise((resolve) => {
+      let isResolved = false
 
-    const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
+      const timeout = setTimeout(() => {
+        if (!isResolved) {
+          isResolved = true
+          resolve(null)
+        }
+      }, maxWaitMs)
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session?.user && !isResolved) {
+          isResolved = true
+          clearTimeout(timeout)
+          resolve(session.user)
+          // Defer unsubscribe to avoid undefined error if called synchronously
+          setTimeout(() => subscription?.unsubscribe(), 0)
+        }
+      })
+
+      // If it resolved synchronously, cleanup immediately
+      if (isResolved) {
         clearTimeout(timeout)
-        sub.unsubscribe()
-        resolve(session.user)
+        subscription?.unsubscribe()
       }
     })
-  })
+  } catch (err) {
+    console.error("Error waiting for session:", err)
+    return null
+  }
 }
 
 const useBoatStore = create((set, get) => ({
