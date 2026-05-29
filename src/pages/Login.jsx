@@ -76,6 +76,11 @@ export default function Login() {
     e.preventDefault()
     clearError()
     setPasswordError('')
+    
+    if (forgotPass) {
+      return handleResetPassword()
+    }
+
     setLoading(true)
 
     try {
