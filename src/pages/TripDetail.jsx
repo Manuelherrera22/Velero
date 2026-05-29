@@ -421,12 +421,12 @@ export default function TripDetail() {
                   <span>{formatPrice(total, trip.currency)}</span>
                 </div>
                 {trip?.requires_full_payment === false && (
-                  <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--border-color)' }}>
-                    <div className="booking-card__line" style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>
+                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px dashed var(--border-color)' }}>
+                    <div className="booking-card__line" style={{ color: 'var(--color-primary)', fontWeight: '800', fontSize: '1.15rem' }}>
                       <span>Reserva con anticipo ({((trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20) * 100).toFixed(0)}%)</span>
                       <span>{formatPrice(total * (trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20), trip.currency)}</span>
                     </div>
-                    <div className="booking-card__line" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
+                    <div className="booking-card__line" style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: '500', marginTop: '8px' }}>
                       <span>Saldo a abonar al capitán</span>
                       <span>{formatPrice(total - (total * (trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20)), trip.currency)}</span>
                     </div>

@@ -470,11 +470,11 @@
 
 .dash-table th {
   padding: var(--space-4) var(--space-3);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary, #94a3b8);
 }
 
 .dash-table td {

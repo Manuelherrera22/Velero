@@ -105,8 +105,13 @@ const TripWizard = () => {
     useBoatStore.getState().fetchMyBoats()
   }, [id, isEditing, isCopying, copyFromId])
 
+  const scrollRef = React.useRef(null)
+
   // Scroll to top when changing steps
   React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [currentStep])
 
@@ -182,7 +187,7 @@ const TripWizard = () => {
       <div className="wizard-content">
         
         {/* Step Content Area */}
-        <div className="wizard-content__scroll">
+        <div className="wizard-content__scroll" ref={scrollRef}>
           <div className="wizard-content__inner">
             {renderStep()}
           </div>

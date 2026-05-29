@@ -230,15 +230,12 @@ const Step8Pricing = () => {
               />
               <span style={{ fontWeight: 600, userSelect: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 Reserva con Anticipo (Seña)
-                <div title="El cliente paga online el anticipo (comisión Kailu + 3% servicio), y el saldo lo cubre a bordo." style={{ cursor: 'help' }}>
+                <div title="El cliente paga online el anticipo (comisión Kailu), y el saldo lo cubre a bordo." style={{ cursor: 'help' }}>
                   <Info size={16} color="var(--text-muted)" />
                 </div>
               </span>
             </label>
           </div>
-          <p className="step-subtitle" style={{ fontSize: '12px', marginTop: '16px' }}>
-            Nota: Todos los cobros online incluyen una tasa de servicio del 3% procesada por la plataforma.
-          </p>
         </div>
 
       </div>

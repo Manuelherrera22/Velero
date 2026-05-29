@@ -235,6 +235,27 @@ const useTripStore = create((set, get) => ({
     }
   },
 
+  deleteTrip: async (tripId) => {
+    set({ loading: true, error: null })
+    try {
+      const { error } = await supabase
+        .from('trips')
+        .delete()
+        .eq('id', tripId)
+
+      if (error) throw error
+      
+      set((state) => ({ 
+        trips: state.trips.filter(t => t.id !== tripId),
+        loading: false 
+      }))
+      return { success: true }
+    } catch (error) {
+      set({ error: error.message, loading: false })
+      return { success: false, error: error.message }
+    }
+  },
+
   // ── Manage trip dates ──
   addTripDate: async (dateData) => {
     try {

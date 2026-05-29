@@ -5,7 +5,7 @@ import useTripStore from '../../stores/tripStore'
 import './Dashboard.css'
 
 export default function MyTrips() {
-  const { trips, loading, fetchMyTrips } = useTripStore()
+  const { trips, loading, fetchMyTrips, deleteTrip } = useTripStore()
   const navigate = useNavigate()
   
   // State for the Delete Modal
@@ -13,6 +13,7 @@ export default function MyTrips() {
   
   // State for the Dropdown menus
   const [activeMenuId, setActiveMenuId] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => { 
     fetchMyTrips() 
@@ -33,12 +34,18 @@ export default function MyTrips() {
     })
   }
 
-  const handleDelete = (e) => {
+  const handleDelete = async (e) => {
     e.stopPropagation()
-    // TODO: implement Supabase deletion
-    console.log('Eliminando', tripToDelete)
-    setTripToDelete(null)
-    setActiveMenuId(null)
+    if (!tripToDelete) return
+    setIsDeleting(true)
+    const { success } = await deleteTrip(tripToDelete.id)
+    setIsDeleting(false)
+    if (success) {
+      setTripToDelete(null)
+      setActiveMenuId(null)
+    } else {
+      alert("No se pudo eliminar la travesía. Puede que tenga reservas asociadas.")
+    }
   }
 
   return (
@@ -185,8 +192,8 @@ export default function MyTrips() {
               <button onClick={() => setTripToDelete(null)} className="btn btn--primary" style={{ width: '100%', height: '48px', borderRadius: 'var(--radius-xl)' }}>
                 Me arrepentí, no quiero eliminar
               </button>
-              <button onClick={handleDelete} className="btn btn--danger" style={{ width: '100%', height: '48px', borderRadius: 'var(--radius-xl)' }}>
-                Quiero eliminar esta travesía
+              <button onClick={handleDelete} className="btn btn--danger" style={{ width: '100%', height: '48px', borderRadius: 'var(--radius-xl)' }} disabled={isDeleting}>
+                {isDeleting ? 'Eliminando...' : 'Quiero eliminar esta travesía'}
               </button>
             </div>
             
