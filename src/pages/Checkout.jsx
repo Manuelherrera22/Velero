@@ -163,18 +163,19 @@ export default function Checkout() {
   const kailuCommission = trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20;
   
   const advanceAmount = isAdvancePayment 
-    ? Math.round(((total * kailuCommission) + serviceFeeAmount) * 100) / 100 
-    : Math.round((total + serviceFeeAmount) * 100) / 100;
+    ? ((total * kailuCommission) + serviceFeeAmount) 
+    : (total + serviceFeeAmount);
     
   const remainingAmount = isAdvancePayment 
-    ? Math.round((total - (total * kailuCommission)) * 100) / 100 
+    ? (total - (total * kailuCommission)) 
     : 0;
 
   const formatPrice = (p) => {
     if (!trip) return '$0'
-    if (trip.currency === 'EUR') return `€${p?.toLocaleString('es-ES', { minimumFractionDigits: 0 })}`
-    if (trip.currency === 'USD') return `US$${p?.toLocaleString('en-US', { minimumFractionDigits: 0 })}`
-    return `$${p?.toLocaleString('es-AR')}`
+    const opts = { minimumFractionDigits: 0, maximumFractionDigits: 2 }
+    if (trip.currency === 'EUR') return `€${p?.toLocaleString('es-ES', opts)}`
+    if (trip.currency === 'USD') return `US$${p?.toLocaleString('en-US', opts)}`
+    return `$${p?.toLocaleString('es-AR', opts)}`
   }
 
   const handleApplyCoupon = async () => {
@@ -478,12 +479,12 @@ export default function Checkout() {
                 <Download size={18} /> Descargar Boleto PDF
               </button>
               <a
-                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`¡Hola! 🎫 Mi código de reserva es: *${booking?.id?.slice(0, 8).toUpperCase()}*\n\nTravesía: ${trip.title}\nLugar de Salida: ${trip.location}\nFecha: ${selectedDate ? new Date(selectedDate.date + 'T12:00:00').toLocaleDateString('es') : 'A coordinar'}\nHora: ${selectedDate ? selectedDate.start_time?.slice(0, 5) + 'hs' : '-'}\nPersonas: ${guests}\n\n¿Podrían confirmar los detalles?`)}`}
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`¡Hola! 🎫 Acabo de reservar esta experiencia y quería enviarles los detalles:\n\nMi código de reserva es: *${booking?.id?.slice(0, 8).toUpperCase()}*\nTravesía: ${trip.title}\nLugar de Salida: ${trip.location}\nFecha: ${selectedDate ? new Date(selectedDate.date + 'T12:00:00').toLocaleDateString('es') : 'A coordinar'}\nHora: ${selectedDate ? selectedDate.start_time?.slice(0, 5) + 'hs' : '-'}\nPersonas: ${guests}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn--whatsapp btn--lg"
               >
-                <WhatsAppIcon /> Enviar código por WhatsApp
+                <WhatsAppIcon /> Enviar detalles por WhatsApp
               </a>
             </div>
 
@@ -897,52 +898,54 @@ export default function Checkout() {
 
               {/* Descuento del capitán */}
               {tripDiscountPercent > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)' }}>
-                  <span>🏷️ Descuento del capitán ({tripDiscountPercent}%)</span>
-                  <span>− {formatPrice(Math.round(tripDiscountAmount))}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)', flexWrap: 'wrap', gap: '4px' }}>
+                  <span style={{ flex: 1, minWidth: '150px' }}>🏷️ Descuento del capitán ({tripDiscountPercent}%)</span>
+                  <span>− {formatPrice(tripDiscountAmount)}</span>
                 </div>
               )}
 
               {/* Subtotal 1 after captain discount */}
               {tripDiscountPercent > 0 && coupon && couponDiscountAmount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '4px 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '4px 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                   <span>Subtotal 1</span>
-                  <span>{formatPrice(Math.round(subtotalAfterCaptainDiscount))}</span>
+                  <span>{formatPrice(subtotalAfterCaptainDiscount)}</span>
                 </div>
               )}
 
               {/* Descuento cupón */}
               {coupon && couponDiscountAmount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)' }}>
-                  <span>🎟️ Cupón {coupon.code} ({coupon.type === 'percentage' ? `${coupon.value}%` : formatPrice(coupon.value)})</span>
-                  <span>− {formatPrice(Math.round(couponDiscountAmount))}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)', flexWrap: 'wrap', gap: '4px' }}>
+                  <span style={{ flex: 1, minWidth: '150px' }}>🎟️ Cupón {coupon.code} ({coupon.type === 'percentage' ? `${coupon.value}%` : formatPrice(coupon.value)})</span>
+                  <span>− {formatPrice(couponDiscountAmount)}</span>
                 </div>
               )}
 
               {/* Adicionales (sin descuento) */}
               {addonsTotal > 0 && (
                 <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '4px 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', fontStyle: 'italic', borderTop: '1px dashed var(--border-color)', marginTop: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '4px 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', fontStyle: 'italic', borderTop: '1px dashed var(--border-color)', marginTop: '4px' }}>
                     <span>Subtotal experiencia</span>
-                    <span>{formatPrice(Math.round(subtotalAfterDiscounts))}</span>
+                    <span>{formatPrice(subtotalAfterDiscounts)}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '4px 0', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
-                    <span>🎁 Adicionales</span>
-                    <span>{formatPrice(Math.round(addonsTotal))}</span>
-                  </div>
+                  {tripAddons.filter(a => selectedAddons[a.id] > 0).map(a => (
+                    <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '4px 0', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
+                      <span>🎁 {a.name} {selectedAddons[a.id] > 1 ? `× ${selectedAddons[a.id]}` : ''}</span>
+                      <span>{formatPrice(a.price * selectedAddons[a.id])}</span>
+                    </div>
+                  ))}
                 </>
               )}
 
               {/* Total (experiencia descontada + adicionales) */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '10px 0', borderTop: '1px solid var(--border-color)', marginTop: '4px', fontWeight: 600 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '10px 0', borderTop: '1px solid var(--border-color)', marginTop: '4px', fontWeight: 600 }}>
                 <span>Subtotal</span>
-                <span>{formatPrice(Math.round(total))}</span>
+                <span>{formatPrice(total)}</span>
               </div>
 
               {/* Tasa de servicio */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '6px 0', fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
                 <span>Tasa de servicio Kailu (3%)</span>
-                <span>{formatPrice(Math.round(serviceFeeAmount))}</span>
+                <span>{formatPrice(serviceFeeAmount)}</span>
               </div>
 
               {/* TOTAL FINAL */}
@@ -951,7 +954,7 @@ export default function Checkout() {
                   {isAdvancePayment ? '💳 Pagás ahora online' : '💳 Total a pagar'}
                 </span>
                 <strong style={{ fontSize: 'var(--text-xl)', color: 'var(--color-primary)' }}>
-                  {formatPrice(Math.round(advanceAmount))}
+                  {formatPrice(advanceAmount)}
                 </strong>
               </div>
               
@@ -962,7 +965,7 @@ export default function Checkout() {
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '10px', fontSize: 'var(--text-md)', backgroundColor: 'rgba(245, 158, 11, 0.08)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
                     <span>🤝 Saldo a abonar al capitán</span>
-                    <strong>{formatPrice(Math.round(remainingAmount))}</strong>
+                    <strong>{formatPrice(remainingAmount)}</strong>
                   </div>
                   <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '4px', lineHeight: 1.4 }}>
                     Se abona directamente al capitán antes de zarpar

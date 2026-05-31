@@ -27,18 +27,29 @@ export default function TripDetail() {
   const [bookingMode, setBookingMode] = useState('shared') // 'shared' | 'private'
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  const isPrivateAllowed = trip?.metadata?.allow_full_boat || trip?.allow_full_boat;
+  const basePrivateAllowed = trip?.metadata?.allow_full_boat || trip?.allow_full_boat;
   const privatePrice = trip?.metadata?.full_boat_price || trip?.full_boat_price;
+
+  const selectedDateObj = tripDates?.find(d => d.id === selectedDate);
+  const hasBookings = selectedDateObj && selectedDateObj.available_spots < trip?.capacity;
+  const isPrivateAllowed = basePrivateAllowed && !hasBookings;
 
   useEffect(() => {
     if (trip) {
       const hasShared = trip.price_per_person > 0;
       const hasPrivate = isPrivateAllowed && privatePrice > 0;
+      
+      // If shared isn't an option, force private
       if (!hasShared && hasPrivate) {
         setBookingMode('private');
       }
+      
+      // If they selected private but it became unavailable (e.g. they clicked a date with bookings), revert to shared
+      if (bookingMode === 'private' && !hasPrivate && hasShared) {
+        setBookingMode('shared');
+      }
     }
-  }, [trip, isPrivateAllowed, privatePrice]);
+  }, [trip, isPrivateAllowed, privatePrice, bookingMode]);
 
   useEffect(() => {
     fetchTrip(id)
@@ -76,7 +87,6 @@ export default function TripDetail() {
   const addonsTotal = tripAddons.reduce((sum, a) => sum + (selectedAddons[a.id] || 0) * a.price, 0)
   
   // Dynamic Pricing based on Mode + selected time slot override
-  const selectedDateObj = tripDates.find(d => d.id === selectedDate)
   const basePriceOriginal = bookingMode === 'private'
     ? (selectedDateObj?.full_boat_price_override || trip.full_boat_price || trip.metadata?.full_boat_price)
     : (selectedDateObj?.price_per_person_override || trip.price_per_person || trip.metadata?.price_per_person)
