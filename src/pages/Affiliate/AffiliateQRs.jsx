@@ -34,12 +34,16 @@ export default function AffiliateQRs() {
   }
 
   const generateQR = async (hotelId) => {
+    const zoneName = window.prompt("Ingresa un nombre o ubicación para este QR (ej. Recepción, Instagram, Habitación 101):")
+    if (!zoneName) return
+
     setGeneratingFor(hotelId)
     try {
       const code = `A${hotelId.slice(0, 5).toUpperCase()}${Date.now().toString(36).toUpperCase()}`
       const { error } = await supabase.from('qr_codes').insert({
         hotel_id: hotelId,
         code,
+        zone: zoneName,
         is_active: true,
       })
       if (error) {
@@ -125,17 +129,20 @@ export default function AffiliateQRs() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {hotel.qr_codes?.map(qr => (
-                    <div key={qr.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <QrCode size={14} style={{ color: 'var(--color-accent-400)' }}/>
-                          <span style={{ fontWeight: 600, letterSpacing: '1px' }}>{qr.code}</span>
+                    <div key={qr.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ flex: '1 1 auto', minWidth: '150px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <QrCode size={16} style={{ color: 'var(--color-accent-400)' }}/>
+                          <span style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text-primary)' }}>{qr.zone || 'General'}</span>
                         </div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '4px' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', letterSpacing: '0.5px' }}>
+                          ID: {qr.code}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--color-primary-400)', marginTop: '4px', fontWeight: 500 }}>
                           {qr.scan_count} escaneos totales
                         </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <div style={{ display: 'none' }}>
                           <QRCodeCanvas 
                             id={`qr-canvas-${qr.code}`} 

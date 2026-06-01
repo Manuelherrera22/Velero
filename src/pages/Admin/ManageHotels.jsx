@@ -71,12 +71,15 @@ export default function ManageHotels() {
   }
 
   const generateQR = async (hotelId) => {
+    const zoneName = window.prompt("Ingresa un nombre o ubicación para este QR (ej. Recepción, Instagram, Habitación 101):")
+    if (!zoneName) return // User cancelled or entered empty string
+
     const hotelIdStr = String(hotelId)
     const code = `H${hotelIdStr.slice(0, 6).toUpperCase()}${Date.now().toString(36).toUpperCase()}`
     const { error } = await supabase.from('qr_codes').insert({
       hotel_id: hotelId,
       code,
-      zone: 'General',
+      zone: zoneName,
       is_active: true,
     })
     
@@ -182,6 +185,9 @@ export default function ManageHotels() {
                   </option>
                 ))}
               </select>
+              <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '6px', lineHeight: '1.4' }}>
+                <strong>Nota:</strong> Si no vinculas un usuario, el Aliado no podrá entrar a la plataforma, pero los escaneos de sus QRs se seguirán contabilizando a su nombre y podrás liquidar su comisión desde el panel de liquidaciones.
+              </p>
             </div>
           </div>
 
@@ -228,6 +234,7 @@ export default function ManageHotels() {
               {hotel.qr_codes?.map(qr => (
                 <div key={qr.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                   <div>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'block', marginBottom: '4px', fontSize: '14px' }}>{qr.zone || 'General'}</span>
                     <span className="coupon-card__code" style={{ fontSize: '11px' }}>{qr.code}</span>
                     <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginLeft: '8px' }}>
                       {qr.scan_count} scans
