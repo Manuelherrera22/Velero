@@ -479,12 +479,12 @@ export default function Checkout() {
                 <Download size={18} /> Descargar Boleto PDF
               </button>
               <a
-                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`¡Hola! 🎫 Acabo de reservar esta experiencia y quería enviarles los detalles:\n\nMi código de reserva es: *${booking?.id?.slice(0, 8).toUpperCase()}*\nTravesía: ${trip.title}\nLugar de Salida: ${trip.location}\nFecha: ${selectedDate ? new Date(selectedDate.date + 'T12:00:00').toLocaleDateString('es') : 'A coordinar'}\nHora: ${selectedDate ? selectedDate.start_time?.slice(0, 5) + 'hs' : '-'}\nPersonas: ${guests}`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`🎫 *Detalles de mi Reserva en Velero/Kailu*\n\nMi código de reserva es: *${booking?.id?.slice(0, 8).toUpperCase()}*\nTravesía: ${trip.title}\nLugar de Salida: ${trip.location}\nFecha: ${selectedDate ? new Date(selectedDate.date + 'T12:00:00').toLocaleDateString('es') : 'A coordinar'}\nHora: ${selectedDate ? selectedDate.start_time?.slice(0, 5) + 'hs' : '-'}\nPersonas: ${guests}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn--whatsapp btn--lg"
               >
-                <WhatsAppIcon /> Enviar detalles por WhatsApp
+                <WhatsAppIcon /> Guardar en mi WhatsApp
               </a>
             </div>
 
