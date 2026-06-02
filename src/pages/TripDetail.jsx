@@ -460,7 +460,7 @@ export default function TripDetail() {
                 rel="noopener noreferrer"
                 className="btn btn--whatsapp btn--lg booking-card__cta"
               >
-                <WhatsAppIcon /> Consultar por WhatsApp
+                <WhatsAppIcon /> Enviar consulta
               </a>
 
               <p className="booking-card__note">

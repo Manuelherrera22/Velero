@@ -38,7 +38,13 @@ const useBookingStore = create((set, get) => ({
       }
 
       // Increment coupon uses if applicable
-      // Note: Coupon usage is now handled securely by a Postgres Trigger 'on_booking_created_increment_coupon'
+      if (bookingInsert.coupon_id) {
+        try {
+          await supabase.rpc('increment_coupon_usage', { p_coupon_id: bookingInsert.coupon_id });
+        } catch (err) {
+          console.error("No se pudo actualizar el uso del cupón:", err)
+        }
+      }
 
       set({ currentBooking: data, loading: false })
       return { success: true, data }
