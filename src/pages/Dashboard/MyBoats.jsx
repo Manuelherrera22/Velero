@@ -157,8 +157,8 @@ export default function MyBoats() {
               <thead>
                 <tr>
                   <th>Alias de la Embarcación</th>
-                  <th>Fecha de carga</th>
-                  <th style={{ textAlign: 'right', paddingRight: '24px' }}>Acciones</th>
+                  <th style={{ textAlign: 'center' }}>Fecha de carga</th>
+                  <th style={{ textAlign: 'center' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -174,9 +174,9 @@ export default function MyBoats() {
                       )}
                     </td>
 
-                    <td className="dash-table__hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{formatDate(boat.created_at)}</td>
+                    <td className="dash-table__hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: '14px', textAlign: 'center' }}>{formatDate(boat.created_at)}</td>
 
-                    <td style={{ textAlign: 'right', paddingRight: '24px', position: 'relative' }}>
+                    <td style={{ textAlign: 'center', position: 'relative' }}>
                       {/* Desktop inline actions */}
                       <div className="dash-table__inline-actions">
                         <button className="dash-table__action-link" onClick={() => handleCopyBoat(boat)}>Copiar</button>

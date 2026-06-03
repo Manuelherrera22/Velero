@@ -49,9 +49,9 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
 
   // Header Text (Dark inside Cyan)
   doc.setTextColor(10, 22, 40) 
-  doc.setFontSize(16)
+  doc.setFontSize(14)
   doc.setFont('helvetica', 'bold')
-  doc.text('VELERO', 16, 18)
+  doc.text(((trip?.title || 'KAILU').substring(0, 30)).toUpperCase(), 16, 18)
 
   doc.setFontSize(8)
   doc.setFont('helvetica', 'bold')
@@ -164,16 +164,17 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
   doc.text(shortId, 170, 61)
 
   doc.setFontSize(6)
-  doc.setFont('helvetica', 'normal')
-  doc.setTextColor(100, 116, 139)
-  doc.text('Presenta este QR', 167, 72)
-  doc.text('al abordar', 173, 76)
-
-  doc.setFontSize(6)
   doc.setTextColor(37, 211, 102)
-  doc.text('WhatsApp:', 168, 84)
+  doc.text('Soporte Kailu (WhatsApp):', 165, 72)
   doc.setTextColor(148, 163, 184)
-  doc.text('+54 9 11 3669-6696', 164, 88)
+  doc.text('+54 9 11 6178-9818', 168, 76)
+
+  if (trip?.captain?.phone) {
+    doc.setTextColor(37, 211, 102)
+    doc.text('Capitán:', 168, 82)
+    doc.setTextColor(148, 163, 184)
+    doc.text(String(trip.captain.phone), 168, 86)
+  }
 
   doc.save(`velero-ticket-${shortId}.pdf`)
 }

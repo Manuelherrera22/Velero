@@ -104,7 +104,6 @@ export default function MyTrips() {
                 <tr>
                   <th>Travesía</th>
                   <th>Estado</th>
-                  <th className="dash-table__hide-mobile">Pendientes</th>
                   <th className="dash-table__hide-mobile">Modificado</th>
                   <th className="dash-table__hide-tablet">Creado</th>
                   <th style={{ textAlign: 'center' }}>Acciones</th>
@@ -134,7 +133,6 @@ export default function MyTrips() {
                         </span>
                       </td>
 
-                      <td className="dash-table__hide-mobile" style={{ color: 'var(--text-secondary)' }}>-</td>
                       <td className="dash-table__hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{formatDate(trip.updated_at)}</td>
                       <td className="dash-table__hide-tablet" style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{formatDate(trip.created_at)}</td>
 
