@@ -362,14 +362,15 @@ export default function TripDetail() {
                               return (
                                 <button
                                   key={d.id}
-                                  className={`booking-card__date flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border transition-all ${selectedDate === d.id ? 'booking-card__date--selected border-primary bg-primary/10' : 'border-border/60 hover:border-primary/50'}`}
+                                  disabled={d.available_spots <= 0}
+                                  className={`booking-card__date flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border transition-all ${selectedDate === d.id ? 'booking-card__date--selected border-primary bg-primary/10' : 'border-border/60 hover:border-primary/50'} ${d.available_spots <= 0 ? 'opacity-50 cursor-not-allowed bg-neutral-100' : ''}`}
                                   onClick={() => setSelectedDate(d.id)}
                                 >
                                   <span className="booking-card__date-time font-bold text-[15px]">{d.start_time?.slice(0, 5)} hs</span>
                                   <span className="booking-card__date-price text-sm text-muted-foreground">{formatPrice(slotPrice, trip.currency)}</span>
-                                  <span className="booking-card__date-spots flex items-center gap-1.5 text-xs text-success mt-1">
-                                    <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-                                    {d.available_spots} disp.
+                                  <span className={`booking-card__date-spots flex items-center gap-1.5 text-xs mt-1`} style={{ color: d.available_spots <= 0 ? '#ef4444' : 'var(--color-success)' }}>
+                                    <div className={`w-2 h-2 rounded-full ${d.available_spots <= 0 ? '' : 'animate-pulse'}`} style={{ backgroundColor: d.available_spots <= 0 ? '#ef4444' : 'var(--color-success)' }}></div>
+                                    {d.available_spots <= 0 ? 'Agotado' : `${d.available_spots} disp.`}
                                   </span>
                                 </button>
                               )
