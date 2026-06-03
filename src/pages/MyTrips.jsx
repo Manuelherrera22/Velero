@@ -171,7 +171,7 @@ export default function MyTrips() {
                         </button>
                       )}
                       <a
-                        href={`https://wa.me/?text=${encodeURIComponent(`🎫 *Detalles de mi Reserva en Velero/Kailu*\n\nMi código de reserva es: *${shortId}*\nTravesía: ${booking.trip?.title}\nFecha: ${tripDate || 'A coordinar'}\nHora: ${tripTime ? tripTime + 'hs' : '-'}\nPersonas: ${booking.metadata?.bookingMode === 'private' ? 'Hasta ' + (booking.metadata?.capacity || booking.trip?.max_capacity || booking.trip?.capacity || 6) : booking.quantity}`)}`}
+                        href={`https://wa.me/?text=${encodeURIComponent(`🎫 *Detalles de mi Reserva en Velero/Kailu*\n\nMi código de reserva es: *${shortId}*\nTravesía: ${booking.trip?.title}\nLugar de Salida: ${booking.trip?.location || 'A coordinar'} ${booking.trip?.location ? `(https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.trip.location)})` : ''}\nFecha: ${tripDate || 'A coordinar'}\nHora: ${tripTime ? tripTime + 'hs' : '-'}\nPersonas: ${booking.metadata?.bookingMode === 'private' ? 'Hasta ' + (booking.metadata?.capacity || booking.trip?.max_capacity || booking.trip?.capacity || 6) : booking.quantity}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn--whatsapp btn--sm"
