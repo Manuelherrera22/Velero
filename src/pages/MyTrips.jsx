@@ -54,6 +54,8 @@ export default function MyTrips() {
       guests: booking.quantity,
       total: booking.total,
       currency: booking.metadata?.currency || 'ARS',
+      bookingMode: booking.metadata?.bookingMode || 'shared',
+      capacity: booking.metadata?.capacity || booking.trip?.max_capacity || booking.trip?.capacity || 6,
       bookingId: booking.id,
       name: profile?.full_name || booking.guest_name || 'Viajero',
       email: user.email || booking.guest_email || '',
@@ -169,12 +171,13 @@ export default function MyTrips() {
                         </button>
                       )}
                       <a
-                        href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola! Mi código de reserva es: *${shortId}*\n\nTravesía: ${booking.trip?.title}\n\n¿Podrían ayudarme?`)}`}
+                        href={`https://wa.me/?text=${encodeURIComponent(`🎫 *Detalles de mi Reserva en Velero/Kailu*\n\nMi código de reserva es: *${shortId}*\nTravesía: ${booking.trip?.title}\nFecha: ${tripDate || 'A coordinar'}\nHora: ${tripTime ? tripTime + 'hs' : '-'}\nPersonas: ${booking.metadata?.bookingMode === 'private' ? 'Hasta ' + (booking.metadata?.capacity || booking.trip?.max_capacity || booking.trip?.capacity || 6) : booking.quantity}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn--whatsapp btn--sm"
+                        title="Guardar o compartir por WhatsApp"
                       >
-                        <WhatsAppIcon /> Consultar
+                        <WhatsAppIcon /> Enviar Info
                       </a>
                       {booking.status === 'completed' && (
                         <Link to={`/review/${booking.id}`} className="btn btn--ghost btn--sm">

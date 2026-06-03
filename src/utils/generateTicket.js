@@ -2,7 +2,7 @@
  * Generate a boarding-pass style PDF ticket with QR code
  * All heavy dependencies (jsPDF, qrcode) are loaded dynamically
  */
-export async function generateTicketPDF({ trip, date, guests, total, currency, bookingId, name, email, phone }) {
+export async function generateTicketPDF({ trip, date, guests, total, currency, bookingMode, capacity, bookingId, name, email, phone }) {
   // Dynamic imports to avoid bundle issues
   const { default: jsPDF } = await import('jspdf')
   
@@ -80,7 +80,7 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(9)
   doc.setFont('helvetica', 'bold')
-  doc.text(String(guests), 80, 51)
+  doc.text(bookingMode === 'private' ? `Hasta ${capacity}` : String(guests), 80, 51)
 
   doc.setFontSize(7)
   doc.setFont('helvetica', 'normal')

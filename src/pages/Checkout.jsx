@@ -320,6 +320,8 @@ export default function Checkout() {
         qr_code: qrCode || null,
         affiliate_commission: affiliateCommission,
         metadata: {
+          bookingMode: mode,
+          capacity: trip?.max_capacity || trip?.capacity || 6,
           selected_addons: addonsList,
           currency: trip?.currency || 'ARS',
           contact: { name: formData.name, email: formData.email, phone: formData.phone },
@@ -468,6 +470,8 @@ export default function Checkout() {
                     guests,
                     total,
                     currency: trip.currency || 'ARS',
+                    bookingMode: booking?.metadata?.bookingMode || mode,
+                    capacity: booking?.metadata?.capacity || trip?.max_capacity || trip?.capacity || 6,
                     bookingId: booking?.id,
                     name: formData.name,
                     email: formData.email,

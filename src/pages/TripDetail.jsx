@@ -31,7 +31,8 @@ export default function TripDetail() {
   const privatePrice = trip?.metadata?.full_boat_price || trip?.full_boat_price;
 
   const selectedDateObj = tripDates?.find(d => d.id === selectedDate);
-  const hasBookings = selectedDateObj && selectedDateObj.available_spots < trip?.capacity;
+  const capacity = trip?.max_capacity || trip?.capacity || 6;
+  const hasBookings = selectedDateObj && selectedDateObj.available_spots < capacity;
   const isPrivateAllowed = basePrivateAllowed && !hasBookings;
 
   useEffect(() => {
@@ -82,6 +83,15 @@ export default function TripDetail() {
       ...prev,
       [addonId]: prev[addonId] ? 0 : 1
     }))
+  }
+
+  const updateAddonQuantity = (e, addonId, change) => {
+    e.stopPropagation()
+    setSelectedAddons(prev => {
+      const current = prev[addonId] || 0
+      const next = Math.max(0, current + change)
+      return { ...prev, [addonId]: next }
+    })
   }
 
   const addonsTotal = tripAddons.reduce((sum, a) => sum + (selectedAddons[a.id] || 0) * a.price, 0)
@@ -399,17 +409,40 @@ export default function TripDetail() {
                 <div className="booking-card__section border-t border-border/40 pt-6 mt-6">
                   <label className="booking-card__label mb-3" style={{ fontSize: '1.05rem', fontWeight: 700 }}>Mejorá tu experiencia (opcional)</label>
                   {tripAddons.map(addon => (
-                    <button
+                    <div
                       key={addon.id}
                       className={`booking-card__addon ${selectedAddons[addon.id] ? 'booking-card__addon--selected' : ''}`}
-                      onClick={() => toggleAddon(addon.id)}
+                      onClick={() => !selectedAddons[addon.id] && toggleAddon(addon.id)}
+                      style={{ cursor: selectedAddons[addon.id] ? 'default' : 'pointer' }}
                     >
-                      <div>
+                      <div style={{ flex: 1 }}>
                         <strong>{addon.name}</strong>
                         {addon.description && <span>{addon.description}</span>}
                       </div>
-                      <span className="booking-card__addon-price">+{formatPrice(addon.price, trip.currency)}</span>
-                    </button>
+                      {selectedAddons[addon.id] ? (
+                        <div className="booking-card__counter" style={{ padding: '4px' }}>
+                          <button 
+                            className="booking-card__counter-btn" 
+                            style={{ width: '28px', height: '28px' }}
+                            onClick={(e) => updateAddonQuantity(e, addon.id, -1)}
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="booking-card__counter-value" style={{ width: '20px', fontSize: '14px' }}>
+                            {selectedAddons[addon.id]}
+                          </span>
+                          <button 
+                            className="booking-card__counter-btn" 
+                            style={{ width: '28px', height: '28px' }}
+                            onClick={(e) => updateAddonQuantity(e, addon.id, 1)}
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="booking-card__addon-price">+{formatPrice(addon.price, trip.currency)}</span>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
