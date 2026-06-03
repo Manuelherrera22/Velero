@@ -51,11 +51,7 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
   doc.setTextColor(10, 22, 40) 
   doc.setFontSize(14)
   doc.setFont('helvetica', 'bold')
-  doc.text(((trip?.title || 'KAILU').substring(0, 30)).toUpperCase(), 16, 18)
-
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'bold')
-  doc.text('RESERVA CONFIRMADA', 105, 17)
+  doc.text('RESERVA CONFIRMADA', 16, 18)
 
   // Trip Title (White inside dark blue panel)
   doc.setTextColor(255, 255, 255)
