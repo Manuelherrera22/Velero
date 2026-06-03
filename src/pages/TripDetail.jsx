@@ -478,13 +478,26 @@ export default function TripDetail() {
               </div>
 
               {/* CTA Buttons */}
-              <Link
-                to={`/checkout/${trip.id}?date=${selectedDate}&guests=${guests}&addons=${JSON.stringify(selectedAddons)}&total=${total}&mode=${bookingMode}${qrCode ? `&qr=${qrCode}` : ''}`}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (!selectedDate) {
+                    alert("Por favor, seleccioná una fecha y horario antes de continuar.");
+                    return;
+                  }
+                  if (bookingMode === 'private' && hasBookings) {
+                    alert("Esta fecha ya tiene lugares compartidos ocupados y no se puede reservar en modo privado. Por favor, selecciona el modo Compartido o elegí otra fecha.");
+                    setBookingMode('shared');
+                    return;
+                  }
+                  navigate(`/checkout/${trip.id}?date=${selectedDate}&guests=${guests}&addons=${JSON.stringify(selectedAddons)}&total=${total}&mode=${bookingMode}${qrCode ? `&qr=${qrCode}` : ''}`);
+                }}
                 className={`btn btn--accent btn--lg booking-card__cta ${!selectedDate ? 'booking-card__cta--disabled' : ''}`}
+                style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
               >
                 Reservar ahora
                 <ChevronRight size={18} />
-              </Link>
+              </button>
 
               {/* WhatsApp Button */}
               <a
