@@ -108,6 +108,9 @@ const Step5Services = () => {
             )
           })}
         </div>
+        <div style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px', fontStyle: 'italic' }}>
+          👇 Desplazá la lista hacia abajo para ver más servicios
+        </div>
 
         {/* Custom Services Row (Moved outside scroll area) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 'var(--space-4)', alignItems: 'center', marginTop: 'var(--space-4)', paddingTop: 'var(--space-4)', borderTop: '1px solid var(--border-color)' }}>
