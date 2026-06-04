@@ -119,7 +119,7 @@ const Step4Photos = () => {
           </p>
           
           {hasBookings && (
-            <div style={{ marginTop: 'var(--space-4)', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500 }}>
+            <div style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#d97706', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, marginBottom: 'var(--space-6)' }}>
               ⚠️ Edición bloqueada. Esta travesía ya cuenta con reservas.
             </div>
           )}

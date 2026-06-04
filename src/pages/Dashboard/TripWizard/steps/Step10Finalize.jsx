@@ -263,7 +263,10 @@ const Step10Finalize = () => {
             start_time: d.departure_time ? (d.departure_time.length <= 5 ? `${d.departure_time}:00` : d.departure_time) : '08:00:00',
             end_time: d.arrival_time ? (d.arrival_time.length <= 5 ? `${d.arrival_time}:00` : d.arrival_time) : null,
             available_spots: d.available_spots !== undefined ? d.available_spots : (formData.max_passengers || 6),
-            blocked_spots: d.blocked_spots || 0
+            blocked_spots: d.blocked_spots || 0,
+            price_per_person_override: d.price_per_person !== undefined ? d.price_per_person : null,
+            full_boat_price_override: d.full_boat_price !== undefined ? d.full_boat_price : null,
+            is_active: true
           }
         })
 
