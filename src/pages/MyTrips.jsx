@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { Navigate, Link, useSearchParams } from 'react-router-dom'
 import { Compass, CalendarDays, Users, MapPin, Download, Clock, CheckCircle, XCircle, Loader, AlertCircle, Ticket } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import useBookingStore from '../stores/bookingStore'
@@ -25,6 +25,8 @@ export default function MyTrips() {
   const { user, profile } = useAuthStore()
   const { bookings, fetchMyBookings, loading } = useBookingStore()
   const [activeTab, setActiveTab] = useState('upcoming')
+  const [searchParams] = useSearchParams()
+  const paymentStatus = searchParams.get('status')
 
   useEffect(() => {
     if (user) fetchMyBookings()
@@ -67,7 +69,13 @@ export default function MyTrips() {
     <div className="my-trips">
       <div className="container">
         <div className="my-trips__header">
-          <div>
+          <div style={{ width: '100%' }}>
+            {paymentStatus === 'approved' && (
+              <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#059669', padding: '16px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)', marginBottom: '16px' }}>
+                <strong>¡Pago procesado exitosamente por Mercado Pago!</strong><br />
+                Estamos sincronizando la confirmación. Si tu reserva aún aparece como "Pendiente de pago", refrescá la página en 1 o 2 minutos para ver tu boleto.
+              </div>
+            )}
             <h1><Ticket size={28} /> Mis Viajes</h1>
             <p>Tus experiencias náuticas con Kailu</p>
           </div>
