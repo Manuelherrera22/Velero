@@ -121,7 +121,8 @@ export async function generateTicketPDF({ trip, date, guests, total, currency, b
     doc.setFontSize(7)
     doc.setFont('helvetica', 'normal')
     try {
-      doc.textWithLink('Abrir en Google Maps ->', 16, 88, { url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trip.location)}` })
+      const mapsLink = trip?.metadata?.coordinates?.lat ? `https://www.google.com/maps/search/?api=1&query=${trip.metadata.coordinates.lat},${trip.metadata.coordinates.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trip.location)}`;
+      doc.textWithLink('Abrir en Google Maps ->', 16, 88, { url: mapsLink })
     } catch(e) {
       doc.text('Ver en mapa', 16, 88)
     }

@@ -42,7 +42,37 @@ export async function handler(event) {
           }
           
           console.log(`Booking ${bookingId} marked as PAID.`)
-          // Acá podríamos disparar la lógica de send-ticket internamente
+          
+          // Fetch booking details to send the ticket
+          const { data: bookingDetails } = await supabase
+            .from('bookings')
+            .select('*, trip:trips(*), trip_date:trip_dates(*)')
+            .eq('id', bookingId)
+            .single()
+
+          if (bookingDetails) {
+            try {
+              const protocol = event.headers['x-forwarded-proto'] || 'https'
+              const host = event.headers.host
+              await fetch(`${protocol}://${host}/api/send-ticket`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  bookingId: bookingId,
+                  trip: bookingDetails.trip?.title,
+                  date: bookingDetails.trip_date ? { date: bookingDetails.trip_date.date, start_time: bookingDetails.trip_date.start_time } : null,
+                  email: bookingDetails.guest_email,
+                  name: bookingDetails.guest_name,
+                  guests: bookingDetails.quantity,
+                  total: bookingDetails.total,
+                  currency: bookingDetails.metadata?.currency || 'ARS'
+                })
+              })
+              console.log('Ticket sent automatically from webhook.')
+            } catch (emailErr) {
+              console.error('Error triggering send-ticket from webhook:', emailErr)
+            }
+          }
         }
       }
     }

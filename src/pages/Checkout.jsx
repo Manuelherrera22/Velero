@@ -483,7 +483,7 @@ export default function Checkout() {
                 <Download size={18} /> Descargar Boleto PDF
               </button>
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`🎫 *Detalles de mi Reserva en Velero/Kailu*\n\nMi código de reserva es: *${booking?.id?.slice(0, 8).toUpperCase()}*\nTravesía: ${trip.title}\nLugar de Salida: ${trip.location} (https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trip.location)})\nFecha: ${selectedDate ? new Date(selectedDate.date + 'T12:00:00').toLocaleDateString('es') : 'A coordinar'}\nHora: ${selectedDate ? selectedDate.start_time?.slice(0, 5) + 'hs' : '-'}\nPersonas: ${guests}`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`🎫 *Detalles de mi Reserva en Velero/Kailu*\n\nMi código de reserva es: *${booking?.id?.slice(0, 8).toUpperCase()}*\nTravesía: ${trip.title}\nLugar de Salida: ${trip.location} (${trip.metadata?.coordinates?.lat ? `https://www.google.com/maps/search/?api=1&query=${trip.metadata.coordinates.lat},${trip.metadata.coordinates.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trip.location)}`})\nFecha: ${selectedDate ? new Date(selectedDate.date + 'T12:00:00').toLocaleDateString('es') : 'A coordinar'}\nHora: ${selectedDate ? selectedDate.start_time?.slice(0, 5) + 'hs' : '-'}\nPersonas: ${guests}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn--whatsapp btn--lg"
