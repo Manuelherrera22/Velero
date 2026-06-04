@@ -33,7 +33,7 @@ export async function handler(event) {
 
           const { error } = await supabase
             .from('bookings')
-            .update({ status: 'paid' })
+            .update({ status: 'confirmed' })
             .eq('id', bookingId)
 
           if (error) {
