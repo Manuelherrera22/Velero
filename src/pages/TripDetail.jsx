@@ -359,18 +359,30 @@ export default function TripDetail() {
                               const slotPrice = bookingMode === 'private'
                                 ? (d.full_boat_price_override || trip.full_boat_price)
                                 : (d.price_per_person_override || trip.price_per_person)
+                              
+                              const dateHasBookings = d.available_spots < capacity;
+                              const isDateDisabled = bookingMode === 'private' ? dateHasBookings : d.available_spots <= 0;
+                              
                               return (
                                 <button
                                   key={d.id}
-                                  disabled={d.available_spots <= 0}
-                                  className={`booking-card__date flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border transition-all ${selectedDate === d.id ? 'booking-card__date--selected border-primary bg-primary/10' : 'border-border/60 hover:border-primary/50'} ${d.available_spots <= 0 ? 'opacity-50 cursor-not-allowed bg-neutral-100' : ''}`}
+                                  disabled={isDateDisabled}
+                                  className={`booking-card__date flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border transition-all ${selectedDate === d.id ? 'booking-card__date--selected border-primary bg-primary/10' : 'border-border/60 hover:border-primary/50'} ${isDateDisabled ? 'opacity-50 cursor-not-allowed bg-neutral-100' : ''}`}
                                   onClick={() => setSelectedDate(d.id)}
                                 >
                                   <span className="booking-card__date-time font-bold text-[15px]">{d.start_time?.slice(0, 5)} hs</span>
                                   <span className="booking-card__date-price text-sm text-muted-foreground">{formatPrice(slotPrice, trip.currency)}</span>
-                                  <span className={`booking-card__date-spots flex items-center gap-1.5 text-xs mt-1`} style={{ color: d.available_spots <= 0 ? '#ef4444' : 'var(--color-success)' }}>
-                                    <div className={`w-2 h-2 rounded-full ${d.available_spots <= 0 ? '' : 'animate-pulse'}`} style={{ backgroundColor: d.available_spots <= 0 ? '#ef4444' : 'var(--color-success)' }}></div>
-                                    {d.available_spots <= 0 ? 'Agotado' : `${d.available_spots} disp.`}
+                                  <span className={`booking-card__date-spots flex items-center gap-1.5 text-xs mt-1 text-center`} style={{ color: d.available_spots <= 0 ? '#ef4444' : 'var(--color-success)' }}>
+                                    {d.available_spots <= 0 ? (
+                                      'Agotado'
+                                    ) : ( bookingMode === 'private' && dateHasBookings ) ? (
+                                      <span style={{ color: '#ef4444' }}>Ocupado</span>
+                                    ) : (
+                                      <>
+                                        <div className={`w-2 h-2 rounded-full animate-pulse`} style={{ backgroundColor: 'var(--color-success)' }}></div>
+                                        {`${d.available_spots} disp.`}
+                                      </>
+                                    )}
                                   </span>
                                 </button>
                               )
