@@ -14,7 +14,7 @@ const WhatsAppIcon = ({ size = 14 }) => (
 const WHATSAPP_NUMBER = '5491161789818'
 
 const STATUS_MAP = {
-  pending: { label: 'Confirmada', color: 'success', icon: CheckCircle },
+  pending: { label: 'Pendiente de pago', color: 'warning', icon: Clock },
   confirmed: { label: 'Confirmada', color: 'success', icon: CheckCircle },
   completed: { label: 'Completada', color: 'info', icon: CheckCircle },
   cancelled: { label: 'Cancelada', color: 'error', icon: XCircle },
@@ -156,7 +156,11 @@ export default function MyTrips() {
                       </div>
                       <div className="boarding-pass__detail">
                         <span className="boarding-pass__label">PERSONAS</span>
-                        <span className="boarding-pass__value">{booking.quantity}</span>
+                        <span className="boarding-pass__value">
+                          {booking.metadata?.bookingMode === 'private' 
+                            ? (booking.metadata?.passengers?.length || booking.metadata?.actualGuests || 'Velero Completo') 
+                            : booking.quantity}
+                        </span>
                       </div>
                       <div className="boarding-pass__detail">
                         <span className="boarding-pass__label">UBICACIÓN</span>

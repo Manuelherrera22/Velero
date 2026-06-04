@@ -94,7 +94,11 @@ export default function Bookings() {
             </div>
 
             <div className="item-card__footer">
-              <span>{booking.quantity} persona{booking.quantity > 1 ? 's' : ''}</span>
+              <span>
+                {booking.metadata?.bookingMode === 'private' 
+                  ? `${booking.metadata?.passengers?.length || booking.metadata?.actualGuests || 'Velero Completo'}` 
+                  : `${booking.quantity} persona${booking.quantity > 1 ? 's' : ''}`}
+              </span>
               <span style={{ color: 'var(--color-accent-400)', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>
                 ${booking.total?.toLocaleString('es-AR')}
               </span>

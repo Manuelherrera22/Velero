@@ -303,6 +303,8 @@ export default function Checkout() {
         }
       }
 
+      const bookingCapacity = trip?.max_capacity || trip?.capacity || 6;
+      
       const bookingData = {
         trip_id: id,
         trip_date_id: dateId || null,
@@ -310,7 +312,7 @@ export default function Checkout() {
         guest_name: !user ? formData.name : null,
         guest_email: !user ? formData.email : null,
         guest_phone: !user ? formData.phone : null,
-        quantity: guests,
+        quantity: mode === 'private' ? bookingCapacity : guests,
         subtotal: grossTotal,
         addons_total: addonsTotal,
         discount: totalDiscount,
