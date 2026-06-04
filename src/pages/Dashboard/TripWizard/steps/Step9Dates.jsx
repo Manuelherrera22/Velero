@@ -100,7 +100,11 @@ const Step9Dates = () => {
   }
 
   const handleRemoveDate = (id) => {
-    if (hasBookings) return;
+    // Prevent removing existing database dates (UUID string) if trip has bookings
+    if (hasBookings && typeof id === 'string') {
+      alert("No puedes eliminar fechas de una travesía que ya tiene reservas.");
+      return;
+    }
     updateFormData({
       custom_dates: formData.custom_dates.filter(d => d.id !== id)
     })
@@ -145,12 +149,12 @@ const Step9Dates = () => {
         
         {hasBookings && (
           <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, marginBottom: 'var(--space-6)' }}>
-            ⚠️ Esta travesía ya tiene reservas. Solo puedes modificar las plazas bloqueadas.
+            ⚠️ Esta travesía ya tiene reservas. Puedes agregar nuevas fechas o modificar las plazas bloqueadas, pero no eliminar fechas existentes.
           </div>
         )}
 
         {/* Date Ingestion UI */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-6)', paddingBottom: 'var(--space-4)', opacity: hasBookings ? 0.5 : 1, pointerEvents: hasBookings ? 'none' : 'auto' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-6)', paddingBottom: 'var(--space-4)' }}>
           
           {/* Calendar Picker */}
           <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'white', padding: 'var(--space-4)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-color)', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
@@ -393,7 +397,7 @@ const Step9Dates = () => {
                         />
                       </div>
                     )}
-                    {!hasBookings && (
+                    {!(hasBookings && typeof date.id === 'string') && (
                       <button 
                         onClick={() => handleRemoveDate(date.id)}
                       className="date-remove-btn"

@@ -262,7 +262,7 @@ const Step10Finalize = () => {
             date: d.departure_date,
             start_time: d.departure_time ? (d.departure_time.length <= 5 ? `${d.departure_time}:00` : d.departure_time) : '08:00:00',
             end_time: d.arrival_time ? (d.arrival_time.length <= 5 ? `${d.arrival_time}:00` : d.arrival_time) : null,
-            available_spots: formData.max_passengers || 6,
+            available_spots: d.available_spots !== undefined ? d.available_spots : (formData.max_passengers || 6),
             blocked_spots: d.blocked_spots || 0
           }
         })
