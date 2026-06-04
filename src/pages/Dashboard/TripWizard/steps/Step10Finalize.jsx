@@ -254,10 +254,12 @@ const Step10Finalize = () => {
       if (formData.custom_dates && formData.custom_dates.length > 0) {
         setStatusMsg('Guardando fechas...')
         
-        const datesToUpsert = formData.custom_dates.map(d => {
+        const existingDates = []
+        const newDates = []
+
+        formData.custom_dates.forEach(d => {
           const isExisting = typeof d.id === 'string' && d.id.length > 20;
-          return {
-            ...(isExisting ? { id: d.id } : {}),
+          const dateObj = {
             trip_id: trip.id,
             date: d.departure_date,
             start_time: d.departure_time ? (d.departure_time.length <= 5 ? `${d.departure_time}:00` : d.departure_time) : '08:00:00',
@@ -268,11 +270,17 @@ const Step10Finalize = () => {
             full_boat_price_override: d.full_boat_price !== undefined ? d.full_boat_price : null,
             is_active: true
           }
-        })
+          if (isExisting) {
+            dateObj.id = d.id;
+            existingDates.push(dateObj);
+          } else {
+            newDates.push(dateObj);
+          }
+        });
 
         // Borrar fechas eliminadas (solo si no estamos editando o si estamos editando y permitimos borrar)
         if (formData.id) {
-          const keepIds = datesToUpsert.map(d => d.id).filter(Boolean)
+          const keepIds = existingDates.map(d => d.id)
           if (keepIds.length > 0) {
             await supabase.from('trip_dates').delete().eq('trip_id', trip.id).not('id', 'in', `(${keepIds.join(',')})`)
           } else {
@@ -280,12 +288,16 @@ const Step10Finalize = () => {
           }
         }
 
-        const datesInsertPromise = supabase
-          .from('trip_dates')
-          .upsert(datesToUpsert)
+        const datePromises = []
+        if (existingDates.length > 0) {
+          datePromises.push(supabase.from('trip_dates').upsert(existingDates))
+        }
+        if (newDates.length > 0) {
+          datePromises.push(supabase.from('trip_dates').insert(newDates))
+        }
 
         const { error: datesError } = await Promise.race([
-          datesInsertPromise,
+          Promise.all(datePromises),
           new Promise((_, reject) => setTimeout(() => reject(new Error('La base de datos tardó demasiado al guardar las fechas. Verificá tu conexión.')), 60000))
         ])
 
