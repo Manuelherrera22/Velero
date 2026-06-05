@@ -61,8 +61,8 @@ export async function handler(event) {
                   bookingId: bookingId,
                   trip: bookingDetails.trip?.title,
                   date: bookingDetails.trip_date ? { date: bookingDetails.trip_date.date, start_time: bookingDetails.trip_date.start_time } : null,
-                  email: bookingDetails.guest_email,
-                  name: bookingDetails.guest_name,
+                  email: bookingDetails.guest_email || bookingDetails.metadata?.contact?.email,
+                  name: bookingDetails.guest_name || bookingDetails.metadata?.contact?.name,
                   guests: bookingDetails.quantity,
                   total: bookingDetails.total,
                   currency: bookingDetails.metadata?.currency || 'ARS'
