@@ -199,7 +199,7 @@ export default function TripDetail() {
             <div className="trip-detail__meta">
               <span><MapPin size={16} /> {trip.location}</span>
               <span><Users size={16} /> Mínimo {trip.min_passengers || 1} {trip.min_passengers === 1 ? 'persona' : 'personas'}</span>
-              <span><Users size={16} /> Hasta {trip.capacity} personas</span>
+              <span><Users size={16} /> Hasta {capacity} personas</span>
               {trip.boat?.cabins > 0 && <span>🛏 {trip.boat.cabins} Camarotes</span>}
               {trip.boat?.bathrooms > 0 && <span>🚿 {trip.boat.bathrooms} Baños</span>}
             </div>
@@ -358,7 +358,7 @@ export default function TripDetail() {
                             .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
                             .map(d => {
                               const remainingSpots = d.available_spots - (d.blocked_spots || 0);
-                              const dateHasBookings = d.available_spots < trip.capacity;
+                              const dateHasBookings = d.available_spots < capacity;
                               const isDateDisabled = bookingMode === 'private' ? (dateHasBookings || d.blocked_spots > 0) : remainingSpots <= 0;
                               const slotPrice = bookingMode === 'private'
                                 ? (d.full_boat_price_override || trip.full_boat_price || trip.metadata?.full_boat_price)
@@ -406,8 +406,8 @@ export default function TripDetail() {
                   <button className="booking-card__counter-btn" disabled={bookingMode === 'private'} onClick={() => setGuests(Math.max(1, guests - 1))}>
                     <Minus size={16} />
                   </button>
-                  <span className="booking-card__counter-value">{bookingMode === 'private' ? `Hasta ${trip.capacity}` : guests}</span>
-                  <button className="booking-card__counter-btn" disabled={bookingMode === 'private'} onClick={() => setGuests(Math.min(trip.capacity, guests + 1))}>
+                  <span className="booking-card__counter-value">{bookingMode === 'private' ? `Hasta ${capacity}` : guests}</span>
+                  <button className="booking-card__counter-btn" disabled={bookingMode === 'private'} onClick={() => setGuests(Math.min(capacity, guests + 1))}>
                     <Plus size={16} />
                   </button>
                 </div>

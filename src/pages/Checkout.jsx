@@ -275,8 +275,11 @@ export default function Checkout() {
     let isRedirecting = false
 
     try {
-      if (mode === 'private' && selectedDate?.blocked_spots > 0) {
-        setError('Esta fecha tiene plazas bloqueadas y no se puede reservar en modalidad privada (exclusiva).')
+      const capacity = trip?.max_capacity || trip?.capacity || 6
+      const isAlreadyBookedShared = selectedDate && selectedDate.available_spots < capacity
+
+      if (mode === 'private' && (selectedDate?.blocked_spots > 0 || isAlreadyBookedShared)) {
+        setError('Esta fecha ya cuenta con reservas compartidas o lugares bloqueados y no puede ser reservada como velero privado (exclusivo).')
         setLoading(false)
         return
       }

@@ -124,7 +124,10 @@ export default function MyTrips() {
         ) : (
           <div className="my-trips__list animate-fade-in">
             {displayBookings.map(booking => {
-              const status = STATUS_MAP[booking.status] || STATUS_MAP.pending
+              const isPendingPaymentSuccess = booking.status === 'pending' && paymentStatus === 'approved';
+              const status = isPendingPaymentSuccess 
+                ? { label: 'En unos segundos...', color: 'info', icon: Loader }
+                : (STATUS_MAP[booking.status] || STATUS_MAP.pending)
               const StatusIcon = status.icon
               const shortId = booking.id?.slice(0, 8).toUpperCase()
               const tripDate = booking.trip_date?.date
@@ -145,7 +148,7 @@ export default function MyTrips() {
                     <div className="boarding-pass__header">
                       <span className="boarding-pass__brand">⛵ VELERO</span>
                       <span className={`badge badge--${status.color}`}>
-                        <StatusIcon size={12} /> {status.label}
+                        <StatusIcon size={12} className={isPendingPaymentSuccess ? 'spin' : ''} /> {status.label}
                       </span>
                     </div>
 
