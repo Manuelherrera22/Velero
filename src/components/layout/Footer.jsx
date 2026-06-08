@@ -25,7 +25,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="footer__brand">
             <Link to="/" className="footer__logo">
-              <img src="/logo-kailu.jpg" alt="Kailu" style={{ height: '32px', width: 'auto', borderRadius: '4px' }} />
+              <img src="/logo-azul.png" alt="Kailu" style={{ height: '32px', width: 'auto', borderRadius: '4px' }} />
             </Link>
             <p className="footer__tagline">
               Conectamos viajeros con capitanes que ofrecen experiencias en velero únicas, accesibles y sostenibles.

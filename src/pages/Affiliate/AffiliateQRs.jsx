@@ -156,7 +156,7 @@ export default function AffiliateQRs() {
                             bgColor={"#ffffff"}
                             fgColor={"#0f172a"}
                             imageSettings={{
-                              src: "/logo-kailu.jpg",
+                              src: "/logo-azul.png",
                               height: 120,
                               width: 120,
                               excavate: true,

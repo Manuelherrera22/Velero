@@ -34,7 +34,7 @@ export default function Header() {
     <header className={`header ${scrolled ? 'header--scrolled' : ''}`}>
       <div className="container header__inner">
         <Link to="/" className="header__logo" aria-label="Kailu Home">
-          <img src="/logo-kailu.jpg" alt="Kailu" style={{ height: '48px', width: 'auto', borderRadius: '4px' }} />
+          <img src="/logo-azul.png" alt="Kailu" style={{ height: '56px', width: 'auto', borderRadius: '4px' }} />
         </Link>
 
         <nav className={`header__nav ${menuOpen ? 'header__nav--open' : ''}`}>

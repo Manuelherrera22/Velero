@@ -193,7 +193,7 @@ export default function Login() {
     <div className="login-page">
       <div className="login-card glass animate-fade-in">
         <div className="login-card__logo" style={{ background: 'transparent', boxShadow: 'none' }}>
-          <img src="/logo-kailu.jpg" alt="Kailu" style={{ height: '48px', width: 'auto', borderRadius: '4px' }} />
+          <img src="/logo-azul.png" alt="Kailu" style={{ height: '48px', width: 'auto', borderRadius: '4px' }} />
         </div>
 
         <h1 className="login-card__title">Bienvenido a Kailu</h1>
