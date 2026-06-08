@@ -100,9 +100,11 @@ const Step9Dates = () => {
   }
 
   const handleRemoveDate = (id) => {
-    // Prevent removing existing database dates (UUID string) if trip has bookings
-    if (hasBookings && typeof id === 'string') {
-      alert("No puedes eliminar fechas de una travesía que ya tiene reservas.");
+    const dateObj = formData.custom_dates.find(d => d.id === id);
+    const dateHasBookings = dateObj && dateObj.available_spots < (formData.max_passengers || 6);
+
+    if (dateHasBookings) {
+      alert("No puedes eliminar esta fecha porque ya tiene reservas. Si necesitas reprogramar o cancelarla por mal tiempo o fuerza mayor, comunícate con nosotros escribiendo a soporte@kailu.travel o por WhatsApp para coordinar con los pasajeros.");
       return;
     }
     updateFormData({
@@ -392,14 +394,14 @@ const Step9Dates = () => {
                           min="0"
                           max={formData.max_passengers || 6}
                           value={date.blocked_spots || 0}
+                          disabled={date.available_spots < (formData.max_passengers || 6)}
                           onChange={(e) => handleUpdateBlockedSpots(date.id, e.target.value)}
-                          style={{ width: '60px', padding: '4px', textAlign: 'center', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 'bold' }}
+                          style={{ width: '60px', padding: '4px', textAlign: 'center', borderRadius: '4px', border: '1px solid var(--border-color)', fontWeight: 'bold', opacity: (date.available_spots < (formData.max_passengers || 6)) ? 0.6 : 1 }}
                         />
                       </div>
                     )}
-                    {!(hasBookings && typeof date.id === 'string') && (
-                      <button 
-                        onClick={() => handleRemoveDate(date.id)}
+                    <button 
+                      onClick={() => handleRemoveDate(date.id)}
                       className="date-remove-btn"
                       style={{
                         backgroundColor: 'transparent',
@@ -417,7 +419,6 @@ const Step9Dates = () => {
                     >
                       <Trash2 size={20}/>
                     </button>
-                    )}
                   </div>
                 </div>
               ))}

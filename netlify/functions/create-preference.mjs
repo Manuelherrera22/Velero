@@ -40,7 +40,7 @@ export async function handler(event) {
       },
       auto_return: 'approved',
       external_reference: bookingId,
-      // notification_url: `${origin}/api/mp-webhook`, // Descomentar al tener el dominio definitivo
+      ...(origin.includes('localhost') ? {} : { notification_url: `${origin}/api/mp-webhook` })
     }
 
     const result = await preference.create({ body })

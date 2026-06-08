@@ -275,6 +275,12 @@ export default function Checkout() {
     let isRedirecting = false
 
     try {
+      if (mode === 'private' && selectedDate?.blocked_spots > 0) {
+        setError('Esta fecha tiene plazas bloqueadas y no se puede reservar en modalidad privada (exclusiva).')
+        setLoading(false)
+        return
+      }
+
       // Build addon list
       const addonsList = tripAddons
         .filter(a => selectedAddons[a.id] > 0)
@@ -291,12 +297,16 @@ export default function Checkout() {
         try {
           const { data: qrData } = await supabase
             .from('qr_codes')
-            .select('*, hotel:hotels!hotel_id(commission_percent)')
+            .select('*, hotel:hotels!hotel_id(commission_percent, commission_type)')
             .eq('code', qrCode)
             .single()
             
           if (qrData?.hotel?.commission_percent) {
-            affiliateCommission = total * (qrData.hotel.commission_percent / 100)
+            if (qrData.hotel.commission_type === 'fixed') {
+              affiliateCommission = qrData.hotel.commission_percent
+            } else {
+              affiliateCommission = total * (qrData.hotel.commission_percent / 100)
+            }
           }
         } catch (err) {
           console.error("Error fetching QR commission", err)

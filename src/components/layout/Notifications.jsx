@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Bell, ShieldAlert, BookOpen, AlertCircle, Ship } from 'lucide-react'
+import { Bell, ShieldAlert, BookOpen, AlertCircle, Ship, CalendarCheck } from 'lucide-react'
 import supabase from '../../lib/supabase'
 import useAuthStore from '../../stores/authStore'
 
@@ -76,6 +76,8 @@ export default function Notifications() {
 
       if (myTrips && myTrips.length > 0) {
         const tripIds = myTrips.map(t => t.id)
+        
+        // Pending bookings
         const { count: pendingBookings } = await supabase
           .from('bookings')
           .select('*', { count: 'exact', head: true })
@@ -90,6 +92,24 @@ export default function Notifications() {
             icon: <BookOpen size={16} />,
             link: '/dashboard/reservas',
             color: 'var(--color-success)'
+          })
+        }
+
+        // Confirmed / Completed bookings
+        const { count: confirmedBookings } = await supabase
+          .from('bookings')
+          .select('*', { count: 'exact', head: true })
+          .in('trip_id', tripIds)
+          .in('status', ['confirmed', 'completed'])
+
+        if (confirmedBookings > 0) {
+          notifs.push({
+            id: 'capt-confirmed-bookings',
+            title: 'Reservas Confirmadas',
+            message: `Tienes ${confirmedBookings} reserva(s) confirmada(s) / completada(s).`,
+            icon: <CalendarCheck size={16} />,
+            link: '/dashboard/reservas',
+            color: 'var(--color-accent-400)'
           })
         }
       }

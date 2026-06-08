@@ -264,6 +264,21 @@ const Step5Services = () => {
         .service-row-hover:hover .service-label {
           color: var(--color-accent-600) !important;
         }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+          display: block !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.05) !important;
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(0, 180, 180, 0.3) !important;
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 180, 180, 0.6) !important;
+        }
       `}</style>
     </div>
   )

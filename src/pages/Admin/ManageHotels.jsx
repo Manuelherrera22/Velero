@@ -10,6 +10,8 @@ export default function ManageHotels() {
   const [saving, setSaving] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
   const [affiliates, setAffiliates] = useState([])
+  const [qrHotelId, setQrHotelId] = useState(null)
+  const [qrZoneName, setQrZoneName] = useState('')
   const [form, setForm] = useState({
     name: '', location: '', contact_email: '', contact_phone: '', 
     commission_percent: 10, commission_type: 'percentage', owner_id: ''
@@ -22,7 +24,10 @@ export default function ManageHotels() {
 
   const fetchAffiliates = async () => {
     try {
-      const { data, error } = await supabase.from('profiles').select('id, full_name, email').neq('role', 'admin')
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, business_name, business_location, bank_alias, bank_holder')
+        .eq('role', 'affiliate')
       if (error) throw error
       setAffiliates(data || [])
     } catch (err) {
@@ -56,6 +61,7 @@ export default function ManageHotels() {
       contact_email: form.contact_email || null,
       contact_phone: form.contact_phone || null,
       commission_percent: parseFloat(form.commission_percent) || 10,
+      commission_type: form.commission_type || 'percentage',
       owner_id: form.owner_id || null,
     })
     
@@ -68,18 +74,17 @@ export default function ManageHotels() {
     setShowForm(false)
     setForm({ name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10, commission_type: 'percentage', owner_id: '' })
     fetchHotels()
+    fetchAffiliates()
   }
 
-  const generateQR = async (hotelId) => {
-    const zoneName = window.prompt("Ingresa un nombre o ubicación para este QR (ej. Recepción, Instagram, Habitación 101):")
-    if (!zoneName) return // User cancelled or entered empty string
-
+  const submitQR = async (hotelId) => {
+    if (!qrZoneName.trim()) return
     const hotelIdStr = String(hotelId)
     const code = `H${hotelIdStr.slice(0, 6).toUpperCase()}${Date.now().toString(36).toUpperCase()}`
     const { error } = await supabase.from('qr_codes').insert({
       hotel_id: hotelId,
       code,
-      zone: zoneName,
+      zone: qrZoneName.trim(),
       is_active: true,
     })
     
@@ -88,6 +93,8 @@ export default function ManageHotels() {
       alert("Hubo un error al generar el QR: " + error.message)
     }
     
+    setQrHotelId(null)
+    setQrZoneName('')
     fetchHotels()
   }
 
@@ -111,6 +118,8 @@ export default function ManageHotels() {
 
   const updateField = (f, v) => setForm(p => ({ ...p, [f]: v }))
 
+  const pendingAffiliates = affiliates.filter(aff => !hotels.some(h => h.owner_id === aff.id))
+
   return (
     <div className="dash-page">
       <div className="dash-pane">
@@ -124,6 +133,49 @@ export default function ManageHotels() {
             </button>
           )}
         </div>
+
+        {/* Pending Ally Registration Queue */}
+        {!loading && pendingAffiliates.length > 0 && (
+          <div className="item-card glass" style={{ marginBottom: 'var(--space-6)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+            <div className="item-card__header" style={{ marginBottom: 'var(--space-4)' }}>
+              <h3 className="item-card__title" style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Building2 size={18} /> Solicitudes de Registro Pendientes ({pendingAffiliates.length})
+              </h3>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {pendingAffiliates.map(aff => (
+                <div key={aff.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(255,255,255,0.05)', flexWrap: 'wrap', gap: '16px' }}>
+                  <div>
+                    <strong style={{ fontSize: '15px', color: 'var(--text-primary)' }}>{aff.business_name || 'Negocio sin nombre'}</strong>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '6px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                      <span><b>Responsable:</b> {aff.full_name}</span>
+                      <span><b>Email:</b> {aff.email}</span>
+                      {aff.business_location && <span><b>Ubicación:</b> {aff.business_location}</span>}
+                      {aff.bank_alias && <span><b>Alias/CBU:</b> {aff.bank_alias} ({aff.bank_holder})</span>}
+                    </div>
+                  </div>
+                  <button 
+                    className="btn btn--accent btn--sm"
+                    onClick={() => {
+                      setForm({
+                        name: aff.business_name || '',
+                        location: aff.business_location || '',
+                        contact_email: aff.email || '',
+                        contact_phone: '',
+                        commission_percent: 10,
+                        commission_type: 'percentage',
+                        owner_id: aff.id
+                      })
+                      setShowForm(true)
+                    }}
+                  >
+                    Configurar y Aprobar
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
       {showForm && (
         <div className="item-card glass" style={{ marginBottom: 'var(--space-6)' }}>
@@ -221,7 +273,7 @@ export default function ManageHotels() {
                 </p>
               </div>
               <span className="coupon-card__code" style={{ fontSize: '11px' }}>
-                {hotel.commission_type === 'percentage' ? <Percent size={12} /> : '$'}{hotel.commission_percent}{hotel.commission_type === 'percentage' ? '%' : ''}
+                {hotel.commission_type === 'percentage' ? <Percent size={12} style={{ display: 'inline', verticalAlign: '-2px', marginRight: '2px' }} /> : '$'}{hotel.commission_percent}{hotel.commission_type === 'percentage' ? '%' : ''}
               </span>
             </div>
 
@@ -268,9 +320,30 @@ export default function ManageHotels() {
               ))}
             </div>
 
-            <button className="btn btn--outline btn--sm" onClick={() => generateQR(hotel.id)} style={{ marginTop: 'var(--space-3)' }}>
-              <QrCode size={14} /> Generar nuevo QR
-            </button>
+            {qrHotelId === hotel.id ? (
+              <div style={{ marginTop: 'var(--space-3)', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input 
+                  className="input" 
+                  style={{ height: '36px', fontSize: '13px', padding: '4px 8px' }} 
+                  placeholder="Ej: Recepción, Habitación 101" 
+                  value={qrZoneName} 
+                  onChange={(e) => setQrZoneName(e.target.value)} 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      submitQR(hotel.id)
+                    }
+                  }}
+                  autoFocus
+                />
+                <button className="btn btn--accent btn--sm" onClick={() => submitQR(hotel.id)} style={{ height: '36px', whiteSpace: 'nowrap', padding: '0 12px' }}>Generar</button>
+                <button className="btn btn--ghost btn--sm" onClick={() => { setQrHotelId(null); setQrZoneName('') }} style={{ height: '36px', padding: '0 8px' }}><X size={14} /></button>
+              </div>
+            ) : (
+              <button className="btn btn--outline btn--sm" onClick={() => { setQrHotelId(hotel.id); setQrZoneName('') }} style={{ marginTop: 'var(--space-3)', width: '100%' }}>
+                <QrCode size={14} /> Generar nuevo QR
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -278,3 +351,4 @@ export default function ManageHotels() {
     </div>
   )
 }
+

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { QrCode, Plus, Check, Copy, Loader, MapPin, Download } from 'lucide-react'
+import { QrCode, Plus, Check, Copy, Loader, MapPin, Download, X } from 'lucide-react'
 import { QRCodeCanvas } from 'qrcode.react'
 import supabase from '../../lib/supabase'
 
@@ -8,6 +8,8 @@ export default function AffiliateQRs() {
   const [loading, setLoading] = useState(true)
   const [copiedId, setCopiedId] = useState(null)
   const [generatingFor, setGeneratingFor] = useState(null)
+  const [qrHotelId, setQrHotelId] = useState(null)
+  const [qrZoneName, setQrZoneName] = useState('')
 
   useEffect(() => {
     fetchHotelsAndQRs()
@@ -33,9 +35,8 @@ export default function AffiliateQRs() {
     }
   }
 
-  const generateQR = async (hotelId) => {
-    const zoneName = window.prompt("Ingresa un nombre o ubicación para este QR (ej. Recepción, Instagram, Habitación 101):")
-    if (!zoneName) return
+  const submitQR = async (hotelId) => {
+    if (!qrZoneName.trim()) return
 
     setGeneratingFor(hotelId)
     try {
@@ -43,7 +44,7 @@ export default function AffiliateQRs() {
       const { error } = await supabase.from('qr_codes').insert({
         hotel_id: hotelId,
         code,
-        zone: zoneName,
+        zone: qrZoneName.trim(),
         is_active: true,
       })
       if (error) {
@@ -51,6 +52,8 @@ export default function AffiliateQRs() {
         alert('Hubo un error al generar el código QR. ' + (error.message || ''))
         return
       }
+      setQrHotelId(null)
+      setQrZoneName('')
       await fetchHotelsAndQRs()
     } catch (err) {
       console.error(err)
@@ -173,14 +176,37 @@ export default function AffiliateQRs() {
               )}
             </div>
 
-            <button 
-              className="btn btn--outline btn--sm" 
-              onClick={() => generateQR(hotel.id)} 
-              disabled={generatingFor === hotel.id}
-              style={{ marginTop: 'var(--space-5)', width: '100%' }}
-            >
-              {generatingFor === hotel.id ? <Loader size={14} className="spin" /> : <><Plus size={14} /> Generar nuevo QR</>}
-            </button>
+            {qrHotelId === hotel.id ? (
+              <div style={{ marginTop: 'var(--space-5)', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input 
+                  className="input" 
+                  style={{ height: '36px', fontSize: '13px', padding: '4px 8px' }} 
+                  placeholder="Ej: Recepción, Habitación 101" 
+                  value={qrZoneName} 
+                  onChange={(e) => setQrZoneName(e.target.value)} 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      submitQR(hotel.id)
+                    }
+                  }}
+                  autoFocus
+                />
+                <button className="btn btn--accent btn--sm" onClick={() => submitQR(hotel.id)} disabled={generatingFor === hotel.id} style={{ height: '36px', whiteSpace: 'nowrap', padding: '0 12px' }}>
+                  {generatingFor === hotel.id ? <Loader size={14} className="spin" /> : 'Generar'}
+                </button>
+                <button className="btn btn--ghost btn--sm" onClick={() => { setQrHotelId(null); setQrZoneName('') }} style={{ height: '36px', padding: '0 8px' }}><X size={14} /></button>
+              </div>
+            ) : (
+              <button 
+                className="btn btn--outline btn--sm" 
+                onClick={() => { setQrHotelId(hotel.id); setQrZoneName('') }} 
+                disabled={generatingFor === hotel.id}
+                style={{ marginTop: 'var(--space-5)', width: '100%' }}
+              >
+                <Plus size={14} /> Generar nuevo QR
+              </button>
+            )}
           </div>
         ))}
       </div>

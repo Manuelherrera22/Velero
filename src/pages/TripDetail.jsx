@@ -33,7 +33,8 @@ export default function TripDetail() {
   const selectedDateObj = tripDates?.find(d => d.id === selectedDate);
   const capacity = trip?.max_capacity || trip?.capacity || 6;
   const hasBookings = selectedDateObj && selectedDateObj.available_spots < capacity;
-  const isPrivateAllowed = basePrivateAllowed && !hasBookings;
+  const hasBlockedSpots = selectedDateObj && selectedDateObj.blocked_spots > 0;
+  const isPrivateAllowed = basePrivateAllowed && !hasBookings && !hasBlockedSpots;
 
   useEffect(() => {
     if (trip) {
@@ -356,12 +357,12 @@ export default function TripDetail() {
                           {slots
                             .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
                             .map(d => {
+                              const remainingSpots = d.available_spots - (d.blocked_spots || 0);
+                              const dateHasBookings = d.available_spots < trip.capacity;
+                              const isDateDisabled = bookingMode === 'private' ? (dateHasBookings || d.blocked_spots > 0) : remainingSpots <= 0;
                               const slotPrice = bookingMode === 'private'
-                                ? (d.full_boat_price_override || trip.full_boat_price)
-                                : (d.price_per_person_override || trip.price_per_person)
-                              
-                              const dateHasBookings = d.available_spots < capacity;
-                              const isDateDisabled = bookingMode === 'private' ? dateHasBookings : d.available_spots <= 0;
+                                ? (d.full_boat_price_override || trip.full_boat_price || trip.metadata?.full_boat_price)
+                                : (d.price_per_person_override || trip.price_per_person || trip.metadata?.price_per_person);
                               
                               return (
                                 <button
@@ -372,15 +373,15 @@ export default function TripDetail() {
                                 >
                                   <span className="booking-card__date-time font-bold text-[15px]">{d.start_time?.slice(0, 5)} hs</span>
                                   <span className="booking-card__date-price text-sm text-muted-foreground">{formatPrice(slotPrice, trip.currency)}</span>
-                                  <span className={`booking-card__date-spots flex items-center gap-1.5 text-xs mt-1 text-center`} style={{ color: d.available_spots <= 0 ? '#ef4444' : 'var(--color-success)' }}>
-                                    {d.available_spots <= 0 ? (
+                                  <span className={`booking-card__date-spots flex items-center gap-1.5 text-xs mt-1 text-center`} style={{ color: remainingSpots <= 0 ? '#ef4444' : 'var(--color-success)' }}>
+                                    {remainingSpots <= 0 ? (
                                       'Agotado'
-                                    ) : ( bookingMode === 'private' && dateHasBookings ) ? (
+                                    ) : ( bookingMode === 'private' && (dateHasBookings || d.blocked_spots > 0) ) ? (
                                       <span style={{ color: '#ef4444' }}>Ocupado</span>
                                     ) : (
                                       <>
                                         <div className={`w-2 h-2 rounded-full animate-pulse`} style={{ backgroundColor: 'var(--color-success)' }}></div>
-                                        {`${d.available_spots} disp.`}
+                                        {`${remainingSpots} disp.`}
                                       </>
                                     )}
                                   </span>

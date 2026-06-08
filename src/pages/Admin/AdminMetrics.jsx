@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, DollarSign, Users, Ship, CalendarCheck, TrendingUp, QrCode, MapPin, Download, ChevronDown, ChevronUp, Filter } from 'lucide-react'
+import { BarChart3, DollarSign, Users, Ship, CalendarCheck, TrendingUp, QrCode, MapPin, Download, ChevronDown, ChevronUp, Filter, X } from 'lucide-react'
 import supabase from '../../lib/supabase'
 import './AdminMetrics.css'
 
@@ -35,7 +35,84 @@ export default function AdminMetrics() {
   const [dateTo, setDateTo] = useState('')
   const [showFilters, setShowFilters] = useState(false)
 
+  // Voucher search state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [selectedBooking, setSelectedBooking] = useState(null)
+  const [hasSearched, setHasSearched] = useState(false)
+
   useEffect(() => { fetchMetrics() }, [])
+
+  const handleSearchSubmit = async (e) => {
+    e.preventDefault()
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) {
+      setHasSearched(false)
+      setSearchResults([])
+      return
+    }
+
+    setSearchLoading(true)
+    try {
+      let promises = []
+      
+      // 1. Search by voucher code (first 8 chars of UUID)
+      if (/^[0-9a-f]{8}$/.test(query)) {
+        const lower = `${query}-0000-0000-0000-000000000000`
+        const upper = `${query}-ffff-ffff-ffff-ffffffffffff`
+        promises.push(
+          supabase
+            .from('bookings')
+            .select('*, trip:trips!trip_id(title, location), trip_date:trip_dates!trip_date_id(date, start_time)')
+            .gte('id', lower)
+            .lte('id', upper)
+        )
+      } else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(query)) {
+        promises.push(
+          supabase
+            .from('bookings')
+            .select('*, trip:trips!trip_id(title, location), trip_date:trip_dates!trip_date_id(date, start_time)')
+            .eq('id', query)
+        )
+      }
+      
+      // 2. Search by guest name or email
+      promises.push(
+        supabase
+          .from('bookings')
+          .select('*, trip:trips!trip_id(title, location), trip_date:trip_dates!trip_date_id(date, start_time)')
+          .or(`guest_name.ilike.%${query}%,guest_email.ilike.%${query}%`)
+          .limit(30)
+      )
+      
+      const results = await Promise.all(promises)
+      const allBookings = []
+      const seenIds = new Set()
+      
+      for (const res of results) {
+        if (res.data) {
+          for (const b of res.data) {
+            if (!seenIds.has(b.id)) {
+              seenIds.add(b.id)
+              allBookings.push(b)
+            }
+          }
+        }
+      }
+
+      setSearchResults(allBookings)
+      setHasSearched(true)
+      if (allBookings.length === 1) {
+        setSelectedBooking(allBookings[0])
+      }
+    } catch (err) {
+      console.error("Error searching bookings:", err)
+    } finally {
+      setSearchLoading(false)
+    }
+  }
+
 
   const fetchMetrics = async (from, to) => {
     setLoading(true)
@@ -406,13 +483,87 @@ export default function AdminMetrics() {
 
       {/* Recent Bookings */}
       <div className="metrics-table glass" style={{ marginTop: 'var(--space-6)' }}>
-        <h3 className="metrics-table__title"><CalendarCheck size={18} /> Últimas Reservas</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)', flexWrap: 'wrap', gap: '12px' }}>
+          <h3 className="metrics-table__title" style={{ marginBottom: 0 }}><CalendarCheck size={18} /> Últimas Reservas</h3>
+          <form onSubmit={handleSearchSubmit} className="search-voucher-form" style={{ display: 'flex', gap: '8px', width: '100%', maxWidth: '400px' }}>
+            <input 
+              type="text" 
+              className="input" 
+              placeholder="Buscar por voucher (8 carac.) o cliente..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ minHeight: '36px', padding: '6px 12px', fontSize: '14px', flex: 1 }}
+            />
+            <button type="submit" className="btn btn--accent btn--sm" disabled={searchLoading} style={{ minHeight: '36px' }}>
+              {searchLoading ? 'Buscando...' : 'Buscar'}
+            </button>
+          </form>
+        </div>
+
+        {/* Search Results */}
+        {hasSearched && (
+          <div className="search-results-container glass" style={{
+            padding: 'var(--space-4)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            marginBottom: 'var(--space-6)',
+            background: 'rgba(255, 255, 255, 0.02)',
+            animation: 'fadeSlide 0.2s ease-out'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-3)' }}>
+              <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Resultados de la búsqueda</h4>
+              <button 
+                className="btn btn--ghost btn--sm" 
+                style={{ padding: '2px 8px', minHeight: 'unset' }}
+                onClick={() => {
+                  setHasSearched(false);
+                  setSearchResults([]);
+                  setSearchQuery('');
+                }}
+              >
+                Limpiar Resultados
+              </button>
+            </div>
+
+            {searchResults.length === 0 ? (
+              <p style={{ color: 'var(--text-tertiary)', fontSize: '13px', margin: 0 }}>No se encontraron reservas con esos criterios.</p>
+            ) : (
+              <div className="metrics-table__rows" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                {searchResults.map(b => (
+                  <div 
+                    key={b.id} 
+                    className="metrics-table__row" 
+                    style={{ cursor: 'pointer', transition: 'background 0.2s' }}
+                    onClick={() => setSelectedBooking(b)}
+                  >
+                    <span className={`status-badge status-badge--${b.status}`} style={{ fontSize: '10px', minWidth: '70px', textAlign: 'center' }}>
+                      {b.status === 'pending' ? 'Pendiente' : b.status === 'confirmed' ? 'Confirmada' : b.status}
+                    </span>
+                    <div className="metrics-table__info">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <strong>{b.trip?.title || '—'}</strong>
+                        <span style={{ fontSize: '10px', background: 'var(--color-primary-50)', color: 'var(--color-primary-600)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--color-primary-100)' }}>
+                          #{b.id?.slice(0, 8).toUpperCase()}
+                        </span>
+                      </div>
+                      <span>{b.guest_name || b.guest_email || 'Usuario registrado'} · {b.quantity} pers.</span>
+                    </div>
+                    <span className="metrics-table__count" style={{ color: 'var(--color-accent-400)' }}>
+                      ${b.total?.toLocaleString('es-AR')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {recentBookings.length === 0 ? (
           <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)' }}>Sin reservas aún</p>
         ) : (
           <div className="metrics-table__rows">
             {recentBookings.map(b => (
-              <div key={b.id} className="metrics-table__row">
+              <div key={b.id} className="metrics-table__row" style={{ cursor: 'pointer' }} onClick={() => setSelectedBooking(b)}>
                 <span className={`status-badge status-badge--${b.status}`} style={{ fontSize: '10px', minWidth: '70px', textAlign: 'center' }}>
                   {b.status === 'pending' ? 'Pendiente' : b.status === 'confirmed' ? 'Confirmada' : b.status}
                 </span>
@@ -433,6 +584,139 @@ export default function AdminMetrics() {
           </div>
         )}
       </div>
+
+      {/* Modal de Detalle de Reserva */}
+      {selectedBooking && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }} onClick={() => setSelectedBooking(null)}>
+          <div className="modal-content glass" style={{
+            background: 'rgba(18, 25, 35, 0.95)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: 'var(--radius-xl)',
+            padding: 'var(--space-6)',
+            width: '100%',
+            maxWidth: '600px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            position: 'relative',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
+          }} onClick={(e) => e.stopPropagation()}>
+            <button 
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                padding: '4px'
+              }} 
+              onClick={() => setSelectedBooking(null)}
+            >
+              <X size={20} />
+            </button>
+
+            <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              Detalle de Reserva
+              <span style={{ fontSize: '12px', background: 'var(--color-primary-50)', color: 'var(--color-primary-600)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--color-primary-100)' }}>
+                #{selectedBooking.id?.slice(0, 8).toUpperCase()}
+              </span>
+            </h2>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: 'var(--space-5)' }}>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', display: 'block', textTransform: 'uppercase' }}>Travesía</span>
+                <strong style={{ fontSize: '15px' }}>{selectedBooking.trip?.title || '—'}</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', display: 'block', textTransform: 'uppercase' }}>Estado</span>
+                <div>
+                  <span className={`status-badge status-badge--${selectedBooking.status}`} style={{ display: 'inline-block', marginTop: '4px' }}>
+                    {selectedBooking.status === 'pending' ? 'Pendiente' : selectedBooking.status === 'confirmed' ? 'Confirmada' : selectedBooking.status}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', display: 'block', textTransform: 'uppercase' }}>Fecha y Hora</span>
+                <strong>{selectedBooking.trip_date?.date ? new Date(selectedBooking.trip_date.date).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '—'}</strong>
+                {selectedBooking.trip_date?.start_time && <span style={{ color: 'var(--text-secondary)', marginLeft: '6px' }}>({selectedBooking.trip_date.start_time.slice(0, 5)} hs)</span>}
+              </div>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', display: 'block', textTransform: 'uppercase' }}>Total Abonado</span>
+                <strong style={{ fontSize: '16px', color: 'var(--color-accent-400)' }}>${selectedBooking.total?.toLocaleString('es-AR')} {selectedBooking.metadata?.currency || 'ARS'}</strong>
+              </div>
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid rgba(255, 255, 255, 0.06)', margin: 'var(--space-4) 0' }} />
+
+            <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: 'var(--space-3)' }}>Contacto de la Reserva</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: 'var(--space-5)' }}>
+              <div>
+                <strong>Nombre:</strong> {selectedBooking.guest_name || selectedBooking.metadata?.contact?.name || '—'}
+              </div>
+              <div>
+                <strong>Email:</strong> {selectedBooking.guest_email || selectedBooking.metadata?.contact?.email || '—'}
+              </div>
+              <div>
+                <strong>Teléfono:</strong> {selectedBooking.metadata?.contact?.phone || '—'}
+              </div>
+              <div>
+                <strong>Pasajeros:</strong> {selectedBooking.quantity}
+              </div>
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid rgba(255, 255, 255, 0.06)', margin: 'var(--space-4) 0' }} />
+
+            <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: 'var(--space-3)' }}>Lista de Pasajeros</h3>
+            {selectedBooking.metadata?.passengers?.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {selectedBooking.metadata.passengers.map((pax, idx) => (
+                  <div key={idx} style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.04)', borderRadius: '8px', padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <strong style={{ fontSize: '13px', display: 'block' }}>{pax.name || '—'}</strong>
+                      <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Nacionalidad: {pax.nationality || '—'}</span>
+                    </div>
+                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)', background: 'rgba(255, 255, 255, 0.05)', padding: '2px 6px', borderRadius: '4px' }}>
+                      {pax.id_type?.toUpperCase() || 'DNI'}: {pax.id_number || '—'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ color: 'var(--text-tertiary)', fontSize: '13px', fontStyle: 'italic' }}>No se especificaron detalles individuales de pasajeros.</p>
+            )}
+
+            {selectedBooking.metadata?.selected_addons?.length > 0 && (
+              <>
+                <hr style={{ border: 'none', borderTop: '1px solid rgba(255, 255, 255, 0.06)', margin: 'var(--space-4) 0' }} />
+                <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: 'var(--space-3)' }}>Servicios Adicionales</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+                  {selectedBooking.metadata.selected_addons.map((addon, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+                      <span>{addon.name} (x{addon.quantity || 1})</span>
+                      <span>${((addon.price || addon.unit_price) * (addon.quantity || 1))?.toLocaleString('es-AR')}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       </div>
     </div>
   )
