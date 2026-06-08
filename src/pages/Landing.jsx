@@ -8,6 +8,16 @@ import {
 import useTripStore from '../stores/tripStore'
 import './Landing.css'
 
+const HERO_IMAGES = [
+  '/WhatsApp Image 2026-06-08 at 5.27.36 PM.jpeg',
+  '/WhatsApp Image 2026-06-08 at 5.27.36 PM1.jpeg',
+  '/WhatsApp Image 2026-06-08 at 5.27.36 PM2.jpeg',
+  '/WhatsApp Image 2026-06-08 at 5.27.37 PM3.jpeg',
+  '/WhatsApp Image 2026-06-08 at 5.27.37 PM4.jpeg',
+  '/WhatsApp Image 2026-06-08 at 5.27.37 PM5.jpeg',
+  '/WhatsApp Image 2026-06-08 at 5.27.38 PM6.jpeg'
+]
+
 /* ── Fallback mock data (shown when no published trips in DB) ── */
 const MOCK_TRIPS = [
   { id: '1', title: 'Paseo por el Río de la Plata', location: 'San Fernando, Buenos Aires', price_per_person: 25000, currency: 'ARS', capacity: 6, tags: ['Paseo', 'Río'], captain: { full_name: 'Carlos M.' } },
@@ -180,9 +190,17 @@ export default function Landing() {
   const { featuredTrips, fetchFeaturedTrips } = useTripStore()
   const [openFaq, setOpenFaq] = useState(null)
   const [activeFaqCategory, setActiveFaqCategory] = useState('generales')
+  const [currentBgIndex, setCurrentBgIndex] = useState(0)
 
   useEffect(() => {
     fetchFeaturedTrips()
+  }, [])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentBgIndex((prev) => (prev + 1) % HERO_IMAGES.length)
+    }, 5000)
+    return () => clearInterval(timer)
   }, [])
 
   const displayTrips = featuredTrips.length > 0 ? featuredTrips : MOCK_TRIPS
@@ -232,23 +250,28 @@ export default function Landing() {
     <div className="landing">
       {/* ══════════════════ HERO ══════════════════ */}
       <section className="hero">
-        <div className="hero__bg">
-          <div 
-            className="hero__video"
-            style={{ 
-              position: 'absolute', 
-              top: 0, 
-              left: 0, 
-              width: '100%', 
-              height: '100%', 
-              backgroundImage: 'url("https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?q=80&w=2000&auto=format&fit=crop")',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              opacity: 1, 
-              zIndex: 0,
-              animation: 'panZoom 30s infinite alternate linear'
-            }}
-          />
+        <div className="hero__bg" style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+          {HERO_IMAGES.map((imgSrc, index) => (
+            <div 
+              key={imgSrc}
+              className="hero__video"
+              style={{ 
+                position: 'absolute', 
+                top: 0, 
+                left: 0, 
+                width: '100%', 
+                height: '100%', 
+                backgroundImage: `url("${imgSrc}")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                opacity: index === currentBgIndex ? 1 : 0, 
+                transition: 'opacity 1.5s ease-in-out',
+                zIndex: 0,
+                transform: index === currentBgIndex ? 'scale(1.05)' : 'scale(1.0)',
+                animation: index === currentBgIndex ? 'panZoom 15s infinite alternate linear' : 'none'
+              }}
+            />
+          ))}
           <div className="hero__gradient" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 100%)', zIndex: 1 }} />
           <div className="hero__particles" style={{ zIndex: 2 }}>
             {[...Array(5)].map((_, i) => (
