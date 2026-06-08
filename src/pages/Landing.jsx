@@ -273,8 +273,7 @@ export default function Landing() {
           </h1>
 
           <p className="hero__subtitle animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            Conectamos viajeros con capitanes que ofrecen travesías en velero 
-            únicas, accesibles y sostenibles. Sin complicaciones.
+            No es solo navegar. Es lo que pasa cuando te subís.
           </p>
 
           <div className="hero__actions animate-slide-up" style={{ animationDelay: '0.4s' }}>
@@ -295,88 +294,146 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══════════════════ TRAVESÍAS DESTACADAS ══════════════════ */}
-      <section className="section" id="travesias">
+      {/* ══════════════════ DESTINOS DESTACADOS ══════════════════ */}
+      <section className="section" id="destinos">
         <div className="container reveal" ref={addRevealRef}>
-          <div className="section__header-row">
-            <div>
-              <p className="section__label">Travesías Destacadas</p>
-              <h2 className="section__title">
-                Activa el modo velero
-              </h2>
-            </div>
-            <Link to="/explorar" className="btn btn--outline">
-              Ver Todas
-              <ArrowRight size={16} />
-            </Link>
+          <div className="section__header-row" style={{ alignItems: 'center', flexDirection: 'column', textAlign: 'center', marginBottom: 'var(--space-6)' }}>
+            <p className="section__label">Descubre Nuevos Horizontes</p>
+            <h2 className="section__title">Destinos Destacados</h2>
           </div>
-          <div className="divider" />
+          <div className="divider" style={{ margin: '0 auto var(--space-8)' }} />
 
-          <div className="trips-grid stagger-children">
-            {displayTrips.map((trip) => (
-              <Link key={trip.id} to={`/travesia/${trip.id}`} className="trip-card card">
-                <div className="trip-card__image-wrap">
-                  {trip.images?.[0] ? (
-                    <img src={trip.images[0]} alt={trip.title} className="card__image" />
-                  ) : (
-                    <div className="trip-card__image-placeholder">
-                      <Compass size={40} />
-                      <span>{trip.location}</span>
-                    </div>
-                  )}
-                  <div className="trip-card__overlay">
-                    <span className="card__tag">
-                      {trip.tags?.[0] || 'Travesía'}
-                    </span>
-                  </div>
+          <div className="destinations-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-6)' }}>
+            {[
+              {
+                name: 'Buenos Aires',
+                desc: 'Navegaciones por el Delta y el imponente Río de la Plata.',
+                img: 'https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?q=80&w=800&auto=format&fit=crop',
+                link: '/explorar?search=Buenos Aires'
+              },
+              {
+                name: 'Bariloche',
+                desc: 'Aventura a vela entre lagos de aguas cristalinas y cordillera.',
+                img: 'https://images.unsplash.com/photo-1596550269389-98ee3e89df9a?q=80&w=800&auto=format&fit=crop',
+                link: '/explorar?search=Bariloche'
+              },
+              {
+                name: 'Uruguay',
+                desc: 'Navegación oceánica y puestas de sol mágicas sobre la costa.',
+                img: 'https://images.unsplash.com/photo-1616091216791-a5360b5fc78a?q=80&w=800&auto=format&fit=crop',
+                link: '/explorar?search=Uruguay'
+              }
+            ].map((dest, i) => (
+              <Link key={i} to={dest.link} className="destination-card glass" style={{
+                position: 'relative',
+                height: '350px',
+                borderRadius: 'var(--radius-xl)',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                padding: 'var(--space-5)',
+                textDecoration: 'none',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-6px)';
+                e.currentTarget.style.borderColor = 'rgba(11, 171, 195, 0.3)';
+                e.currentTarget.querySelector('.destination-bg').style.transform = 'scale(1.08)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                e.currentTarget.querySelector('.destination-bg').style.transform = 'scale(1)';
+              }}
+              >
+                <div className="destination-bg" style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url(${dest.img})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  transition: 'transform 0.5s ease',
+                  zIndex: 0
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.4) 50%, rgba(15, 23, 42, 0.1) 100%)',
+                  zIndex: 1
+                }} />
+                <div style={{ position: 'relative', zIndex: 2 }}>
+                  <h3 style={{ fontSize: '22px', fontWeight: 700, color: 'white', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>{dest.name}</h3>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.4' }}>{dest.desc}</p>
+                  <span className="btn btn--accent btn--sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    Ver Travesías <ArrowRight size={14} />
+                  </span>
                 </div>
-                <div className="card__body">
-                  <div className="trip-card__meta">
-                    <span className="trip-card__location">
-                      <MapPin size={14} /> {trip.location}
-                    </span>
-                    <span className="trip-card__duration">
-                      <Users size={14} /> {trip.capacity} pers.
-                    </span>
-                  </div>
-                  <h3 className="card__title">{trip.title}</h3>
-                  <p className="trip-card__captain">
-                    <Anchor size={13} /> Capitán {trip.captain?.full_name || 'Verificado'}
-                  </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════ CATEGORÍAS / FORMAS DE VIVIR ══════════════════ */}
+      <section className="section section--dark" id="formas-de-vivir">
+        <div className="container reveal" ref={addRevealRef}>
+          <div className="section__header-row" style={{ alignItems: 'center', flexDirection: 'column', textAlign: 'center', marginBottom: 'var(--space-6)' }}>
+            <p className="section__label">Explora por Estilo</p>
+            <h2 className="section__title">Distintas formas de vivir Kailu en el agua</h2>
+          </div>
+          <div className="divider" style={{ margin: '0 auto var(--space-8)' }} />
+
+          <div className="categories-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-4)' }}>
+            {[
+              { name: 'Navegaciones', desc: 'Salidas generales', link: '/explorar' },
+              { name: 'Solos y Solas', desc: 'Encuentros mensuales', link: '/explorar?search=Solos y Solas' },
+              { name: 'Mindfulness', desc: 'Bienestar y meditación', link: '/explorar?search=Mindfulness' },
+              { name: 'Degustaciones', desc: 'Gastronomía a bordo', link: '/explorar?search=Degustaciones' },
+              { name: 'Aprender', desc: 'Cursos y clínica náutica', link: '/explorar?search=Aprender' }
+            ].map((cat, i) => (
+              <Link key={i} to={cat.link} className="category-card glass" style={{
+                padding: 'var(--space-5)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                textAlign: 'center',
+                textDecoration: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '160px',
+                transition: 'all 0.25s ease',
+                background: 'rgba(255, 255, 255, 0.01)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.background = 'rgba(11, 171, 195, 0.05)';
+                e.currentTarget.style.borderColor = 'rgba(11, 171, 195, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.01)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+              }}
+              >
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  background: 'rgba(11, 171, 195, 0.1)',
+                  color: 'var(--color-accent-400)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 'var(--space-3)'
+                }}>
+                  <Compass size={20} />
                 </div>
-                <div className="card__footer">
-                  <div className="card__rating">
-                    <Star size={14} fill="currentColor" />
-                    {trip.avgRating || '—'}
-                  </div>
-                  <div className="card__price">
-                    {trip.metadata?.discount_percentage > 0 && (
-                      <span style={{ 
-                        fontSize: '0.7rem', 
-                        background: 'var(--color-accent-500)', 
-                        color: 'white', 
-                        padding: '2px 6px', 
-                        borderRadius: '4px', 
-                        fontWeight: 700, 
-                        marginRight: '6px' 
-                      }}>
-                        -{trip.metadata.discount_percentage}%
-                      </span>
-                    )}
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontWeight: 'normal', marginRight: '4px' }}>Desde</span>
-                    {trip.metadata?.discount_percentage > 0 ? (
-                      <>
-                        <span style={{ textDecoration: 'line-through', color: 'var(--text-tertiary)', fontSize: '0.85rem', marginRight: '4px' }}>
-                          {formatPrice(trip.price_per_person, trip.currency)}
-                        </span>
-                        {formatPrice(Math.round(trip.price_per_person * (1 - trip.metadata.discount_percentage / 100)), trip.currency)}
-                      </>
-                    ) : (
-                      formatPrice(trip.price_per_person, trip.currency)
-                    )}
-                    <span>/persona</span>
-                  </div>
-                </div>
+                <strong style={{ fontSize: '15px', color: 'white', display: 'block', marginBottom: '4px' }}>{cat.name}</strong>
+                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>{cat.desc}</span>
               </Link>
             ))}
           </div>

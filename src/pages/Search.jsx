@@ -1,19 +1,27 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Search as SearchIcon, MapPin, Compass, Star, Clock, Anchor, Users } from 'lucide-react'
 import useTripStore from '../stores/tripStore'
 import './Search.css'
 
 export default function Search() {
   const { trips, tags, isLoadingTrips: loading, fetchTrips, fetchTags } = useTripStore()
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchParams] = useSearchParams()
+  const urlSearch = searchParams.get('search') || ''
+
+  const [searchQuery, setSearchQuery] = useState(urlSearch)
   const [activeTag, setActiveTag] = useState('Todos')
 
   useEffect(() => {
     window.scrollTo(0, 0)
     fetchTags()
-    fetchTrips()
-  }, [])
+    if (urlSearch) {
+      setSearchQuery(urlSearch)
+      fetchTrips({ search: urlSearch })
+    } else {
+      fetchTrips()
+    }
+  }, [urlSearch])
 
   const handleSearch = () => {
     const filters = {}
