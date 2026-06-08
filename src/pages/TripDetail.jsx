@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { MapPin, Clock, Users, Star, Anchor, ArrowLeft, CalendarDays, Plus, Minus, Shield, ChevronRight, ChevronLeft, Compass, Loader, MessageCircle, Image } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import useTripStore from '../stores/tripStore'
+import useAuthStore from '../stores/authStore'
 import './TripDetail.css'
 
 /* WhatsApp inline icon */
@@ -18,6 +19,75 @@ export default function TripDetail() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { currentTrip: trip, tripDates, tripAddons, isLoadingTrip: loading, fetchTrip, clearCurrentTrip } = useTripStore()
+  
+  const { user, profile } = useAuthStore()
+
+  const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false)
+  const [inquiryForm, setInquiryForm] = useState({ name: '', email: '', message: '' })
+  const [inquiryLoading, setInquiryLoading] = useState(false)
+  const [inquirySuccess, setInquirySuccess] = useState(false)
+  const [inquiryError, setInquiryError] = useState('')
+
+  useEffect(() => {
+    if (isInquiryModalOpen) {
+      setInquiryForm({
+        name: profile?.full_name || '',
+        email: user?.email || '',
+        message: ''
+      })
+      setInquirySuccess(false)
+      setInquiryError('')
+    }
+  }, [isInquiryModalOpen, profile, user])
+
+  const handleSendInquiry = async (e) => {
+    e.preventDefault()
+    setInquiryError('')
+    setInquiryLoading(true)
+
+    if (!inquiryForm.name.trim() || !inquiryForm.email.trim() || !inquiryForm.message.trim()) {
+      setInquiryError('Todos los campos son obligatorios.')
+      setInquiryLoading(false)
+      return
+    }
+
+    try {
+      const dateText = selectedDateObj
+        ? `${new Date(selectedDateObj.date + 'T12:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })} a las ${selectedDateObj.start_time?.slice(0, 5)}hs`
+        : ''
+
+      const protocol = window.location.protocol
+      const host = window.location.host
+      
+      const response = await fetch(`${protocol}//${host}/api/send-inquiry`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          tripId: trip.id,
+          tripTitle: trip.title,
+          captainId: trip.captain?.id || trip.captain_id,
+          name: inquiryForm.name.trim(),
+          email: inquiryForm.email.trim(),
+          message: inquiryForm.message.trim(),
+          dateText,
+          guests
+        })
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'No se pudo enviar la consulta. Intente más tarde.')
+      }
+
+      setInquirySuccess(true)
+    } catch (err) {
+      setInquiryError(err.message)
+    } finally {
+      setInquiryLoading(false)
+    }
+  }
   
   const qrCode = searchParams.get('qr')
 
@@ -546,6 +616,16 @@ export default function TripDetail() {
                 <WhatsAppIcon /> Enviar consulta
               </a>
 
+              {/* Email Inquiry Button */}
+              <button
+                type="button"
+                onClick={() => setIsInquiryModalOpen(true)}
+                className="btn btn--secondary btn--lg booking-card__cta"
+                style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '8px' }}
+              >
+                <MessageCircle size={18} style={{ marginRight: '8px' }} /> Enviar consulta por Email
+              </button>
+
               <p className="booking-card__note">
                 Sin registro obligatorio · Pago seguro con Mercado Pago
               </p>
@@ -553,6 +633,190 @@ export default function TripDetail() {
           </div>
         </div>
       </div>
+
+      {/* Inquiry Modal */}
+      {isInquiryModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(10, 22, 40, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div className="glass" style={{
+            maxWidth: '500px',
+            width: '100%',
+            borderRadius: '16px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            padding: '28px',
+            position: 'relative',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)'
+          }}>
+            <button
+              onClick={() => setIsInquiryModalOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontSize: '20px',
+                padding: '4px'
+              }}
+            >
+              ✕
+            </button>
+
+            {inquirySuccess ? (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: 'rgba(38, 198, 198, 0.1)',
+                  border: '2px solid rgba(38, 198, 198, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#26C6C6',
+                  margin: '0 auto 20px'
+                }}>
+                  <MessageCircle size={32} />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '12px', color: '#fff' }}>¡Consulta enviada!</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5', marginBottom: '24px' }}>
+                  Recibimos tu consulta. El capitán de la travesía te responderá directamente a <strong>{inquiryForm.email}</strong> a la brevedad.
+                </p>
+                <button
+                  onClick={() => setIsInquiryModalOpen(false)}
+                  className="btn btn--accent btn--md"
+                  style={{ width: '100%' }}
+                >
+                  Entendido
+                </button>
+              </div>
+            ) : (
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px', color: '#fff' }}>Enviar consulta</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>
+                  Preguntale al capitán sobre <strong>{trip.title}</strong> por email.
+                </p>
+
+                {inquiryError && (
+                  <div style={{
+                    padding: '12px',
+                    borderRadius: '8px',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    color: '#ef4444',
+                    fontSize: '0.9rem',
+                    marginBottom: '16px'
+                  }}>
+                    {inquiryError}
+                  </div>
+                )}
+
+                <form onSubmit={handleSendInquiry} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '6px', textAlign: 'left' }}>
+                      Nombre completo
+                    </label>
+                    <input
+                      type="text"
+                      className="input"
+                      style={{ width: '100%', background: 'rgba(255, 255, 255, 0.05)', color: '#fff' }}
+                      value={inquiryForm.name}
+                      onChange={(e) => setInquiryForm(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Ej: Juan Pérez"
+                      required
+                      disabled={inquiryLoading}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '6px', textAlign: 'left' }}>
+                      Email de contacto
+                    </label>
+                    <input
+                      type="email"
+                      className="input"
+                      style={{ width: '100%', background: 'rgba(255, 255, 255, 0.05)', color: '#fff' }}
+                      value={inquiryForm.email}
+                      onChange={(e) => setInquiryForm(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="ejemplo@correo.com"
+                      required
+                      disabled={inquiryLoading}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '6px', textAlign: 'left' }}>
+                      Tu mensaje o consulta
+                    </label>
+                    <textarea
+                      className="input"
+                      style={{
+                        width: '100%',
+                        minHeight: '100px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: '#fff',
+                        fontFamily: 'inherit',
+                        padding: '12px',
+                        resize: 'vertical'
+                      }}
+                      value={inquiryForm.message}
+                      onChange={(e) => setInquiryForm(prev => ({ ...prev, message: e.target.value }))}
+                      placeholder="Escribí tu consulta aquí..."
+                      required
+                      disabled={inquiryLoading}
+                    />
+                  </div>
+
+                  {selectedDateObj && (
+                    <div style={{
+                      fontSize: '0.85rem',
+                      color: 'var(--text-tertiary)',
+                      background: 'rgba(255, 255, 255, 0.02)',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      borderLeft: '2px solid var(--accent)',
+                      textAlign: 'left'
+                    }}>
+                      Consultando para el día: <strong>{new Date(selectedDateObj.date + 'T12:00:00').toLocaleDateString('es', { day: 'numeric', month: 'long' })}</strong>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="btn btn--accent btn--lg"
+                    style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '8px' }}
+                    disabled={inquiryLoading}
+                  >
+                    {inquiryLoading ? (
+                      <>
+                        <Loader size={18} className="spin" style={{ marginRight: '8px' }} />
+                        Enviando consulta...
+                      </>
+                    ) : (
+                      'Enviar consulta'
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

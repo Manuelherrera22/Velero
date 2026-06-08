@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activa tu cuenta en Kailu</title>
+</head>
+<body style="margin:0;padding:0;background:#0A1628;font-family:'Helvetica Neue',Arial,sans-serif;color:#fff;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <h1 style="font-size:28px;margin:0;color:#26C6C6;font-weight:800;letter-spacing:-0.5px;">⛵ KAILU</h1>
+      <p style="font-size:14px;color:#94A3B8;margin-top:4px;">Activación de cuenta</p>
+    </div>
+
+    <!-- Main Card -->
+    <div style="background:rgba(30,41,59,0.8);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;padding:32px;text-align:center;">
+      <h2 style="font-size:22px;margin:0 0 16px 0;font-weight:700;color:#fff;">¡Hola!</h2>
+      
+      <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#E2E8F0;">
+        Para activar tu cuenta en Kailu, solo necesitás confirmar tu correo electrónico haciendo clic en el botón de abajo.
+      </p>
+
+      <!-- CTA Button -->
+      <div style="margin-bottom:24px;">
+        <a href="{{ .ConfirmationURL }}" 
+           style="display:inline-block;background:#26C6C6;color:#0A1628;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:700;font-size:16px;box-shadow:0 4px 12px rgba(38,198,198,0.2);">
+          Validar correo electrónico
+        </a>
+      </div>
+      
+      <p style="margin:0;font-size:12px;color:#94A3B8;line-height:1.5;">
+        Si el botón no funciona, podés copiar y pegar el siguiente enlace en tu navegador:<br/>
+        <a href="{{ .ConfirmationURL }}" style="color:#26C6C6;text-decoration:underline;word-break:break-all;">{{ .ConfirmationURL }}</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);">
+      <p style="font-size:12px;color:#64748B;margin:0;">
+        © 2026 Kailu — Experiencias náuticas en Argentina
+      </p>
+      <p style="font-size:11px;color:#475569;margin:4px 0 0;">
+        Si no solicitaste registrarte en Kailu, podés ignorar este correo de forma segura.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

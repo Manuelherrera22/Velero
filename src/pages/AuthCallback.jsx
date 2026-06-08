@@ -67,6 +67,38 @@ export default function AuthCallback() {
             // Email verification — show success message, then redirect to role-based panel
             setVerified(true)
             setStatus('¡Tu cuenta fue verificada exitosamente!')
+            
+            // Send welcome email asynchronously in the background
+            const triggerWelcomeEmail = async () => {
+              try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                  const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('full_name, role')
+                    .eq('id', user.id)
+                    .single()
+                  
+                  if (profile) {
+                    const protocol = window.location.protocol
+                    const host = window.location.host
+                    await fetch(`${protocol}//${host}/api/send-welcome`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        email: user.email,
+                        name: profile.full_name,
+                        role: profile.role
+                      })
+                    })
+                  }
+                }
+              } catch (err) {
+                console.error('Failed to trigger welcome email:', err)
+              }
+            }
+            triggerWelcomeEmail()
+
             const redirectTo = await getRedirectPath()
             setTimeout(() => navigate(redirectTo, { replace: true }), 2500)
             return

@@ -44,8 +44,17 @@ export default async (req) => {
     
     <!-- Header -->
     <div style="text-align:center;margin-bottom:32px;">
-      <h1 style="font-size:28px;margin:0;color:#26C6C6;">⛵ Velero</h1>
+      <h1 style="font-size:28px;margin:0;color:#26C6C6;font-weight:800;letter-spacing:-0.5px;">⛵ KAILU</h1>
       <p style="font-size:14px;color:#94A3B8;margin-top:4px;">Experiencias náuticas en Argentina</p>
+    </div>
+
+    <!-- Greeting Message -->
+    <div style="margin-bottom:24px;background:rgba(30,41,59,0.5);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:20px;line-height:1.6;">
+      <p style="margin:0 0 12px 0;font-size:16px;font-weight:600;color:#fff;">¡Hola!</p>
+      <p style="margin:0 0 12px 0;font-size:15px;color:#E2E8F0;">Tu reserva ya fue realizada.</p>
+      <p style="margin:0 0 12px 0;font-size:15px;color:#E2E8F0;">Adjunto encontrarás toda la información necesaria para tu experiencia.</p>
+      <p style="margin:0 0 12px 0;font-size:15px;color:#E2E8F0;">Ahora sí, solo queda esperar el momento.</p>
+      <p style="margin:0;font-size:15px;font-weight:600;color:#26C6C6;">Nos vemos pronto.</p>
     </div>
 
     <!-- Main Card -->
@@ -107,10 +116,10 @@ export default async (req) => {
     <!-- Footer -->
     <div style="text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);">
       <p style="font-size:12px;color:#64748B;margin:0;">
-        © ${new Date().getFullYear()} Velero — Experiencias náuticas en Argentina
+        © ${new Date().getFullYear()} Kailu — Experiencias náuticas en Argentina
       </p>
       <p style="font-size:11px;color:#475569;margin:4px 0 0;">
-        Este email fue enviado a ${email} por tu reserva en velero-ar.netlify.app
+        Este email fue enviado a ${email} por tu reserva en kailu.travel
       </p>
     </div>
   </div>
@@ -118,6 +127,7 @@ export default async (req) => {
 </html>`
 
     // Send email via Resend API
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Kailu <onboarding@resend.dev>'
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -125,7 +135,7 @@ export default async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Velero <onboarding@resend.dev>',
+        from: fromEmail,
         to: [email],
         subject: `🎫 Tu reserva está confirmada — ${trip}`,
         html: htmlContent,
