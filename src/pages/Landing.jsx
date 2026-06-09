@@ -337,7 +337,7 @@ export default function Landing() {
               {
                 name: 'Bariloche',
                 desc: 'Aventura a vela entre lagos de aguas cristalinas y cordillera.',
-                img: 'https://images.unsplash.com/photo-1596550269389-98ee3e89df9a?q=80&w=800&auto=format&fit=crop',
+                img: 'https://images.unsplash.com/photo-1536746803623-cef87080bfc8?q=80&w=800&auto=format&fit=crop',
                 link: '/explorar?search=Bariloche'
               },
               {
