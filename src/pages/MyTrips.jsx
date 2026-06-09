@@ -27,10 +27,38 @@ export default function MyTrips() {
   const [activeTab, setActiveTab] = useState('upcoming')
   const [searchParams] = useSearchParams()
   const paymentStatus = searchParams.get('status')
+  const paymentId = searchParams.get('payment_id')
+  const externalReference = searchParams.get('external_reference')
 
   useEffect(() => {
-    if (user) fetchMyBookings()
-  }, [user])
+    if (user) {
+      fetchMyBookings()
+
+      // Fallback: If we returned from a successful checkout redirect, securely confirm payment in DB
+      if (paymentStatus === 'approved' && paymentId && externalReference) {
+        const confirmPaymentAsync = async () => {
+          try {
+            const protocol = window.location.protocol
+            const host = window.location.host
+            const res = await fetch(`${protocol}//${host}/api/confirm-payment`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                bookingId: externalReference,
+                paymentId: paymentId
+              })
+            })
+            if (res.ok) {
+              fetchMyBookings()
+            }
+          } catch (err) {
+            console.error('Error confirming payment via fallback:', err)
+          }
+        }
+        confirmPaymentAsync()
+      }
+    }
+  }, [user, paymentStatus, paymentId, externalReference])
 
   if (!user) return <Navigate to="/login" replace />
 
