@@ -378,7 +378,7 @@ export default function Landing() {
                 <div className="destination-bg" style={{
                   position: 'absolute',
                   inset: 0,
-                  backgroundImage: `url(${dest.img})`,
+                  backgroundImage: `url("${dest.img}")`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   transition: 'transform 0.5s ease',
