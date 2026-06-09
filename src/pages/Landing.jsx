@@ -334,13 +334,13 @@ export default function Landing() {
               {
                 name: 'Buenos Aires',
                 desc: 'Naturaleza, navegación y escapadas a pocos minutos de la ciudad;',
-                img: '/Buenos aires.jpeg',
+                img: '/buenos_aires.jpeg',
                 link: '/explorar?search=Buenos Aires'
               },
               {
                 name: 'Bariloche',
                 desc: 'Lagos, montaña y naturaleza en estado puro;',
-                img: '/Bariloche.jpeg',
+                img: '/bariloche.jpeg',
                 link: '/explorar?search=Bariloche'
               },
               {
