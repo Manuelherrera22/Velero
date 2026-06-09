@@ -464,7 +464,7 @@ export default function Landing() {
       </section>
 
       {/* ══════════════════ CÓMO FUNCIONA ══════════════════ */}
-      <section className="section section--dark" id="como-funciona">
+      <section className="section" id="como-funciona">
         <div className="container reveal" ref={addRevealRef}>
           <p className="section__label">Simple y Rápido</p>
           <h2 className="section__title">
@@ -488,7 +488,7 @@ export default function Landing() {
       </section>
 
       {/* ══════════════════ BENEFICIOS ══════════════════ */}
-      <section className="section" id="beneficios" ref={addRevealRef}>
+      <section className="section section--dark" id="beneficios" ref={addRevealRef}>
         <div className="container reveal" ref={addRevealRef}>
           <p className="section__label">¿Por qué Kailu?</p>
           <h2 className="section__title">

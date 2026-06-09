@@ -248,6 +248,18 @@
   border-color: rgba(11, 171, 195, 0.2);
 }
 
+.section:not(.section--dark) .step-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
+}
+
+.section:not(.section--dark) .step-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--color-accent-300);
+  box-shadow: var(--shadow-md);
+}
+
 .step-card__num {
   font-family: var(--font-heading);
   font-size: var(--text-5xl);
