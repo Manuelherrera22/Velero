@@ -469,6 +469,7 @@
   line-height: var(--leading-relaxed);
   margin-bottom: var(--space-5);
   font-style: italic;
+  white-space: pre-line;
 }
 
 .testimonial-card__rating {

@@ -9,7 +9,6 @@ import useTripStore from '../stores/tripStore'
 import './Landing.css'
 
 const HERO_IMAGES = [
-  '/WhatsApp Image 2026-06-08 at 5.27.36 PM.jpeg',
   '/WhatsApp Image 2026-06-08 at 5.27.36 PM1.jpeg',
   '/WhatsApp Image 2026-06-08 at 5.27.36 PM2.jpeg',
   '/WhatsApp Image 2026-06-08 at 5.27.37 PM3.jpeg',
@@ -35,7 +34,7 @@ const BENEFITS = [
 const TESTIMONIALS = [
   { name: 'Micaela', location: 'Buenos Aires, Río de la Plata', text: 'Una experiencia increíble. Nunca pensé que navegar en velero fuera tan accesible. El capitán nos hizo sentir seguros y la vista fue espectacular.', rating: 5 },
   { name: 'Valentina', location: 'Buenos Aires, Delta de San Fernando', text: 'Fue el mejor regalo de cumpleaños. El delta desde un velero es otro mundo. Súper recomendado para desconectar de la rutina.', rating: 5 },
-  { name: 'Susana', location: 'Alicante, Altea', text: 'Navegamos por la bahía al atardecer. Un sueño hecho realidad. La plataforma fue muy fácil de usar y todo salió perfecto.', rating: 5 },
+  { name: 'Noelia', location: 'Experiencia mindfulness, Buenos Aires', text: 'Hola buen día\nMuy lindo todo\nFue una experiencia muy linda\nHermoso el día\nHermoso el viaje\nEl tiempo de paz y relax\nLas herramientas brindadas\nPara conectar con uno mismo\nFue una experiencia única\nGracias', rating: 5 },
 ]
 
 const STEPS = [
@@ -191,6 +190,7 @@ export default function Landing() {
   const [openFaq, setOpenFaq] = useState(null)
   const [activeFaqCategory, setActiveFaqCategory] = useState('generales')
   const [currentBgIndex, setCurrentBgIndex] = useState(0)
+  const [prevBgIndex, setPrevBgIndex] = useState(null)
 
   useEffect(() => {
     fetchFeaturedTrips()
@@ -198,7 +198,10 @@ export default function Landing() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentBgIndex((prev) => (prev + 1) % HERO_IMAGES.length)
+      setCurrentBgIndex((prev) => {
+        setPrevBgIndex(prev)
+        return (prev + 1) % HERO_IMAGES.length
+      })
     }, 5000)
     return () => clearInterval(timer)
   }, [])
@@ -266,7 +269,7 @@ export default function Landing() {
                 backgroundPosition: 'center',
                 opacity: index === currentBgIndex ? 1 : 0, 
                 transition: 'opacity 1.5s ease-in-out',
-                zIndex: 0,
+                zIndex: index === currentBgIndex ? 2 : (index === prevBgIndex ? 1 : 0),
                 transform: index === currentBgIndex ? 'scale(1.05)' : 'scale(1.0)',
                 animation: index === currentBgIndex ? 'panZoom 15s infinite alternate linear' : 'none'
               }}
@@ -330,20 +333,20 @@ export default function Landing() {
             {[
               {
                 name: 'Buenos Aires',
-                desc: 'Navegaciones por el Delta y el imponente Río de la Plata.',
+                desc: 'Naturaleza, navegación y escapadas a pocos minutos de la ciudad;',
                 img: 'https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?q=80&w=800&auto=format&fit=crop',
                 link: '/explorar?search=Buenos Aires'
               },
               {
                 name: 'Bariloche',
-                desc: 'Aventura a vela entre lagos de aguas cristalinas y cordillera.',
+                desc: 'Lagos, montaña y naturaleza en estado puro;',
                 img: 'https://images.unsplash.com/photo-1536746803623-cef87080bfc8?q=80&w=800&auto=format&fit=crop',
                 link: '/explorar?search=Bariloche'
               },
               {
                 name: 'Uruguay',
-                desc: 'Navegación oceánica y puestas de sol mágicas sobre la costa.',
-                img: 'https://images.unsplash.com/photo-1616091216791-a5360b5fc78a?q=80&w=800&auto=format&fit=crop',
+                desc: 'Navegaciones entre costas históricas, naturaleza y pueblos de encanto',
+                img: '/WhatsApp Image 2026-06-08 at 5.27.36 PM.jpeg',
                 link: '/explorar?search=Uruguay'
               }
             ].map((dest, i) => (
@@ -389,7 +392,7 @@ export default function Landing() {
                 }} />
                 <div style={{ position: 'relative', zIndex: 2 }}>
                   <h3 style={{ fontSize: '22px', fontWeight: 700, color: 'white', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>{dest.name}</h3>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.4' }}>{dest.desc}</p>
+                  <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.85)', marginBottom: '16px', lineHeight: '1.4' }}>{dest.desc}</p>
                   <span className="btn btn--accent btn--sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     Ver Travesías <ArrowRight size={14} />
                   </span>
@@ -455,7 +458,7 @@ export default function Landing() {
                 }}>
                   <Compass size={20} />
                 </div>
-                <strong style={{ fontSize: '15px', color: 'white', display: 'block', marginBottom: '4px' }}>{cat.name}</strong>
+                <strong style={{ fontSize: '15px', color: 'var(--color-primary-600)', display: 'block', marginBottom: '4px' }}>{cat.name}</strong>
                 <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>{cat.desc}</span>
               </Link>
             ))}

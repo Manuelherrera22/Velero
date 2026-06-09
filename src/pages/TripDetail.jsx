@@ -616,7 +616,7 @@ export default function TripDetail() {
                 <WhatsAppIcon /> Enviar consulta
               </a>
 
-              {/* Email Inquiry Button */}
+              {/* Email Inquiry Button - Commented out to prevent bypassing Kailu
               <button
                 type="button"
                 onClick={() => setIsInquiryModalOpen(true)}
@@ -625,6 +625,7 @@ export default function TripDetail() {
               >
                 <MessageCircle size={18} style={{ marginRight: '8px' }} /> Enviar consulta por Email
               </button>
+              */}
 
               <p className="booking-card__note">
                 Sin registro obligatorio · Pago seguro con Mercado Pago
