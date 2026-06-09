@@ -270,8 +270,8 @@ export default function Landing() {
                 opacity: index === currentBgIndex ? 1 : (index === prevBgIndex ? 1 : 0), 
                 transition: index === currentBgIndex ? 'opacity 1.5s ease-in-out' : 'none',
                 zIndex: index === currentBgIndex ? 2 : (index === prevBgIndex ? 1 : 0),
-                transform: index === currentBgIndex ? 'scale(1.05)' : 'scale(1.0)',
-                animation: index === currentBgIndex ? 'panZoom 15s infinite alternate linear' : 'none'
+                transform: (index === currentBgIndex || index === prevBgIndex) ? 'scale(1.05)' : 'scale(1.0)',
+                animation: (index === currentBgIndex || index === prevBgIndex) ? 'panZoom 15s infinite alternate linear' : 'none'
               }}
             />
           ))}
