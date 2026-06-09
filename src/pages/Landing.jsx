@@ -267,8 +267,8 @@ export default function Landing() {
                 backgroundImage: `url("${imgSrc}")`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                opacity: index === currentBgIndex ? 1 : 0, 
-                transition: 'opacity 1.5s ease-in-out',
+                opacity: index === currentBgIndex ? 1 : (index === prevBgIndex ? 1 : 0), 
+                transition: index === currentBgIndex ? 'opacity 1.5s ease-in-out' : 'none',
                 zIndex: index === currentBgIndex ? 2 : (index === prevBgIndex ? 1 : 0),
                 transform: index === currentBgIndex ? 'scale(1.05)' : 'scale(1.0)',
                 animation: index === currentBgIndex ? 'panZoom 15s infinite alternate linear' : 'none'
@@ -334,13 +334,13 @@ export default function Landing() {
               {
                 name: 'Buenos Aires',
                 desc: 'Naturaleza, navegación y escapadas a pocos minutos de la ciudad;',
-                img: 'https://images.unsplash.com/photo-1516690561799-46d8f74f9abf?q=80&w=800&auto=format&fit=crop',
+                img: '/Buenos aires.jpeg',
                 link: '/explorar?search=Buenos Aires'
               },
               {
                 name: 'Bariloche',
                 desc: 'Lagos, montaña y naturaleza en estado puro;',
-                img: 'https://images.unsplash.com/photo-1536746803623-cef87080bfc8?q=80&w=800&auto=format&fit=crop',
+                img: '/Bariloche.jpeg',
                 link: '/explorar?search=Bariloche'
               },
               {
@@ -392,7 +392,7 @@ export default function Landing() {
                 }} />
                 <div style={{ position: 'relative', zIndex: 2 }}>
                   <h3 style={{ fontSize: '22px', fontWeight: 700, color: 'white', marginBottom: '8px', fontFamily: 'var(--font-heading)' }}>{dest.name}</h3>
-                  <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.85)', marginBottom: '16px', lineHeight: '1.4' }}>{dest.desc}</p>
+                  <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.85)', marginBottom: '16px', lineHeight: '1.4', minHeight: '38px' }}>{dest.desc}</p>
                   <span className="btn btn--accent btn--sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     Ver Travesías <ArrowRight size={14} />
                   </span>
@@ -458,8 +458,8 @@ export default function Landing() {
                 }}>
                   <Compass size={20} />
                 </div>
-                <strong style={{ fontSize: '15px', color: 'var(--color-primary-600)', display: 'block', marginBottom: '4px' }}>{cat.name}</strong>
-                <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>{cat.desc}</span>
+                <strong style={{ fontSize: '15px', color: 'var(--text-primary)', display: 'block', marginBottom: '4px' }}>{cat.name}</strong>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{cat.desc}</span>
               </Link>
             ))}
           </div>
