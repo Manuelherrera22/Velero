@@ -42,6 +42,51 @@ export default function Profile() {
     }
   }
 
+  const [uploadingLicense, setUploadingLicense] = useState(false)
+
+  const handleLicenseUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('El archivo supera el límite de 5MB')
+      return
+    }
+
+    const allowedTypes = ['image/png', 'image/jpeg', 'application/pdf']
+    if (!allowedTypes.includes(file.type)) {
+      alert('Solo se permiten archivos JPG, PNG o PDF')
+      return
+    }
+
+    setUploadingLicense(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const filePath = `${profile.id}_license_${Date.now()}.${fileExt}`
+
+      const { data, error } = await supabase.storage
+        .from('licenses')
+        .upload(filePath, file, { cacheControl: '3600', upsert: true })
+
+      if (error) throw error
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('licenses')
+        .getPublicUrl(filePath)
+
+      const result = await updateProfile({ nautical_license_url: publicUrl })
+      if (!result.success) {
+        throw new Error(result.error)
+      }
+      alert('¡Licencia náutica subida correctamente! Será auditada por un administrador.')
+    } catch (err) {
+      console.error(err)
+      alert('Error al subir la licencia: ' + (err.message || err))
+    } finally {
+      setUploadingLicense(false)
+    }
+  }
+
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
@@ -219,6 +264,51 @@ export default function Profile() {
                   )}
                 </div>
               </>
+            )}
+
+            {profile?.role === 'publisher' && (
+              <div className="profile-field" style={{ gridColumn: 'span 2' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Shield size={14} /> Documentación de Licencia Náutica
+                </label>
+                <div style={{ marginTop: 'var(--space-3)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {profile?.nautical_license_url ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '8px', flexWrap: 'wrap', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '18px' }}>📄</span>
+                        <div>
+                          <strong style={{ fontSize: '13px', display: 'block', color: 'var(--text-primary)' }}>Licencia Náutica Cargada</strong>
+                          <span style={{ fontSize: '11px', color: profile?.is_verified ? '#22c55e' : '#f59e0b', fontWeight: 600 }}>
+                            {profile?.is_verified ? '✓ Verificada por administración' : '⏳ Pendiente de verificación'}
+                          </span>
+                        </div>
+                      </div>
+                      <a href={profile.nautical_license_url} target="_blank" rel="noreferrer" className="btn btn--outline btn--sm" style={{ minHeight: 'unset', padding: '4px 10px', fontSize: '12px' }}>
+                        Ver Documento
+                      </a>
+                    </div>
+                  ) : (
+                    <div style={{ padding: '16px', border: '1px dashed rgba(255, 255, 255, 0.15)', borderRadius: '8px', textAlign: 'center', background: 'rgba(255, 255, 255, 0.01)' }}>
+                      <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                        Para verificar tu cuenta y poder publicar travesías, por favor subí tu carnet o licencia náutica.
+                      </p>
+                      <label className="btn btn--accent btn--sm" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', minHeight: 'unset', padding: '6px 12px' }}>
+                        {uploadingLicense ? <Loader size={14} className="spin" /> : <><Plus size={14} /> Subir Licencia</>}
+                        <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={handleLicenseUpload} disabled={uploadingLicense} style={{ display: 'none' }} />
+                      </label>
+                      <span style={{ display: 'block', fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '6px' }}>
+                        Formatos permitidos: PDF, PNG, JPG (máx. 5MB)
+                      </span>
+                    </div>
+                  )}
+                  {profile?.nautical_license_url && (
+                    <label className="btn btn--ghost btn--sm" style={{ alignSelf: 'flex-start', cursor: 'pointer', fontSize: '11px', minHeight: 'unset', padding: '4px 8px' }}>
+                      Reemplazar archivo
+                      <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={handleLicenseUpload} disabled={uploadingLicense} style={{ display: 'none' }} />
+                    </label>
+                  )}
+                </div>
+              </div>
             )}
           </div>
 

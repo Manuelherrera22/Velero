@@ -235,6 +235,37 @@ const Step8Pricing = () => {
                 </div>
               </span>
             </label>
+
+            {formData.requires_full_payment === false && (
+              <div style={{ paddingLeft: '36px', marginTop: 'var(--space-2)' }}>
+                <div className="form-group" style={{ maxWidth: '300px' }}>
+                  <label className="form-group__label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    Porcentaje de anticipo *
+                    <div title="El porcentaje del total que el cliente debe pagar online para reservar (entre 10% y 100%)." style={{ cursor: 'help' }}>
+                      <Info size={16} color="var(--text-muted)" />
+                    </div>
+                  </label>
+                  <div className="input-with-icon">
+                    <span className="input-icon" style={{ fontWeight: 'bold' }}>%</span>
+                    <input
+                      type="number"
+                      min="10"
+                      max="100"
+                      step="5"
+                      className="input-control"
+                      style={{ paddingLeft: '40px', fontWeight: 'bold' }}
+                      value={formData.deposit_percentage ?? 100.0}
+                      onChange={(e) => {
+                        let val = parseFloat(e.target.value) || 10.0
+                        if (val < 10) val = 10
+                        if (val > 100) val = 100
+                        updateFormData({ deposit_percentage: val })
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

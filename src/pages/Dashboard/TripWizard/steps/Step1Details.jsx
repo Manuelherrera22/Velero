@@ -1,8 +1,28 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
+import supabase from '../../../../lib/supabase'
 
 const Step1Details = () => {
   const { formData, updateFormData, hasBookings } = useTripWizardStore()
+  const [navigationZones, setNavigationZones] = useState([])
+
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('navigation_zones')
+          .select('*')
+          .eq('is_active', true)
+          .order('name', { ascending: true })
+        if (!error && data) {
+          setNavigationZones(data)
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    fetchZones()
+  }, [])
 
   const handleRoleChange = (role) => {
     updateFormData({ role_in_activity: role })
@@ -55,6 +75,28 @@ const Step1Details = () => {
             value={formData.description}
             onChange={(e) => updateFormData({ description: e.target.value })}
           />
+        </div>
+
+        {/* Zona de Navegación */}
+        <div className="form-group">
+          <label className="form-group__label">
+            Zona de navegación
+          </label>
+          <select
+            className="input-control"
+            value={formData.navigation_zone_id || ''}
+            onChange={(e) => updateFormData({ navigation_zone_id: e.target.value })}
+          >
+            <option value="">Selecciona una zona...</option>
+            {navigationZones.map(zone => (
+              <option key={zone.id} value={zone.id}>{zone.name}</option>
+            ))}
+          </select>
+          {navigationZones.length === 0 && (
+            <p className="step-subtitle" style={{ fontSize: '12px', marginTop: '4px' }}>
+              No hay zonas de navegación configuradas por administración.
+            </p>
+          )}
         </div>
 
         {/* Rol del organizador */}

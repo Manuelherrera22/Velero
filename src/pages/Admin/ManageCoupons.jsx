@@ -7,6 +7,7 @@ export default function ManageCoupons() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [showHistoric, setShowHistoric] = useState(false)
   const [form, setForm] = useState({
     code: '', type: 'percentage', value: '', valid_from: '', valid_until: '', max_uses: 100,
   })
@@ -35,28 +36,42 @@ export default function ManageCoupons() {
   }
 
   const getCouponStatus = (c) => {
-    if (!c.is_active) return { text: 'Inactivo', className: 'status-badge--archived' }
-    if (c.max_uses && c.current_uses >= c.max_uses) return { text: 'Agotado', className: 'status-badge--archived' }
+    if (!c.is_active) return { text: 'Inactivo', className: 'status-badge--archived', isHistoric: true }
+    if (c.max_uses && c.current_uses >= c.max_uses) return { text: 'Agotado', className: 'status-badge--archived', isHistoric: true }
     if (c.valid_until) {
       const now = new Date()
       const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
       const untilDate = new Date(c.valid_until)
       const untilDateOnly = new Date(untilDate.getFullYear(), untilDate.getMonth(), untilDate.getDate())
-      if (untilDateOnly < todayDate) return { text: 'Vencido', className: 'status-badge--archived' }
+      if (untilDateOnly < todayDate) return { text: 'Vencido', className: 'status-badge--archived', isHistoric: true }
     }
-    return { text: 'Activo', className: 'status-badge--published' }
+    return { text: 'Activo', className: 'status-badge--published', isHistoric: false }
   }
 
   const handleCreate = async () => {
     if (!form.code || !form.value) return
     setSaving(true)
 
+    // Check duplicate
+    const codeUpper = form.code.toUpperCase()
+    const { data: existing, error: checkError } = await supabase
+      .from('coupons')
+      .select('id')
+      .eq('code', codeUpper)
+      .limit(1)
+
+    if (existing && existing.length > 0) {
+      alert("⚠️ Error: Ya existe un cupón con este código (incluso en históricos). Por favor usa otro nombre.")
+      setSaving(false)
+      return
+    }
+
     const { data: { session } } = await supabase.auth.getSession()
     const user = session?.user
 
     // Append T12:00:00 to dates to prevent timezone rollback
     await supabase.from('coupons').insert({
-      code: form.code.toUpperCase(),
+      code: codeUpper,
       type: form.type,
       value: parseFloat(form.value),
       valid_from: form.valid_from ? `${form.valid_from}T12:00:00` : null,
@@ -154,8 +169,9 @@ export default function ManageCoupons() {
         </div>
       )}
 
+      {/* Active Coupons Grid */}
       <div className="dashboard__grid">
-        {coupons.map(c => (
+        {coupons.filter(c => !getCouponStatus(c).isHistoric).map(c => (
           <div key={c.id} className="item-card glass">
             <div className="item-card__header">
               <div>
@@ -191,6 +207,61 @@ export default function ManageCoupons() {
           </div>
         ))}
       </div>
+
+      {/* Collapsible Historic Coupons Section */}
+      {coupons.filter(c => getCouponStatus(c).isHistoric).length > 0 && (
+        <div style={{ marginTop: 'var(--space-8)', width: '100%' }}>
+          <button 
+            type="button"
+            className="btn btn--outline" 
+            onClick={() => setShowHistoric(!showHistoric)}
+            style={{ width: '100%', justifyContent: 'space-between', display: 'flex', alignItems: 'center', padding: '12px 20px', borderRadius: 'var(--radius-xl)' }}
+          >
+            <span>📜 Ver Cupones Históricos ({coupons.filter(c => getCouponStatus(c).isHistoric).length})</span>
+            <span style={{ fontSize: '12px' }}>{showHistoric ? 'Ocultar' : 'Mostrar'}</span>
+          </button>
+          
+          {showHistoric && (
+            <div className="dashboard__grid" style={{ marginTop: 'var(--space-4)', animation: 'fadeSlide 0.2s ease-out' }}>
+              {coupons.filter(c => getCouponStatus(c).isHistoric).map(c => (
+                <div key={c.id} className="item-card glass" style={{ opacity: 0.6 }}>
+                  <div className="item-card__header">
+                    <div>
+                      <span className="coupon-card__code">{c.code}</span>
+                      <div className="coupon-card__value" style={{ marginTop: '8px' }}>
+                        {c.type === 'percentage' ? (
+                          <><Percent size={18} style={{ verticalAlign: '-3px' }} />{c.value}</>
+                        ) : (
+                          <><DollarSign size={18} style={{ verticalAlign: '-3px' }} />{c.value?.toLocaleString('es-AR')}</>
+                        )}
+                      </div>
+                    </div>
+                    <span className={`status-badge ${getCouponStatus(c).className}`}>
+                      {getCouponStatus(c).text}
+                    </span>
+                  </div>
+
+                  <div className="coupon-card__usage">
+                    Usos: {c.current_uses} / {c.max_uses}
+                  </div>
+
+                  {(c.valid_from || c.valid_until) && (
+                    <div className="coupon-card__dates">
+                      {c.valid_from && `Desde: ${formatDate(c.valid_from)}`}
+                      {c.valid_from && c.valid_until && ' · '}
+                      {c.valid_until && `Hasta: ${formatDate(c.valid_until)}`}
+                    </div>
+                  )}
+
+                  <button className="btn btn--ghost btn--sm" onClick={() => toggleActive(c.id, c.is_active)} style={{ marginTop: 'auto' }}>
+                    {c.is_active ? 'Desactivar' : 'Activar'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       </div>
     </div>
   )

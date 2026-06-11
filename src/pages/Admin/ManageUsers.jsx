@@ -64,6 +64,22 @@ export default function ManageUsers() {
     setActionLoading(null)
   }
 
+  const handleUpdateCommission = async (userId, rate) => {
+    if (isNaN(rate) || rate < 0 || rate > 100) return
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, captain_commission_rate: rate } : u))
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ captain_commission_rate: rate })
+        .eq('id', userId)
+      if (error) {
+        alert("Error al actualizar la comisión: " + error.message)
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const getRoleLabel = (role) => {
     switch(role) {
       case 'admin': return 'Admin'
@@ -116,7 +132,29 @@ export default function ManageUsers() {
                   </div>
                   
                   <div className="metrics-table__info" style={{ flex: 1, marginLeft: '16px' }}>
-                    <strong>{user.full_name || 'Sin Nombre'}</strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <strong>{user.full_name || 'Sin Nombre'}</strong>
+                      {user.role === 'publisher' && user.nautical_license_url && (
+                        <a 
+                          href={user.nautical_license_url} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          style={{
+                            fontSize: '11px',
+                            background: 'rgba(11, 171, 195, 0.1)',
+                            color: 'var(--color-accent-400)',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(11, 171, 195, 0.2)',
+                            fontWeight: 'bold',
+                            textDecoration: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          📄 Ver Licencia
+                        </a>
+                      )}
+                    </div>
                     <span style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       {user.email} 
                       {user.phone && ` · ${user.phone}`}
@@ -133,7 +171,32 @@ export default function ManageUsers() {
                     </span>
 
                     {user.role === 'publisher' && (
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {/* Commission selector */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 255, 255, 0.02)', padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Comisión:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.5"
+                            value={user.captain_commission_rate ?? 20.0}
+                            onChange={(e) => handleUpdateCommission(user.id, parseFloat(e.target.value))}
+                            disabled={actionLoading === user.id}
+                            style={{
+                              width: '55px',
+                              background: 'rgba(0, 0, 0, 0.2)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              color: 'white',
+                              borderRadius: '4px',
+                              padding: '2px 4px',
+                              fontSize: '12px',
+                              textAlign: 'center'
+                            }}
+                          />
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>%</span>
+                        </div>
+
                         {user.is_verified ? (
                           <button 
                             className="btn btn--sm btn--ghost"

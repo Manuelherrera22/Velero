@@ -96,6 +96,9 @@ export default function TripDetail() {
   const [selectedAddons, setSelectedAddons] = useState({})
   const [bookingMode, setBookingMode] = useState('shared') // 'shared' | 'private'
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState(null)
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+
 
   const basePrivateAllowed = trip?.metadata?.allow_full_boat || trip?.allow_full_boat;
   const privatePrice = trip?.metadata?.full_boat_price || trip?.full_boat_price;
@@ -122,6 +125,44 @@ export default function TripDetail() {
       }
     }
   }, [trip, isPrivateAllowed, privatePrice, bookingMode]);
+
+  useEffect(() => {
+    if (tripDates && tripDates.length > 0) {
+      const computedDatesByDay = tripDates.reduce((acc, d) => {
+        const remainingSpots = d.available_spots - (d.blocked_spots || 0);
+        const dateHasBookings = d.available_spots < capacity;
+        if (bookingMode === 'private' && (dateHasBookings || d.blocked_spots > 0)) {
+          return acc;
+        }
+        const dayKey = d.date
+        if (!acc[dayKey]) acc[dayKey] = []
+        acc[dayKey].push(d)
+        return acc
+      }, {})
+
+      const activeKeys = Object.keys(computedDatesByDay).sort()
+      if (activeKeys.length > 0) {
+        if (selectedCalendarDay && computedDatesByDay[selectedCalendarDay]) {
+          // Already selected day is valid
+        } else {
+          const firstKey = activeKeys[0]
+          setCurrentMonth(new Date(firstKey + 'T12:00:00'))
+          setSelectedCalendarDay(firstKey)
+          const daySlots = computedDatesByDay[firstKey]
+          if (daySlots && daySlots.length > 0) {
+            setSelectedDate(daySlots[0].id)
+          }
+        }
+      } else {
+        setSelectedCalendarDay(null)
+        setSelectedDate(null)
+      }
+    } else {
+      setSelectedCalendarDay(null)
+      setSelectedDate(null)
+    }
+  }, [tripDates, bookingMode, capacity]);
+
 
   useEffect(() => {
     fetchTrip(id)
@@ -211,6 +252,52 @@ export default function TripDetail() {
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + trip.images.length) % trip.images.length)
   }
+
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const days = []
+    const startDay = firstDay.getDay()
+    const padding = startDay === 0 ? 6 : startDay - 1
+    for (let i = 0; i < padding; i++) {
+      days.push(null)
+    }
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      days.push(new Date(year, month, i))
+    }
+    return days
+  }
+
+  const formatDateKey = (date) => {
+    if (!date) return ''
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
+
+  const handlePrevMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
+  }
+
+  const handleNextMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+  }
+
+  const handleDayClick = (dayKey) => {
+    setSelectedCalendarDay(dayKey)
+    const daySlots = datesByDay[dayKey]
+    if (daySlots && daySlots.length > 0) {
+      setSelectedDate(daySlots[0].id)
+    } else {
+      setSelectedDate(null)
+    }
+  }
+
+  const daysOfCalendar = getDaysInMonth(currentMonth)
+
 
   // selectedDateObj already defined above in pricing section
 
@@ -433,60 +520,160 @@ export default function TripDetail() {
                 </div>
               </div>
 
-
               {/* Date Selection */}
               <div className="booking-card__section">
-                <label className="booking-card__label" style={{ fontSize: '1.05rem', fontWeight: 700 }}>
+                <label className="booking-card__label" style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '12px', display: 'block' }}>
                   📅 Elegí día y horario
                 </label>
                 {tripDates.length > 0 ? (
-                  <div className="booking-card__dates custom-scrollbar" style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '8px', WebkitOverflowScrolling: 'touch' }}>
-                    {Object.entries(datesByDay).map(([dayKey, slots]) => (
-                      <div key={dayKey} className="booking-card__day-group">
-                        <div className="booking-card__day-label">
-                          {new Date(dayKey + 'T12:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'short' })}
-                        </div>
-                        <div className="booking-card__day-slots">
-                          {slots
-                            .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
-                            .map(d => {
-                              const remainingSpots = d.available_spots - (d.blocked_spots || 0);
-                              const dateHasBookings = d.available_spots < capacity;
-                              const isDateDisabled = bookingMode === 'private' ? (dateHasBookings || d.blocked_spots > 0) : remainingSpots <= 0;
-                              const slotPrice = bookingMode === 'private'
-                                ? (d.full_boat_price_override || trip.full_boat_price || trip.metadata?.full_boat_price)
-                                : (d.price_per_person_override || trip.price_per_person || trip.metadata?.price_per_person);
-                              
-                              return (
-                                <button
-                                  key={d.id}
-                                  disabled={isDateDisabled}
-                                  className={`booking-card__date flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border transition-all ${selectedDate === d.id ? 'booking-card__date--selected border-primary bg-primary/10' : 'border-border/60 hover:border-primary/50'} ${isDateDisabled ? 'opacity-50 cursor-not-allowed bg-neutral-100' : ''}`}
-                                  onClick={() => setSelectedDate(d.id)}
-                                >
-                                  <span className="booking-card__date-time font-bold text-[15px]">{d.start_time?.slice(0, 5)} hs</span>
-                                  <span className="booking-card__date-price text-sm text-muted-foreground">{formatPrice(slotPrice, trip.currency)}</span>
-                                  <span className={`booking-card__date-spots flex items-center gap-1.5 text-xs mt-1 text-center`} style={{ color: remainingSpots <= 0 ? '#ef4444' : 'var(--color-success)' }}>
-                                    {remainingSpots <= 0 ? (
-                                      'Agotado'
-                                    ) : ( bookingMode === 'private' && (dateHasBookings || d.blocked_spots > 0) ) ? (
-                                      <span style={{ color: '#ef4444' }}>Ocupado</span>
-                                    ) : (
-                                      <>
-                                        <div className={`w-2 h-2 rounded-full animate-pulse`} style={{ backgroundColor: 'var(--color-success)' }}></div>
-                                        {`${remainingSpots} disp.`}
-                                      </>
-                                    )}
-                                  </span>
-                                </button>
-                              )
-                            })}
-                        </div>
-                      </div>
-                    ))}
+                  <div className="calendar-booking-container" style={{
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: 'var(--radius-xl)',
+                    padding: 'var(--space-4)',
+                    marginBottom: 'var(--space-4)'
+                  }}>
+                    {/* Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+                      <button
+                        type="button"
+                        onClick={handlePrevMonth}
+                        className="btn btn--outline"
+                        style={{ padding: '6px', minHeight: 'unset', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', textTransform: 'capitalize', color: 'var(--text-primary)' }}>
+                        {currentMonth.toLocaleDateString('es', { month: 'long', year: 'numeric' })}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleNextMonth}
+                        className="btn btn--outline"
+                        style={{ padding: '6px', minHeight: 'unset', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+
+                    {/* Day headers */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center', marginBottom: '8px', fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)' }}>
+                      <div>Lu</div>
+                      <div>Ma</div>
+                      <div>Mi</div>
+                      <div>Ju</div>
+                      <div>Vi</div>
+                      <div>Sá</div>
+                      <div>Do</div>
+                    </div>
+
+                    {/* Days grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
+                      {daysOfCalendar.map((day, idx) => {
+                        if (!day) return <div key={`empty-${idx}`} />
+                        const dayKey = formatDateKey(day)
+                        const slots = datesByDay[dayKey] || []
+                        const hasSlots = slots.length > 0
+                        const isSelected = selectedCalendarDay === dayKey
+                        
+                        const isAllDisabled = hasSlots && slots.every(d => {
+                          const remainingSpots = d.available_spots - (d.blocked_spots || 0);
+                          const dateHasBookings = d.available_spots < capacity;
+                          return bookingMode === 'private' ? (dateHasBookings || d.blocked_spots > 0) : remainingSpots <= 0;
+                        })
+
+                        return (
+                          <button
+                            key={dayKey}
+                            type="button"
+                            disabled={!hasSlots}
+                            onClick={() => handleDayClick(dayKey)}
+                            style={{
+                              padding: '8px 2px',
+                              borderRadius: 'var(--radius-lg)',
+                              border: isSelected ? '1px solid var(--color-primary-500)' : '1px solid transparent',
+                              background: isSelected 
+                                ? 'var(--color-primary-500)' 
+                                : hasSlots 
+                                  ? isAllDisabled 
+                                    ? 'rgba(239, 68, 68, 0.05)'
+                                    : 'rgba(11, 171, 195, 0.08)' 
+                                  : 'transparent',
+                              color: isSelected 
+                                ? 'white' 
+                                : hasSlots 
+                                  ? isAllDisabled 
+                                    ? '#ef4444'
+                                    : 'var(--color-accent-400)' 
+                                  : 'var(--text-tertiary)',
+                              cursor: hasSlots ? 'pointer' : 'default',
+                              opacity: hasSlots ? 1 : 0.3,
+                              fontSize: '13px',
+                              fontWeight: hasSlots ? 'bold' : 'normal',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              position: 'relative'
+                            }}
+                          >
+                            <span>{day.getDate()}</span>
+                            {hasSlots && !isAllDisabled && !isSelected && (
+                              <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: 'var(--color-success)', marginTop: '2px' }} />
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
                 ) : (
                   <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)' }}>No hay fechas disponibles actualmente.</p>
+                )}
+
+                {/* Slots del día seleccionado */}
+                {selectedCalendarDay && datesByDay[selectedCalendarDay] && datesByDay[selectedCalendarDay].length > 0 && (
+                  <div style={{ marginTop: '16px', marginBottom: '8px', animation: 'fadeSlide 0.2s ease-out' }}>
+                    <label className="booking-card__label" style={{ fontSize: '0.85rem', marginBottom: '8px', color: 'var(--text-secondary)', display: 'block' }}>
+                      ⏰ Horarios disponibles para el {new Date(selectedCalendarDay + 'T12:00:00').toLocaleDateString('es', { day: 'numeric', month: 'long' })}:
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      {datesByDay[selectedCalendarDay]
+                        .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
+                        .map(d => {
+                          const remainingSpots = d.available_spots - (d.blocked_spots || 0);
+                          const dateHasBookings = d.available_spots < capacity;
+                          const isDateDisabled = bookingMode === 'private' ? (dateHasBookings || d.blocked_spots > 0) : remainingSpots <= 0;
+                          const slotPrice = bookingMode === 'private'
+                            ? (d.full_boat_price_override || trip.full_boat_price || trip.metadata?.full_boat_price)
+                            : (d.price_per_person_override || trip.price_per_person || trip.metadata?.price_per_person);
+
+                          return (
+                            <button
+                              key={d.id}
+                              type="button"
+                              disabled={isDateDisabled}
+                              className={`booking-card__date flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-xl border transition-all ${selectedDate === d.id ? 'booking-card__date--selected border-primary bg-primary/10' : 'border-border/60 hover:border-primary/50'} ${isDateDisabled ? 'opacity-50 cursor-not-allowed bg-neutral-100' : ''}`}
+                              onClick={() => setSelectedDate(d.id)}
+                            >
+                              <span className="booking-card__date-time font-bold text-[15px]">{d.start_time?.slice(0, 5)} hs</span>
+                              <span className="booking-card__date-price text-sm text-muted-foreground">{formatPrice(slotPrice, trip.currency)}</span>
+                              <span className={`booking-card__date-spots flex items-center gap-1.5 text-xs mt-1 text-center`} style={{ color: remainingSpots <= 0 ? '#ef4444' : 'var(--color-success)' }}>
+                                {remainingSpots <= 0 ? (
+                                  'Agotado'
+                                ) : ( bookingMode === 'private' && (dateHasBookings || d.blocked_spots > 0) ) ? (
+                                  <span style={{ color: '#ef4444' }}>Ocupado</span>
+                                ) : (
+                                  <>
+                                    <div className={`w-2 h-2 rounded-full`} style={{ backgroundColor: 'var(--color-success)' }}></div>
+                                    {`${remainingSpots} disp.`}
+                                  </>
+                                )}
+                              </span>
+                            </button>
+                          )
+                        })}
+                    </div>
+                  </div>
                 )}
               </div>
 
@@ -570,18 +757,23 @@ export default function TripDetail() {
                   <span>Total de la experiencia</span>
                   <span>{formatPrice(total, trip.currency)}</span>
                 </div>
-                {trip?.requires_full_payment === false && (
-                  <div style={{ marginTop: '12px' }}>
-                    <div className="booking-card__total" style={{ color: 'var(--color-primary)', borderTop: '2px dashed var(--border-color)' }}>
-                      <span>Tu reserva</span>
-                      <span>{formatPrice(total * (trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20), trip.currency)}</span>
+                {trip?.requires_full_payment === false && (() => {
+                  const depositPercent = trip?.deposit_percentage !== undefined 
+                    ? parseFloat(trip.deposit_percentage) / 100 
+                    : 0.20;
+                  return (
+                    <div style={{ marginTop: '12px' }}>
+                      <div className="booking-card__total" style={{ color: 'var(--color-primary)', borderTop: '2px dashed var(--border-color)' }}>
+                        <span>Tu reserva ({Math.round(depositPercent * 100)}%)</span>
+                        <span>{formatPrice(total * depositPercent, trip.currency)}</span>
+                      </div>
+                      <div className="booking-card__line" style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: '500', marginTop: '8px' }}>
+                        <span>Saldo a abonar al capitán</span>
+                        <span>{formatPrice(total - (total * depositPercent), trip.currency)}</span>
+                      </div>
                     </div>
-                    <div className="booking-card__line" style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: '500', marginTop: '8px' }}>
-                      <span>Saldo a abonar al capitán</span>
-                      <span>{formatPrice(total - (total * (trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20)), trip.currency)}</span>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
 
               {/* CTA Buttons */}

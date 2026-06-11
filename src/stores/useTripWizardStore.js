@@ -6,6 +6,7 @@ const initialData = {
   title: '',
   description: '',
   role_in_activity: 'capitan',
+  navigation_zone_id: '',
   
   // Step 2: Location
   location: '',
@@ -47,6 +48,7 @@ const initialData = {
   max_passengers: 6,
   allowed_payment_methods: ['PayPal'],
   requires_full_payment: true,
+  deposit_percentage: 100.0,
 
   // Step 9: Dates
   custom_dates: [] // Local array before saving to DB
@@ -179,6 +181,8 @@ export const useTripWizardStore = create(
       // Init for Edit
       initForEdit: (tripData, datesData, hasBookings = false, addonsData = []) => {
         const loadedData = tripData.metadata || { ...initialData };
+        loadedData.deposit_percentage = tripData.deposit_percentage ?? 100.0;
+        loadedData.navigation_zone_id = tripData.navigation_zone_id || '';
         
         if (datesData && datesData.length > 0) {
           const durationDays = loadedData.duration_days || 1;
@@ -233,6 +237,8 @@ export const useTripWizardStore = create(
 
       copyFromTrip: (tripData, datesData, addonsData = []) => {
         const loadedData = tripData.metadata || { ...initialData };
+        loadedData.deposit_percentage = tripData.deposit_percentage ?? 100.0;
+        loadedData.navigation_zone_id = tripData.navigation_zone_id || '';
         
         if (datesData && datesData.length > 0) {
           loadedData.custom_dates = datesData.map(d => ({

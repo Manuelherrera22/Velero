@@ -4,6 +4,7 @@ import { Save, ArrowLeft, MapPin, DollarSign, Users, Calendar, Plus, X, Tag, Pac
 import useTripStore from '../../stores/tripStore'
 import useBoatStore from '../../stores/boatStore'
 import ImageUploader from '../../components/ImageUploader'
+import supabase from '../../lib/supabase'
 
 export default function TripEditor() {
   const { tripId } = useParams()
@@ -22,8 +23,10 @@ export default function TripEditor() {
     currency: 'ARS',
     boat_id: '',
     tags: [],
+    navigation_zone_id: '',
   })
 
+  const [navigationZones, setNavigationZones] = useState([])
   const [newDate, setNewDate] = useState({ date: '', start_time: '10:00', end_time: '', spots: 6 })
   const [newAddon, setNewAddon] = useState({ name: '', description: '', price: '' })
   const [saving, setSaving] = useState(false)
@@ -32,6 +35,24 @@ export default function TripEditor() {
   useEffect(() => {
     fetchTags()
     fetchMyBoats()
+
+    // Fetch active navigation zones
+    const fetchZones = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('navigation_zones')
+          .select('*')
+          .eq('is_active', true)
+          .order('name', { ascending: true })
+        if (!error && data) {
+          setNavigationZones(data)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    fetchZones()
+
     if (isEditing) {
       fetchTrip(tripId).then(result => {
         if (result?.trip) {
@@ -44,6 +65,7 @@ export default function TripEditor() {
             currency: result.trip.currency || 'ARS',
             boat_id: result.trip.boat_id || '',
             tags: result.trip.tags || [],
+            navigation_zone_id: result.trip.navigation_zone_id || '',
           })
         }
       })
@@ -70,6 +92,7 @@ export default function TripEditor() {
       price_per_person: parseFloat(form.price_per_person),
       capacity: parseInt(form.capacity),
       boat_id: form.boat_id || null,
+      navigation_zone_id: form.navigation_zone_id || null,
     }
 
     let result
@@ -190,6 +213,21 @@ export default function TripEditor() {
           {boats.length === 0 && (
             <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '4px' }}>
               Primero agrega una embarcación en la sección "Embarcaciones"
+            </p>
+          )}
+        </div>
+
+        <div className="input-group">
+          <label>Zona de Navegación</label>
+          <select className="input" value={form.navigation_zone_id} onChange={(e) => updateField('navigation_zone_id', e.target.value)}>
+            <option value="">Seleccionar zona...</option>
+            {navigationZones.map(z => (
+              <option key={z.id} value={z.id}>{z.name}</option>
+            ))}
+          </select>
+          {navigationZones.length === 0 && (
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '4px' }}>
+              No hay zonas configuradas por administración.
             </p>
           )}
         </div>

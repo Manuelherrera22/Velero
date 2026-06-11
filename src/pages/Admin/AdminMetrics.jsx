@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, DollarSign, Users, Ship, CalendarCheck, TrendingUp, QrCode, MapPin, Download, ChevronDown, ChevronUp, Filter, X } from 'lucide-react'
+import { BarChart3, DollarSign, Users, Ship, CalendarCheck, TrendingUp, QrCode, MapPin, Download, ChevronDown, ChevronUp, Filter, X, AlertTriangle, Anchor, Plus } from 'lucide-react'
 import supabase from '../../lib/supabase'
 import './AdminMetrics.css'
 
@@ -42,7 +42,56 @@ export default function AdminMetrics() {
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [hasSearched, setHasSearched] = useState(false)
 
+  // Capacity Alerts & Navigation Zones states
+  const [capacityAlerts, setCapacityAlerts] = useState([])
+  const [navigationZones, setNavigationZones] = useState([])
+  const [newZoneName, setNewZoneName] = useState('')
+  const [zoneActionLoading, setZoneActionLoading] = useState(false)
+
   useEffect(() => { fetchMetrics() }, [])
+
+  const handleAddZone = async (e) => {
+    e.preventDefault()
+    if (!newZoneName.trim()) return
+    setZoneActionLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('navigation_zones')
+        .insert([{ name: newZoneName.trim() }])
+        .select()
+      
+      if (error) {
+        alert("Error al agregar zona: " + error.message)
+      } else if (data) {
+        setNavigationZones(prev => [...prev, ...data].sort((a, b) => a.name.localeCompare(b.name)))
+        setNewZoneName('')
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setZoneActionLoading(false)
+    }
+  }
+
+  const handleToggleZone = async (zoneId, currentStatus) => {
+    setZoneActionLoading(true)
+    try {
+      const { error } = await supabase
+        .from('navigation_zones')
+        .update({ is_active: !currentStatus })
+        .eq('id', zoneId)
+      
+      if (error) {
+        alert("Error al actualizar zona: " + error.message)
+      } else {
+        setNavigationZones(prev => prev.map(z => z.id === zoneId ? { ...z, is_active: !currentStatus } : z))
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setZoneActionLoading(false)
+    }
+  }
 
   const handleSearchSubmit = async (e) => {
     e.preventDefault()
@@ -125,6 +174,10 @@ export default function AdminMetrics() {
     }
 
     try {
+      // Calculate date range for 72 hour capacity alerts
+      const nowStr = new Date().toISOString().split('T')[0]
+      const limitStr = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString().split('T')[0]
+
       // Fetch all metrics in parallel
       const [
         { count: totalBookings },
@@ -148,6 +201,8 @@ export default function AdminMetrics() {
         { data: topTripsData },
         { data: hotelsData },
         { data: recentData },
+        { data: alertsData },
+        { data: zonesData },
       ] = await Promise.all([
         applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true })),
         applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'confirmed')),
@@ -170,6 +225,19 @@ export default function AdminMetrics() {
         supabase.from('trips').select('id, title, location, price_per_person, currency, bookings(id)').eq('status', 'published').order('created_at', { ascending: false }).limit(10),
         supabase.from('hotels').select('*, qr_codes(scan_count)').order('created_at', { ascending: false }),
         applyDateFilter(supabase.from('bookings').select('*, trip:trips!trip_id(title)').order('created_at', { ascending: false }).limit(8)),
+        // Capacity alerts
+        supabase
+          .from('trip_dates')
+          .select('id, date, start_time, available_spots, trip:trips!trip_id(id, title, location, capacity, min_passengers, max_passengers, captain:profiles!captain_id(id, full_name, email, phone))')
+          .gte('date', nowStr)
+          .lte('date', limitStr)
+          .eq('is_active', true)
+          .order('date', { ascending: true }),
+        // Navigation zones
+        supabase
+          .from('navigation_zones')
+          .select('*')
+          .order('name', { ascending: true }),
       ])
 
       const totalRevenue = (bookingsData || []).reduce((s, b) => s + (b.total || 0), 0)
@@ -214,6 +282,26 @@ export default function AdminMetrics() {
       setTopTrips(tripsWithBookings)
       setTopHotels(hotelsWithScans)
       setRecentBookings(recentData || [])
+
+      // Process capacity alerts defensively
+      const processedAlerts = []
+      if (alertsData) {
+        for (const d of alertsData) {
+          if (d && d.trip) {
+            const cap = d.trip.capacity || d.trip.max_passengers || 6
+            const currentPassengers = cap - d.available_spots
+            const minPass = d.trip.min_passengers ?? 1
+            if (currentPassengers < minPass) {
+              processedAlerts.push(d)
+            }
+          }
+        }
+      }
+      setCapacityAlerts(processedAlerts)
+
+      if (zonesData) {
+        setNavigationZones(zonesData)
+      }
     } catch (err) {
       console.error("Error fetching metrics:", err)
     } finally {
@@ -436,6 +524,69 @@ export default function AdminMetrics() {
         ))}
       </div>
 
+      {/* Capacity Alerts Section */}
+      <div className="metrics-alerts-section" style={{ marginBottom: 'var(--space-6)' }}>
+        <h3 className="metrics-table__title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f59e0b' }}>
+          <AlertTriangle size={18} /> Alertas de Capacidad (Próximas 72 horas)
+        </h3>
+        {capacityAlerts.length === 0 ? (
+          <div className="glass" style={{ padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)', color: 'var(--text-secondary)', fontSize: '14px' }}>
+            ✅ Todas las salidas de las próximas 72hs cumplen con el mínimo de pasajeros o no tienen alertas.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 'var(--space-4)' }}>
+            {capacityAlerts.map(alert => {
+              const capacity = alert.trip.capacity || alert.trip.max_passengers || 6
+              const currentPassengers = capacity - alert.available_spots
+              const minPassengers = alert.trip.min_passengers || 1
+              const captain = alert.trip.captain
+              return (
+                <div key={alert.id} className="glass alert-card" style={{
+                  padding: 'var(--space-4)',
+                  borderRadius: 'var(--radius-lg)',
+                  borderLeft: '4px solid #f59e0b',
+                  background: 'rgba(245, 158, 11, 0.02)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>{alert.trip.title}</h4>
+                    <p style={{ margin: '6px 0 2px 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                      📅 <strong>Salida:</strong> {new Date(alert.date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })} a las {alert.start_time.slice(0, 5)} hs
+                    </p>
+                    <p style={{ margin: '2px 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                      👥 <strong>Pasajeros:</strong> <span style={{ color: '#ef4444', fontWeight: 'bold' }}>{currentPassengers}</span> / Mínimo: {minPassengers} (Max: {capacity})
+                    </p>
+                    {captain && (
+                      <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: 'var(--text-tertiary)' }}>
+                        ⚓ <strong>Capitán:</strong> {captain.full_name || 'Sin nombre'} ({captain.email})
+                      </p>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: 'auto' }}>
+                    <a href={`/trip/${alert.trip.id}`} target="_blank" rel="noreferrer" className="btn btn--outline btn--sm" style={{ padding: '4px 10px', minHeight: 'unset', fontSize: '11px' }}>
+                      Ver Travesía
+                    </a>
+                    {captain?.phone && (
+                      <a href={`https://wa.me/${captain.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="btn btn--accent btn--sm" style={{ padding: '4px 10px', minHeight: 'unset', fontSize: '11px', background: '#25d366', borderColor: '#25d366' }}>
+                        WhatsApp
+                      </a>
+                    )}
+                    {captain?.email && (
+                      <a href={`mailto:${captain.email}?subject=Alerta de capacidad - Salida del ${alert.date}`} className="btn btn--ghost btn--sm" style={{ padding: '4px 10px', minHeight: 'unset', fontSize: '11px' }}>
+                        Email
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Tables Row */}
       <div className="metrics-tables">
         {/* Top Trips */}
@@ -579,6 +730,67 @@ export default function AdminMetrics() {
                 <span className="metrics-table__count" style={{ color: 'var(--color-accent-400)' }}>
                   ${b.total?.toLocaleString('es-AR')}
                 </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Navigation Zones Panel */}
+      <div className="metrics-table glass" style={{ marginTop: 'var(--space-6)' }}>
+        <h3 className="metrics-table__title">
+          <Anchor size={18} /> Panel de Zonas de Navegación
+        </h3>
+        
+        <form onSubmit={handleAddZone} style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-4)', maxWidth: '500px' }}>
+          <input 
+            type="text" 
+            className="input" 
+            placeholder="Nueva zona de navegación (ej. Patagonia Norte)..." 
+            value={newZoneName}
+            onChange={(e) => setNewZoneName(e.target.value)}
+            disabled={zoneActionLoading}
+            style={{ minHeight: '36px', padding: '6px 12px', fontSize: '14px', flex: 1 }}
+          />
+          <button type="submit" className="btn btn--accent btn--sm" disabled={zoneActionLoading || !newZoneName.trim()} style={{ minHeight: '36px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Plus size={14} /> Agregar
+          </button>
+        </form>
+
+        {navigationZones.length === 0 ? (
+          <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)', fontStyle: 'italic' }}>
+            No hay zonas de navegación configuradas o la base de datos no está migrada.
+          </p>
+        ) : (
+          <div className="metrics-table__rows" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--space-2)' }}>
+            {navigationZones.map(zone => (
+              <div key={zone.id} className="metrics-table__row" style={{
+                background: 'rgba(255, 255, 255, 0.01)',
+                border: '1px solid rgba(255, 255, 255, 0.04)',
+                borderRadius: '8px',
+                padding: '10px 16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                minWidth: 'unset'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: zone.is_active ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>
+                    {zone.name}
+                  </span>
+                  <span style={{ fontSize: '11px', color: zone.is_active ? '#22c55e' : '#ef4444' }}>
+                    {zone.is_active ? 'Activa' : 'Inactiva'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className={`btn btn--sm ${zone.is_active ? 'btn--outline' : 'btn--accent'}`}
+                  onClick={() => handleToggleZone(zone.id, zone.is_active)}
+                  disabled={zoneActionLoading}
+                  style={{ minHeight: '28px', padding: '2px 10px', fontSize: '11px' }}
+                >
+                  {zone.is_active ? 'Desactivar' : 'Activar'}
+                </button>
               </div>
             ))}
           </div>

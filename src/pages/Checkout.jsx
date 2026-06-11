@@ -159,15 +159,17 @@ export default function Checkout() {
   // Advance Payment calculations (Anticipo)
   const isAdvancePayment = trip?.requires_full_payment === false;
   
-  // Kailu Commission (20% default, can be overridden per trip/captain in DB)
-  const kailuCommission = trip?.kailu_commission || trip?.captain?.kailu_commission || 0.20;
+  // Down-payment percentage config (defaults to 100% if full payment required, or uses trip's deposit_percentage or 20% default if down-payment is enabled)
+  const depositPercent = isAdvancePayment
+    ? ((trip?.deposit_percentage !== undefined ? parseFloat(trip.deposit_percentage) : 20.0) / 100)
+    : 1.0;
   
   const advanceAmount = isAdvancePayment 
-    ? ((total * kailuCommission) + serviceFeeAmount) 
+    ? ((total * depositPercent) + serviceFeeAmount) 
     : (total + serviceFeeAmount);
     
   const remainingAmount = isAdvancePayment 
-    ? (total - (total * kailuCommission)) 
+    ? (total - (total * depositPercent)) 
     : 0;
 
   const formatPrice = (p) => {
@@ -980,7 +982,7 @@ export default function Checkout() {
               {isAdvancePayment && (
                 <>
                   <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '4px', lineHeight: 1.4 }}>
-                    Incluye anticipo ({Math.round(kailuCommission * 100)}%) + tasa de servicio (3%)
+                    Incluye anticipo ({Math.round(depositPercent * 100)}%) + tasa de servicio (3%)
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '10px', fontSize: 'var(--text-md)', backgroundColor: 'rgba(245, 158, 11, 0.08)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
                     <span>🤝 Saldo a abonar al capitán</span>

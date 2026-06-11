@@ -220,6 +220,8 @@ const Step10Finalize = () => {
         excluded_services: formData.excluded_services || [],
         allowed_payment_methods: formData.allowed_payment_methods || ['PayPal'],
         requires_full_payment: formData.requires_full_payment !== false,
+        deposit_percentage: formData.deposit_percentage ?? 100.0,
+        navigation_zone_id: formData.navigation_zone_id || null,
         itinerary: formData.itinerary || [],
         status: isDraft ? 'draft' : 'published',
         images: uploadedUrls,
