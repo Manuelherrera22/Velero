@@ -15,10 +15,98 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // First, check if there's a hash fragment with tokens
+        // Check if there is a PKCE code in the query parameters or hash fragment tokens
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
+
+        const queryParams = new URLSearchParams(window.location.search)
+        const code = queryParams.get('code')
+        const type = queryParams.get('type')
+
+        // Helper to get redirect path based on role
+        const getRedirectPath = async () => {
+          const { data: { session: innerSession } } = await supabase.auth.getSession()
+          const user = innerSession?.user
+          if (user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', user.id)
+              .single()
+
+            if (profile?.role === 'publisher') return '/dashboard'
+            if (profile?.role === 'affiliate') return '/afiliado'
+            if (profile?.role === 'admin') return '/admin'
+          }
+          return '/mis-viajes'
+        }
+
+        // Helper to trigger welcome email
+        const triggerWelcomeEmail = async () => {
+          try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name, role')
+                .eq('id', user.id)
+                .single()
+              
+              if (profile) {
+                const protocol = window.location.protocol
+                const host = window.location.host
+                await fetch(`${protocol}//${host}/api/send-welcome`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    email: user.email,
+                    name: profile.full_name,
+                    role: profile.role
+                  })
+                })
+              }
+            }
+          } catch (err) {
+            console.error('Failed to trigger welcome email:', err)
+          }
+        }
+
+        if (code) {
+          setStatus('Verificando tu cuenta...')
+          const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+          if (error) {
+            console.error('Auth code exchange error:', error)
+            setStatus('Error al verificar. Redirigiendo...')
+            setTimeout(() => navigate('/login', { replace: true }), 1500)
+            return
+          }
+
+          const isRecovery = type === 'recovery'
+          const isSignup = type === 'signup' || type === 'invite'
+
+          if (isRecovery) {
+            setStatus('Redirigiendo a actualizar contraseña...')
+            setTimeout(() => navigate('/reset-password', { replace: true }), 1000)
+            return
+          }
+
+          if (isSignup) {
+            setVerified(true)
+            setStatus('¡Tu cuenta fue verificada exitosamente!')
+            await triggerWelcomeEmail()
+            const redirectTo = await getRedirectPath()
+            setTimeout(() => navigate(redirectTo, { replace: true }), 2500)
+            return
+          }
+
+          // General sign-in / magic link
+          setStatus('¡Listo! Redirigiendo...')
+          const redirectTo = await getRedirectPath()
+          setTimeout(() => navigate(redirectTo, { replace: true }), 1000)
+          return
+        }
 
         if (accessToken && refreshToken) {
           // Set the session manually from hash fragment
@@ -36,8 +124,8 @@ export default function AuthCallback() {
           }
 
           // Check if this is a password recovery link
-          const isRecovery = new URLSearchParams(window.location.search).get('type') === 'recovery' || hashParams.get('type') === 'recovery'
-          const isSignup = hashParams.get('type') === 'signup'
+          const isRecovery = type === 'recovery' || hashParams.get('type') === 'recovery'
+          const isSignup = type === 'signup' || hashParams.get('type') === 'signup' || hashParams.get('type') === 'invite'
 
           if (isRecovery) {
             setStatus('Redirigiendo a actualizar contraseña...')
@@ -45,59 +133,12 @@ export default function AuthCallback() {
             return
           }
 
-          // Helper to get redirect path based on role
-          const getRedirectPath = async () => {
-            const { data: { session: innerSession } } = await supabase.auth.getSession()
-            const user = innerSession?.user
-            if (user) {
-              const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single()
-
-              if (profile?.role === 'publisher') return '/dashboard'
-              if (profile?.role === 'affiliate') return '/afiliado'
-              if (profile?.role === 'admin') return '/admin'
-            }
-            return '/mis-viajes'
-          }
-
           if (isSignup) {
             // Email verification — show success message, then redirect to role-based panel
             setVerified(true)
             setStatus('¡Tu cuenta fue verificada exitosamente!')
             
-            // Send welcome email asynchronously in the background
-            const triggerWelcomeEmail = async () => {
-              try {
-                const { data: { user } } = await supabase.auth.getUser()
-                if (user) {
-                  const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('full_name, role')
-                    .eq('id', user.id)
-                    .single()
-                  
-                  if (profile) {
-                    const protocol = window.location.protocol
-                    const host = window.location.host
-                    await fetch(`${protocol}//${host}/api/send-welcome`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        email: user.email,
-                        name: profile.full_name,
-                        role: profile.role
-                      })
-                    })
-                  }
-                }
-              } catch (err) {
-                console.error('Failed to trigger welcome email:', err)
-              }
-            }
-            triggerWelcomeEmail()
+            await triggerWelcomeEmail()
 
             const redirectTo = await getRedirectPath()
             setTimeout(() => navigate(redirectTo, { replace: true }), 2500)

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
-import { User, Mail, Phone, MapPin, Shield, LogOut, Edit3, Save, Loader, Lock, CheckCircle, Eye, EyeOff, Building2, CreditCard } from 'lucide-react'
+import { User, Mail, Phone, MapPin, Shield, LogOut, Edit3, Save, Loader, Lock, CheckCircle, Eye, EyeOff, Building2, CreditCard, Plus } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import supabase from '../lib/supabase'
 import './Profile.css'
