@@ -361,6 +361,10 @@
     grid-template-columns: 1fr;
   }
 
+  .checkout-summary {
+    order: -1; /* Render summary before the form steps and payment button on mobile */
+  }
+
   .checkout-progress span:not(.checkout-progress__num) {
     display: none;
   }
