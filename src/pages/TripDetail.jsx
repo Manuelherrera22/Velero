@@ -701,7 +701,10 @@ export default function TripDetail() {
               {/* Addons */}
               {tripAddons.length > 0 && (
                 <div className="booking-card__section border-t border-border/40 pt-6 mt-6">
-                  <label className="booking-card__label mb-3" style={{ fontSize: '1.05rem', fontWeight: 700 }}>Mejorá tu experiencia (opcional)</label>
+                  <label className="booking-card__label mb-1" style={{ fontSize: '1.05rem', fontWeight: 700 }}>Mejorá tu experiencia (opcional)</label>
+                  <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginBottom: '12px', lineHeight: '1.3', fontStyle: 'italic' }}>
+                    *Nota: Las cantidades de adicionales se calculan de manera individual. Recordá seleccionar la cantidad total que necesites para tu grupo (ej. si son 6 personas y todos quieren el opcional, seleccioná cantidad 6).
+                  </p>
                   {tripAddons.map(addon => (
                     <div
                       key={addon.id}
