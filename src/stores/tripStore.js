@@ -89,7 +89,7 @@ const useTripStore = create((set, get) => ({
         .from('trips')
         .select(`
           *,
-          captain:profiles!captain_id(id, full_name, avatar_url, is_verified, bio, location, phone, captain_commission_rate),
+          captain:profiles!captain_id(id, full_name, avatar_url, is_verified, bio, location),
           boat:boats!boat_id(*)
         `)
         .eq('id', tripId)
