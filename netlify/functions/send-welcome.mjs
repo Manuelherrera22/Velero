@@ -116,7 +116,7 @@ export default async (req) => {
 </body>
 </html>`
 
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Kailu <onboarding@resend.dev>'
+    const fromEmail = process.env.RESEND_WELCOME_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'Kailu <hola@kailu.travel>'
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {

@@ -42,7 +42,7 @@ export default async (req) => {
     const captainName = captainProfile?.full_name || 'Capitán Kailu'
 
     // 2. Format emails
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Kailu <onboarding@resend.dev>'
+    const fromEmail = process.env.RESEND_INQUIRY_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'Kailu <no-reply@kailu.travel>'
 
     // Email to Captain
     const captainHtml = `
