@@ -1,9 +1,12 @@
 import React from 'react'
 import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
+import useAuthStore from '../../../../stores/authStore'
 import { Info } from 'lucide-react'
 
 const Step8Pricing = () => {
   const { formData, updateFormData, hasBookings } = useTripWizardStore()
+  const { profile } = useAuthStore()
+  const commissionRate = profile?.captain_commission_rate || 20 // Fallback to default 20% commission
 
   const handleTogglePaymentMethod = (method) => {
     const isPresent = formData.allowed_payment_methods.includes(method)
@@ -226,7 +229,14 @@ const Step8Pricing = () => {
                 name="payment_mode"
                 style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary-500)' }}
                 checked={formData.requires_full_payment === false}
-                onChange={() => updateFormData({ requires_full_payment: false })}
+                onChange={() => {
+                  const currentDeposit = formData.deposit_percentage ?? 100.0
+                  const finalDeposit = currentDeposit < commissionRate ? commissionRate : currentDeposit
+                  updateFormData({ 
+                    requires_full_payment: false,
+                    deposit_percentage: finalDeposit
+                  })
+                }}
               />
               <span style={{ fontWeight: 600, userSelect: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 Reserva con Anticipo (Seña)
@@ -241,7 +251,7 @@ const Step8Pricing = () => {
                 <div className="form-group" style={{ maxWidth: '300px' }}>
                   <label className="form-group__label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     Porcentaje de anticipo *
-                    <div title="El porcentaje del total que el cliente debe pagar online para reservar (entre 10% y 100%)." style={{ cursor: 'help' }}>
+                    <div title={`El porcentaje del total que el cliente debe pagar online para reservar (mínimo ${commissionRate}%).`} style={{ cursor: 'help' }}>
                       <Info size={16} color="var(--text-muted)" />
                     </div>
                   </label>
@@ -249,20 +259,23 @@ const Step8Pricing = () => {
                     <span className="input-icon" style={{ fontWeight: 'bold' }}>%</span>
                     <input
                       type="number"
-                      min="10"
+                      min={commissionRate}
                       max="100"
                       step="5"
                       className="input-control"
                       style={{ paddingLeft: '40px', fontWeight: 'bold' }}
-                      value={formData.deposit_percentage ?? 100.0}
+                      value={formData.deposit_percentage ?? commissionRate}
                       onChange={(e) => {
-                        let val = parseFloat(e.target.value) || 10.0
-                        if (val < 10) val = 10
+                        let val = parseFloat(e.target.value) || commissionRate
+                        if (val < commissionRate) val = commissionRate
                         if (val > 100) val = 100
                         updateFormData({ deposit_percentage: val })
                       }}
                     />
                   </div>
+                  <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '6px', fontStyle: 'italic', lineHeight: '1.4' }}>
+                    * Mínimo permitido: {commissionRate}% (tu comisión acordada con Kailu).
+                  </p>
                 </div>
               </div>
             )}
