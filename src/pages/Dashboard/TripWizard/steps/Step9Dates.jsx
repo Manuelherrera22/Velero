@@ -68,8 +68,8 @@ const Step9Dates = () => {
         departure_time: newDate.departure_time,
         arrival_date: arrival.toISOString().split('T')[0],
         arrival_time: newDate.arrival_time,
-        price_per_person: newDate.price_per_person,
-        full_boat_price: newDate.full_boat_price,
+        price_per_person: formData.allow_individual_booking !== false ? newDate.price_per_person : 0,
+        full_boat_price: formData.allow_full_boat ? newDate.full_boat_price : 0,
         blocked_spots: 0,
         available_spots: formData.max_passengers || 6,
         all_dates: sortedDates.map(d => d.toISOString().split('T')[0])
@@ -84,8 +84,8 @@ const Step9Dates = () => {
           departure_time: newDate.departure_time,
           arrival_date: curDep.toISOString().split('T')[0],
           arrival_time: newDate.arrival_time,
-          price_per_person: newDate.price_per_person,
-          full_boat_price: newDate.full_boat_price,
+          price_per_person: formData.allow_individual_booking !== false ? newDate.price_per_person : 0,
+          full_boat_price: formData.allow_full_boat ? newDate.full_boat_price : 0,
           blocked_spots: 0,
           available_spots: formData.max_passengers || 6
         })
@@ -258,15 +258,16 @@ const Step9Dates = () => {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
+                <div className="form-group" style={{ marginBottom: 0, opacity: formData.allow_individual_booking !== false ? 1 : 0.4 }}>
                   <label style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px', display: 'block', fontWeight: 'bold' }}>Precio Pasajero</label>
                   <div className="input-with-icon">
                     <span className="input-icon" style={{ fontWeight: 'bold' }}>$</span>
                     <input 
                       type="number"
+                      disabled={formData.allow_individual_booking === false}
                       className="input-control"
                       style={{ paddingLeft: '36px', fontWeight: 'bold', fontSize: '16px' }}
-                      value={newDate.price_per_person}
+                      value={formData.allow_individual_booking !== false ? newDate.price_per_person : 0}
                       onChange={(e) => setNewDate({ ...newDate, price_per_person: parseFloat(e.target.value) || 0 })}
                     />
                   </div>
@@ -281,7 +282,7 @@ const Step9Dates = () => {
                       disabled={!formData.allow_full_boat}
                       className="input-control"
                       style={{ paddingLeft: '36px', fontWeight: 'bold', fontSize: '16px' }}
-                      value={newDate.full_boat_price}
+                      value={formData.allow_full_boat ? newDate.full_boat_price : 0}
                       onChange={(e) => setNewDate({ ...newDate, full_boat_price: parseFloat(e.target.value) || 0 })}
                     />
                   </div>
@@ -374,10 +375,12 @@ const Step9Dates = () => {
                     )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-6)' }}>
-                    <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>Por persona</p>
-                      <p style={{ fontWeight: 'bold', color: 'var(--color-primary-500)', fontSize: '16px' }}>$ {formatPrice(date.price_per_person)}</p>
-                    </div>
+                    {formData.allow_individual_booking !== false && (
+                      <div style={{ textAlign: 'right' }}>
+                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>Por persona</p>
+                        <p style={{ fontWeight: 'bold', color: 'var(--color-primary-500)', fontSize: '16px' }}>$ {formatPrice(date.price_per_person)}</p>
+                      </div>
+                    )}
                     {formData.allow_full_boat && (
                       <div style={{ textAlign: 'right' }}>
                         <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>Barco completo</p>

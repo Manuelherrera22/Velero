@@ -130,7 +130,16 @@ export default function ReviewTrips() {
 
             <div className="item-card__footer">
               <span><Users size={14} style={{ verticalAlign: '-2px' }} /> {trip.capacity} pers. · {trip.tags?.join(', ') || '—'}</span>
-              <span style={{ color: 'var(--color-accent-400)', fontWeight: 600 }}>{formatPrice(trip.price_per_person, trip.currency)}/pers.</span>
+              {(() => {
+                const isFullBoatOnly = !(trip.price_per_person > 0) && (trip.full_boat_price > 0 || trip.allow_full_boat);
+                const basePrice = isFullBoatOnly ? trip.full_boat_price : trip.price_per_person;
+                const label = isFullBoatOnly ? '/barco' : '/pers.';
+                return (
+                  <span style={{ color: 'var(--color-accent-400)', fontWeight: 600 }}>
+                    {formatPrice(basePrice, trip.currency)}{label}
+                  </span>
+                );
+              })()}
             </div>
 
             {trip.status === 'pending' && (

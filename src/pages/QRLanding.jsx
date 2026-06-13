@@ -169,17 +169,29 @@ export default function QRLanding() {
                       </span>
                     )}
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontWeight: 'normal', marginRight: '4px' }}>Desde</span>
-                    {trip.metadata?.discount_percentage > 0 ? (
-                      <>
-                        <span style={{ textDecoration: 'line-through', color: 'var(--text-tertiary)', fontSize: '0.85rem', marginRight: '4px' }}>
-                          {formatPrice(trip.price_per_person, trip.currency)}
-                        </span>
-                        {formatPrice(Math.round(trip.price_per_person * (1 - trip.metadata.discount_percentage / 100)), trip.currency)}
-                      </>
-                    ) : (
-                      formatPrice(trip.price_per_person, trip.currency)
-                    )}
-                    <span>/persona</span>
+                    {(() => {
+                      const isFullBoatOnly = !(trip.price_per_person > 0) && (trip.full_boat_price > 0 || trip.allow_full_boat);
+                      const basePrice = isFullBoatOnly ? trip.full_boat_price : trip.price_per_person;
+                      const label = isFullBoatOnly ? '/barco' : '/persona';
+                      
+                      if (trip.metadata?.discount_percentage > 0) {
+                        return (
+                          <>
+                            <span style={{ textDecoration: 'line-through', color: 'var(--text-tertiary)', fontSize: '0.85rem', marginRight: '4px' }}>
+                              {formatPrice(basePrice, trip.currency)}
+                            </span>
+                            {formatPrice(Math.round(basePrice * (1 - trip.metadata.discount_percentage / 100)), trip.currency)}
+                            <span>{label}</span>
+                          </>
+                        );
+                      }
+                      return (
+                        <>
+                          {formatPrice(basePrice, trip.currency)}
+                          <span>{label}</span>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </Link>

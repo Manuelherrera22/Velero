@@ -459,23 +459,31 @@ const Step10Finalize = () => {
             </p>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ backgroundColor: 'rgba(0,180,180,0.1)', padding: '16px', borderRadius: '12px' }}>
-                <p style={{ fontSize: '12px', color: 'var(--color-accent-400)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Precio por persona</p>
-                {formData.discount_percentage > 0 ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <p style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                      $ {(formData.price_per_person * (1 - formData.discount_percentage / 100)).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <p style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                      $ {Number(formData.price_per_person || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
+              {(() => {
+                const isFullBoatOnly = formData.allow_individual_booking === false || !(formData.price_per_person > 0);
+                const priceToUse = isFullBoatOnly ? (formData.full_boat_price || 0) : (formData.price_per_person || 0);
+                const priceLabel = isFullBoatOnly ? 'Precio por barco' : 'Precio por persona';
+
+                return (
+                  <div style={{ backgroundColor: 'rgba(0,180,180,0.1)', padding: '16px', borderRadius: '12px' }}>
+                    <p style={{ fontSize: '12px', color: 'var(--color-accent-400)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>{priceLabel}</p>
+                    {formData.discount_percentage > 0 ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <p style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                          $ {(priceToUse * (1 - formData.discount_percentage / 100)).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <p style={{ fontSize: '16px', fontWeight: '500', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                          $ {Number(priceToUse).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                        $ {Number(priceToUse).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    )}
                   </div>
-                ) : (
-                  <p style={{ fontSize: '24px', fontWeight: 'bold' }}>
-                    $ {Number(formData.price_per_person || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                )}
-              </div>
+                );
+              })()}
               <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '12px' }}>
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px' }}>Capacidad</p>
                 <p style={{ fontSize: '24px', fontWeight: 'bold' }}>Hasta {formData.max_passengers || 6} pas.</p>
