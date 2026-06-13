@@ -213,7 +213,7 @@ const Step8Pricing = () => {
                 name="payment_mode"
                 style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary-500)' }}
                 checked={formData.requires_full_payment === true}
-                onChange={() => updateFormData({ requires_full_payment: true })}
+                onChange={() => updateFormData({ requires_full_payment: true, deposit_percentage: 100.0 })}
               />
               <span style={{ fontWeight: 600, userSelect: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 Pago Total Online
