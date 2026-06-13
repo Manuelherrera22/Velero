@@ -74,7 +74,7 @@ export default function Terms() {
           <section>
             <h2>7. Comisiones y tasas de servicio</h2>
             <p>Kailu cobra comisiones, gastos de gestión u otros cargos asociados a la utilización de la plataforma y a los servicios brindados.</p>
-            <p>Salvo que se indique lo contrario para determinadas actividades o modalidades específicas, la comisión general aplicable a las publicaciones realizadas en la plataforma es actualmente del 20% sobre el valor de la experiencia, más los impuestos correspondientes.</p>
+            <p>Salvo que se indique lo contrario para determinadas actividades o modalidades específicas, la comisión general aplicable a las publicaciones realizadas en la plataforma es actualmente del 20% sobre el valor de la experiencia, más los impuestos que resulten aplicables de la normativa vigente.</p>
             <p>Asimismo, Kailu cobra actualmente una tasa de servicio del 3% sobre el valor de la reserva a los participantes que contraten una experiencia a través de la plataforma.</p>
           </section>
 
@@ -116,6 +116,7 @@ export default function Terms() {
           <section>
             <h2>12. Responsabilidad</h2>
             <p>Cada Capitán, Anfitrión u Organizador será responsable por las actividades que publique y por el cumplimiento de las condiciones ofrecidas en cada experiencia.</p>
+            <p>Asimismo, el Capitán, Anfitrión u Organizador declara bajo su exclusiva responsabilidad contar con las habilitaciones, permisos, medidas de seguridad y coberturas de seguro que resulten aplicables para la realización de la actividad o experiencia publicada.</p>
             <p>Kailu realizará esfuerzos razonables para mantener el correcto funcionamiento y disponibilidad de la plataforma. Sin embargo, no puede garantizar la ausencia absoluta de interrupciones, errores técnicos o fallos operativos ocasionales derivados de servicios propios o de terceros.</p>
             <p>Salvo en aquellos casos en que Kailu participe directamente como organizador de una experiencia, la plataforma actúa principalmente como intermediaria entre usuarios y organizadores independientes.</p>
           </section>
