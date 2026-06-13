@@ -476,9 +476,14 @@ textarea.input-control {
    RESPONSIVE
    ============================== */
 @media (max-width: 768px) {
+  .wizard-layout {
+    flex-direction: column;
+  }
+
   .wizard-sidebar {
     position: static;
     width: 100%;
+    min-width: 0;
     padding: var(--space-4);
     display: flex;
     flex-direction: row;
