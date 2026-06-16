@@ -19,8 +19,12 @@ const Step4Photos = () => {
   const [uploadingUrls, setUploadingUrls] = useState(new Set()) // tracks blob URLs currently uploading
   const [failedUrls, setFailedUrls] = useState(new Set()) // tracks blob URLs that failed to upload
 
+  // Increment/decrement the global pending counter so TripWizard can block navigation
+  const incPending = () => useTripWizardStore.setState(s => ({ pendingUploads: s.pendingUploads + 1 }))
+  const decPending = () => useTripWizardStore.setState(s => ({ pendingUploads: Math.max(0, s.pendingUploads - 1) }))
+
   const compressAndUpload = async (blobUrl, category, attempt = 1) => {
-    const MAX_ATTEMPTS = 2
+    const MAX_ATTEMPTS = 3 // 3 retries for slow connections
     try {
       const user = useAuthStore.getState().user
       if (!user) {
@@ -30,8 +34,9 @@ const Step4Photos = () => {
 
       setUploadingUrls(prev => new Set([...prev, blobUrl]))
       setFailedUrls(prev => { const next = new Set(prev); next.delete(blobUrl); return next })
+      if (attempt === 1) incPending() // Only increment on first attempt
 
-      // Compress image with timeout
+      // Compress image — generous 30s timeout for slow devices
       const blob = await Promise.race([
         new Promise((resolve, reject) => {
           const img = new Image()
@@ -48,18 +53,18 @@ const Step4Photos = () => {
           img.onerror = () => reject('Image load failed')
           img.src = blobUrl
         }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout comprimiendo imagen')), 15000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout comprimiendo imagen')), 30000))
       ])
 
       const ext = 'jpg'
       const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
 
-      // Upload with timeout
+      // Upload — 120s timeout for very slow connections
       const uploadResult = await Promise.race([
         supabase.storage
           .from('trip-images')
           .upload(fileName, blob, { contentType: 'image/jpeg', upsert: true }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout subiendo imagen')), 60000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout subiendo imagen')), 120000))
       ])
 
       if (uploadResult.error) throw uploadResult.error
@@ -72,16 +77,18 @@ const Step4Photos = () => {
         replacePhoto(category, blobUrl, publicUrl)
       }
 
+      decPending()
       console.log(`[EagerUpload] ✅ ${category}: uploaded successfully`)
     } catch (err) {
       console.warn(`[EagerUpload] ⚠️ Attempt ${attempt} failed for ${category}:`, err)
       if (attempt < MAX_ATTEMPTS) {
-        // Auto-retry once
+        // Wait a bit before retrying (exponential backoff)
+        await new Promise(r => setTimeout(r, 1000 * attempt))
         return compressAndUpload(blobUrl, category, attempt + 1)
       }
-      // Mark as failed so user can see and retry manually
+      // All retries exhausted — mark as failed
+      decPending()
       setFailedUrls(prev => new Set([...prev, blobUrl]))
-      // Keep the blob URL - Step10 will handle it as fallback
     } finally {
       setUploadingUrls(prev => {
         const next = new Set(prev)

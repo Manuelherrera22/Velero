@@ -61,6 +61,18 @@ export const useTripWizardStore = create(
   totalSteps: 9,
   formData: { ...initialData },
   hasBookings: false,
+  pendingUploads: 0, // Track how many photos are currently uploading
+
+  // Check if any images are still blob URLs (not yet uploaded)
+  hasPendingPhotos: () => {
+    const m = get().formData.images_meta || {};
+    const isBlob = (u) => typeof u === 'string' && u.startsWith('blob:');
+    if (isBlob(m.portada)) return true;
+    for (const cat of ['camarote', 'actividad', 'comidas', 'paisaje']) {
+      if ((m[cat] || []).some(isBlob)) return true;
+    }
+    return get().pendingUploads > 0;
+  },
 
   // Navigation
   nextStep: () => set((state) => ({ 
@@ -176,7 +188,7 @@ export const useTripWizardStore = create(
   },
 
       // Reset entirely
-      resetWizard: () => set({ currentStep: 1, formData: { ...initialData }, hasBookings: false }),
+      resetWizard: () => set({ currentStep: 1, formData: { ...initialData }, hasBookings: false, pendingUploads: 0 }),
 
       // Init for Edit
       initForEdit: (tripData, datesData, hasBookings = false, addonsData = []) => {
@@ -279,6 +291,7 @@ export const useTripWizardStore = create(
         
         return {
           ...state,
+          pendingUploads: 0, // Always reset on reload — transient runtime value
           formData: {
             ...state.formData,
             images_meta: {

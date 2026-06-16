@@ -1,8 +1,9 @@
 import React from 'react'
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
-import { CheckCircle2, ChevronRight, Compass, Loader } from 'lucide-react'
+import { CheckCircle2, ChevronRight, Compass, Loader, Upload } from 'lucide-react'
 import { useTripWizardStore } from '../../../stores/useTripWizardStore'
 import useBoatStore from '../../../stores/boatStore'
+import useAuthStore from '../../../stores/authStore'
 import supabase from '../../../lib/supabase'
 
 // Form Steps
@@ -33,8 +34,10 @@ const STEPS_CONFIG = [
 const TripWizard = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { currentStep, totalSteps, nextStep, prevStep } = useTripWizardStore()
+  const { currentStep, totalSteps, nextStep, prevStep, pendingUploads } = useTripWizardStore()
+  const hasPendingPhotos = useTripWizardStore(s => s.hasPendingPhotos)
   const [errorMsg, setErrorMsg] = React.useState('')
+  const [draftSaveStatus, setDraftSaveStatus] = React.useState('') // '', 'saving', 'saved', 'error'
   
   const location = useLocation()
   const [searchParams] = useSearchParams()
@@ -43,6 +46,96 @@ const TripWizard = () => {
   const isEditing = id && id !== 'nueva'
   const isCopying = !!copyFromId
   const [isLoadingTrip, setIsLoadingTrip] = React.useState(isEditing || isCopying)
+
+  // Auto-save draft to Supabase when step changes (so progress is NEVER lost)
+  const saveDraftToServer = React.useCallback(async () => {
+    try {
+      const user = useAuthStore.getState().user
+      if (!user) return
+
+      const formData = useTripWizardStore.getState().formData
+      
+      // Only save if there's meaningful data (title or photos)
+      if (!formData.title && !formData.images_meta?.portada) return
+
+      setDraftSaveStatus('saving')
+
+      // Collect only real (non-blob) image URLs
+      const images = formData.images_meta || {}
+      const stripBlobs = (arr) => (arr || []).filter(u => typeof u === 'string' && !u.startsWith('blob:'))
+      const realImages = [
+        (typeof images.portada === 'string' && !images.portada.startsWith('blob:')) ? images.portada : null,
+        ...stripBlobs(images.camarote),
+        ...stripBlobs(images.actividad),
+        ...stripBlobs(images.comidas),
+        ...stripBlobs(images.paisaje)
+      ].filter(Boolean)
+
+      const cleanMetadata = {
+        role_in_activity: formData.role_in_activity || 'capitan',
+        duration_days: formData.duration_days || 1,
+        duration_nights: formData.duration_nights || 0,
+        exact_location: formData.exact_location || '',
+        location_reference: formData.location_reference || '',
+        coordinates: formData.coordinates || null,
+        custom_services: formData.custom_services || [],
+        allow_individual_booking: formData.allow_individual_booking,
+        images_meta: {
+          portada: realImages[0] || '',
+          camarote: stripBlobs(images.camarote),
+          actividad: stripBlobs(images.actividad),
+          comidas: stripBlobs(images.comidas),
+          paisaje: stripBlobs(images.paisaje)
+        }
+      }
+
+      const isValidUUID = (val) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val)
+      const cleanBoatId = (formData.boat_id && formData.boat_id !== 'NEW' && isValidUUID(String(formData.boat_id))) ? formData.boat_id : null
+
+      const draftData = {
+        captain_id: user.id,
+        boat_id: cleanBoatId,
+        title: formData.title || 'Borrador sin título',
+        description: formData.description || '',
+        location: formData.location || '',
+        capacity: formData.max_passengers || 6,
+        price_per_person: formData.price_per_person || 0,
+        full_boat_price: formData.full_boat_price || null,
+        allow_full_boat: formData.allow_full_boat || false,
+        min_passengers: formData.min_passengers || 1,
+        max_passengers: formData.max_passengers || 6,
+        pension_type: formData.pension_type || null,
+        included_services: formData.included_services || [],
+        excluded_services: formData.excluded_services || [],
+        allowed_payment_methods: formData.allowed_payment_methods || ['PayPal'],
+        requires_full_payment: formData.requires_full_payment !== false,
+        deposit_percentage: formData.deposit_percentage ?? 100.0,
+        navigation_zone_id: formData.navigation_zone_id || null,
+        itinerary: formData.itinerary || [],
+        status: 'draft',
+        images: realImages,
+        tags: formData.tags || [],
+        metadata: cleanMetadata
+      }
+
+      const existingId = formData.id
+      if (existingId) {
+        await supabase.from('trips').update(draftData).eq('id', existingId)
+      } else {
+        const { data } = await supabase.from('trips').insert(draftData).select('id').single()
+        if (data?.id) {
+          // Store the draft ID so future saves update instead of insert
+          useTripWizardStore.getState().updateFormData({ id: data.id })
+        }
+      }
+      setDraftSaveStatus('saved')
+      setTimeout(() => setDraftSaveStatus(''), 2000)
+    } catch (err) {
+      console.warn('[AutoSave] Draft save failed:', err)
+      setDraftSaveStatus('error')
+      setTimeout(() => setDraftSaveStatus(''), 3000)
+    }
+  }, [])
 
   React.useEffect(() => {
     if (isEditing || isCopying) {
@@ -115,7 +208,17 @@ const TripWizard = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [currentStep])
 
+  // Auto-save draft when changing steps (after step 2 to have meaningful data)
+  const prevStepRef = React.useRef(currentStep)
+  React.useEffect(() => {
+    if (prevStepRef.current !== currentStep && currentStep > 2) {
+      saveDraftToServer()
+    }
+    prevStepRef.current = currentStep
+  }, [currentStep, saveDraftToServer])
+
   const progressPercentage = (currentStep / totalSteps) * 100
+  const photosStillUploading = pendingUploads > 0 || (typeof hasPendingPhotos === 'function' && hasPendingPhotos())
 
   if (isLoadingTrip) {
     return (
@@ -181,6 +284,18 @@ const TripWizard = () => {
             </div>
           ))}
         </div>
+
+        {/* Auto-save status indicator */}
+        {draftSaveStatus && (
+          <div style={{ marginTop: 'var(--space-4)', fontSize: '12px', textAlign: 'center', padding: '6px 12px', borderRadius: '8px',
+            backgroundColor: draftSaveStatus === 'saved' ? 'rgba(34,197,94,0.1)' : draftSaveStatus === 'saving' ? 'rgba(0,180,180,0.1)' : 'rgba(239,68,68,0.1)',
+            color: draftSaveStatus === 'saved' ? '#22c55e' : draftSaveStatus === 'saving' ? 'var(--color-primary-500)' : '#ef4444'
+          }}>
+            {draftSaveStatus === 'saving' && '💾 Guardando borrador...'}
+            {draftSaveStatus === 'saved' && '✅ Borrador guardado'}
+            {draftSaveStatus === 'error' && '⚠️ No se pudo guardar borrador'}
+          </div>
+        )}
       </div>
 
       {/* RIGHT PANEL - FORM CONTENT */}
@@ -202,6 +317,14 @@ const TripWizard = () => {
             </div>
           )}
 
+          {/* Photo upload blocking banner */}
+          {currentStep === 4 && photosStillUploading && (
+            <div style={{ backgroundColor: 'rgba(0, 180, 180, 0.1)', border: '1px solid rgba(0, 180, 180, 0.3)', color: 'var(--color-primary-600)', padding: '12px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 500, textAlign: 'center', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <Upload size={16} className="spin" />
+              Esperá a que terminen de subir las fotos antes de continuar... ({pendingUploads} pendiente{pendingUploads !== 1 ? 's' : ''})
+            </div>
+          )}
+
           <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
             <button
               onClick={() => {
@@ -218,6 +341,12 @@ const TripWizard = () => {
                 onClick={() => {
                   setErrorMsg('')
                   
+                  // Block navigation if photos are still uploading
+                  if (currentStep === 4 && photosStillUploading) {
+                    setErrorMsg('Las fotos aún se están subiendo. Esperá a que terminen antes de continuar.')
+                    return
+                  }
+
                   if (currentStep === 4) {
                     const currentCount = useTripWizardStore.getState().getTotalPhotos();
                     if (currentCount < 5) {
@@ -239,6 +368,8 @@ const TripWizard = () => {
                   nextStep()
                 }}
                 className="btn btn--accent"
+                disabled={currentStep === 4 && photosStillUploading}
+                style={currentStep === 4 && photosStillUploading ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
               >
                 Siguiente <ChevronRight size={16} style={{ marginLeft: '8px' }} />
               </button>
@@ -252,3 +383,4 @@ const TripWizard = () => {
 }
 
 export default TripWizard
+
