@@ -48,7 +48,10 @@ const TripWizard = () => {
   const [isLoadingTrip, setIsLoadingTrip] = React.useState(isEditing || isCopying)
 
   // Auto-save draft to Supabase when step changes (so progress is NEVER lost)
+  const isSavingRef = React.useRef(false) // Mutex to prevent concurrent saves
   const saveDraftToServer = React.useCallback(async () => {
+    if (isSavingRef.current) return // Skip if already saving
+    isSavingRef.current = true
     try {
       const user = useAuthStore.getState().user
       if (!user) return
@@ -118,9 +121,12 @@ const TripWizard = () => {
         metadata: cleanMetadata
       }
 
-      const existingId = formData.id
+      // Re-check formData.id right before insert (could have been set by concurrent save)
+      const existingId = useTripWizardStore.getState().formData.id
       if (existingId) {
-        await supabase.from('trips').update(draftData).eq('id', existingId)
+        // Don't change status when auto-saving an existing trip (could be published)
+        const { status, ...updateData } = draftData
+        await supabase.from('trips').update(updateData).eq('id', existingId)
       } else {
         const { data } = await supabase.from('trips').insert(draftData).select('id').single()
         if (data?.id) {
@@ -134,6 +140,8 @@ const TripWizard = () => {
       console.warn('[AutoSave] Draft save failed:', err)
       setDraftSaveStatus('error')
       setTimeout(() => setDraftSaveStatus(''), 3000)
+    } finally {
+      isSavingRef.current = false
     }
   }, [])
 
