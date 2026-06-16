@@ -80,6 +80,24 @@ export default function ManageUsers() {
     }
   }
 
+  const handleUpdateUserRole = async (userId, newRole) => {
+    const roleLabel = getRoleLabel(newRole);
+    if (!window.confirm(`¿Seguro que deseas cambiar el rol de este usuario a ${roleLabel}?`)) return;
+    
+    setActionLoading(userId);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: newRole })
+      .eq('id', userId);
+
+    if (!error) {
+      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    } else {
+      alert('Error al actualizar el rol: ' + error.message);
+    }
+    setActionLoading(null);
+  }
+
   const getRoleLabel = (role) => {
     switch(role) {
       case 'admin': return 'Admin'
@@ -162,13 +180,35 @@ export default function ManageUsers() {
                   </div>
                   
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <span className={`status-badge`} style={{ 
-                      background: user.role === 'admin' ? 'rgba(168, 85, 247, 0.1)' : user.role === 'publisher' ? 'rgba(59, 130, 246, 0.1)' : user.role === 'affiliate' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(255,255,255,0.05)',
-                      color: user.role === 'admin' ? '#a855f7' : user.role === 'publisher' ? '#3b82f6' : user.role === 'affiliate' ? '#f59e0b' : 'var(--text-secondary)'
-                    }}>
-                      {user.role === 'admin' ? <Shield size={12} style={{marginRight:'4px'}}/> : <User size={12} style={{marginRight:'4px'}}/>}
-                      {getRoleLabel(user.role)}
-                    </span>
+                    {user.role !== 'admin' ? (
+                      <select
+                        value={user.role}
+                        disabled={actionLoading === user.id}
+                        onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
+                        style={{
+                          background: 'rgba(0, 0, 0, 0.2)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: 'white',
+                          borderRadius: '6px',
+                          padding: '4px 8px',
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <option value="viewer" style={{ background: '#1e293b' }}>Pasajero</option>
+                        <option value="publisher" style={{ background: '#1e293b' }}>Capitán</option>
+                        <option value="affiliate" style={{ background: '#1e293b' }}>Aliado</option>
+                      </select>
+                    ) : (
+                      <span className={`status-badge`} style={{ 
+                        background: 'rgba(168, 85, 247, 0.1)',
+                        color: '#a855f7'
+                      }}>
+                        <Shield size={12} style={{marginRight:'4px'}}/>
+                        Admin
+                      </span>
+                    )}
 
                     {user.role === 'publisher' && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
