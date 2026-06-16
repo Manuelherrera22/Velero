@@ -167,18 +167,13 @@ const Step10Finalize = () => {
         const blobImages = allImages.filter(u => u.startsWith('blob:'))
         const regularImages = allImages.filter(u => !u.startsWith('blob:'))
 
-        if (blobImages.length > 0) {
-          setStatusMsg(`Subiendo ${blobImages.length} foto(s)...`)
+        // Upload blob images SEQUENTIALLY to avoid saturating slow connections
+        const uploadedBlobs = []
+        for (let i = 0; i < blobImages.length; i++) {
+          setStatusMsg(`Subiendo foto ${i + 1} de ${blobImages.length}...`)
+          const result = await uploadSingleImage(blobImages[i], activeUser.id)
+          if (result) uploadedBlobs.push(result)
         }
-
-        // Upload blob images concurrently
-        const uploadPromises = blobImages.map(async (img, i) => {
-          setStatusMsg(`Subiendo foto(s)...`)
-          const result = await uploadSingleImage(img, activeUser.id)
-          return result
-        })
-        const results = await Promise.all(uploadPromises)
-        const uploadedBlobs = results.filter(Boolean)
 
         uploadedUrls = [...uploadedBlobs, ...regularImages]
       }
@@ -189,20 +184,29 @@ const Step10Finalize = () => {
 
       setStatusMsg('Guardando travesía...')
 
-      // Clean metadata: remove blob URLs and store only real URLs to reduce payload size
-      const cleanMetadata = { ...formData }
-      // Replace images_meta blobs with uploaded URLs
-      cleanMetadata.images_meta = {
-        portada: typeof formData.images_meta.portada === 'string' && !formData.images_meta.portada.startsWith('blob:') ? formData.images_meta.portada : (uploadedUrls[0] || ''),
-        camarote: (formData.images_meta.camarote || []).filter(u => !u.startsWith('blob:')),
-        actividad: (formData.images_meta.actividad || []).filter(u => !u.startsWith('blob:')),
-        comidas: (formData.images_meta.comidas || []).filter(u => !u.startsWith('blob:')),
-        paisaje: (formData.images_meta.paisaje || []).filter(u => !u.startsWith('blob:'))
+      // Clean metadata: ONLY store fields that don't have their own DB column.
+      // Previously we stored the entire formData here, causing massive payloads
+      // and DB timeouts. Fields like custom_dates, addons, images_meta, etc. are
+      // already saved in their own tables (trip_dates, trip_addons, images column).
+      const cleanMetadata = {
+        role_in_activity: formData.role_in_activity || 'capitan',
+        duration_days: formData.duration_days || 1,
+        duration_nights: formData.duration_nights || 0,
+        exact_location: formData.exact_location || '',
+        location_reference: formData.location_reference || '',
+        coordinates: formData.coordinates || null,
+        custom_services: formData.custom_services || [],
+        allow_individual_booking: formData.allow_individual_booking,
+        images_meta: {
+          portada: uploadedUrls[0] || '',
+          camarote: (formData.images_meta.camarote || []).filter(u => !u.startsWith('blob:')),
+          actividad: (formData.images_meta.actividad || []).filter(u => !u.startsWith('blob:')),
+          comidas: (formData.images_meta.comidas || []).filter(u => !u.startsWith('blob:')),
+          paisaje: (formData.images_meta.paisaje || []).filter(u => !u.startsWith('blob:'))
+        }
       }
-      // Remove boat_id if invalid to prevent FK issues in metadata
-      if (!cleanBoatId) delete cleanMetadata.boat_id
 
-      // 1. Save trip (with 60s timeout for slow connections)
+      // 1. Save trip (with 120s timeout for slow connections)
       const tripData = {
         captain_id: activeUser.id,
         boat_id: cleanBoatId,
@@ -247,7 +251,7 @@ const Step10Finalize = () => {
 
       const { data: trip, error: tripError } = await Promise.race([
         tripInsertPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('La base de datos tardó demasiado. Verificá tu conexión a internet e intentá nuevamente.')), 60000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('La base de datos tardó demasiado. Verificá tu conexión a internet e intentá nuevamente.')), 120000))
       ])
 
       if (tripError) throw tripError
@@ -340,7 +344,7 @@ const Step10Finalize = () => {
 
       setStatusMsg('¡Publicada con éxito!')
       resetWizard()
-      navigate('/dashboard/travesias')
+      navigate(`/travesia/${trip.id}`)
     } catch (err) {
       console.error('Error al publicar travesía:', err)
       

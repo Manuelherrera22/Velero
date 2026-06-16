@@ -28,6 +28,23 @@ const useTripStore = create((set, get) => ({
         .eq('status', 'published')
         .order('created_at', { ascending: false })
 
+      // Apply zone filter (lookup zone ID by name, then filter by navigation_zone_id)
+      if (filters.zone) {
+        const { data: zoneData } = await supabase
+          .from('navigation_zones')
+          .select('id')
+          .ilike('name', `%${filters.zone}%`)
+          .limit(1)
+          .single()
+
+        if (zoneData?.id) {
+          query = query.eq('navigation_zone_id', zoneData.id)
+        } else {
+          // Fallback: search by location text if zone not found
+          query = query.ilike('location', `%${filters.zone}%`)
+        }
+      }
+
       // Apply filters
       if (filters.location) {
         query = query.ilike('location', `%${filters.location}%`)

@@ -8,6 +8,7 @@ export default function Search() {
   const { trips, tags, isLoadingTrips: loading, fetchTrips, fetchTags } = useTripStore()
   const [searchParams] = useSearchParams()
   const urlSearch = searchParams.get('search') || ''
+  const urlZone = searchParams.get('zone') || ''
 
   const [searchQuery, setSearchQuery] = useState(urlSearch)
   const [activeTag, setActiveTag] = useState('Todos')
@@ -15,13 +16,16 @@ export default function Search() {
   useEffect(() => {
     window.scrollTo(0, 0)
     fetchTags()
-    if (urlSearch) {
+    if (urlZone) {
+      setSearchQuery('')
+      fetchTrips({ zone: urlZone })
+    } else if (urlSearch) {
       setSearchQuery(urlSearch)
       fetchTrips({ search: urlSearch })
     } else {
       fetchTrips()
     }
-  }, [urlSearch])
+  }, [urlSearch, urlZone])
 
   const handleSearch = () => {
     const filters = {}
@@ -79,6 +83,15 @@ export default function Search() {
             Buscar
           </button>
         </div>
+
+        {urlZone && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginTop: 'var(--space-3)' }}>
+            <MapPin size={16} style={{ color: 'var(--color-accent-500)' }} />
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+              Filtrando por zona: <strong style={{ color: 'var(--color-accent-400)' }}>{urlZone}</strong>
+            </span>
+          </div>
+        )}
 
         <div className="search-tags">
           {allTags.map((tag) => (

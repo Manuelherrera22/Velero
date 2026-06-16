@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useTripWizardStore } from '../../../../stores/useTripWizardStore'
 import useAuthStore from '../../../../stores/authStore'
 import supabase from '../../../../lib/supabase'
-import { UploadCloud, Image as ImageIcon, X, Loader } from 'lucide-react'
+import { UploadCloud, Image as ImageIcon, X, Loader, AlertTriangle, RefreshCw } from 'lucide-react'
 
 const PHOTO_CATEGORIES = [
   { id: 'portada', label: 'Portada', description: 'La imagen principal de tu travesía.' },
@@ -17,8 +17,10 @@ const Step4Photos = () => {
   const fileInputRef = React.useRef(null)
   const [activeCategory, setActiveCategory] = useState(null)
   const [uploadingUrls, setUploadingUrls] = useState(new Set()) // tracks blob URLs currently uploading
+  const [failedUrls, setFailedUrls] = useState(new Set()) // tracks blob URLs that failed to upload
 
-  const compressAndUpload = async (blobUrl, category) => {
+  const compressAndUpload = async (blobUrl, category, attempt = 1) => {
+    const MAX_ATTEMPTS = 2
     try {
       const user = useAuthStore.getState().user
       if (!user) {
@@ -27,32 +29,40 @@ const Step4Photos = () => {
       }
 
       setUploadingUrls(prev => new Set([...prev, blobUrl]))
+      setFailedUrls(prev => { const next = new Set(prev); next.delete(blobUrl); return next })
 
-      // Compress image
-      const blob = await new Promise((resolve, reject) => {
-        const img = new Image()
-        img.onload = () => {
-          const MAX = 1200
-          let w = img.width, h = img.height
-          if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX } }
-          else { if (h > MAX) { w *= MAX / h; h = MAX } }
-          const canvas = document.createElement('canvas')
-          canvas.width = w; canvas.height = h
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h)
-          canvas.toBlob(b => b ? resolve(b) : reject('toBlob failed'), 'image/jpeg', 0.8)
-        }
-        img.onerror = () => reject('Image load failed')
-        img.src = blobUrl
-      })
+      // Compress image with timeout
+      const blob = await Promise.race([
+        new Promise((resolve, reject) => {
+          const img = new Image()
+          img.onload = () => {
+            const MAX = 1200
+            let w = img.width, h = img.height
+            if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX } }
+            else { if (h > MAX) { w *= MAX / h; h = MAX } }
+            const canvas = document.createElement('canvas')
+            canvas.width = w; canvas.height = h
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+            canvas.toBlob(b => b ? resolve(b) : reject('toBlob failed'), 'image/jpeg', 0.8)
+          }
+          img.onerror = () => reject('Image load failed')
+          img.src = blobUrl
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout comprimiendo imagen')), 15000))
+      ])
 
       const ext = 'jpg'
       const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
 
-      const { error: uploadError } = await supabase.storage
-        .from('trip-images')
-        .upload(fileName, blob, { contentType: 'image/jpeg', upsert: true })
+      // Upload with timeout
+      const uploadResult = await Promise.race([
+        supabase.storage
+          .from('trip-images')
+          .upload(fileName, blob, { contentType: 'image/jpeg', upsert: true }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout subiendo imagen')), 60000))
+      ])
 
-      if (uploadError) throw uploadError
+      if (uploadResult.error) throw uploadResult.error
 
       const { data } = supabase.storage.from('trip-images').getPublicUrl(fileName)
       const publicUrl = data.publicUrl
@@ -64,7 +74,13 @@ const Step4Photos = () => {
 
       console.log(`[EagerUpload] ✅ ${category}: uploaded successfully`)
     } catch (err) {
-      console.warn(`[EagerUpload] ⚠️ Failed for ${category}, will retry at save:`, err)
+      console.warn(`[EagerUpload] ⚠️ Attempt ${attempt} failed for ${category}:`, err)
+      if (attempt < MAX_ATTEMPTS) {
+        // Auto-retry once
+        return compressAndUpload(blobUrl, category, attempt + 1)
+      }
+      // Mark as failed so user can see and retry manually
+      setFailedUrls(prev => new Set([...prev, blobUrl]))
       // Keep the blob URL - Step10 will handle it as fallback
     } finally {
       setUploadingUrls(prev => {
@@ -137,6 +153,11 @@ const Step4Photos = () => {
           {uploadingUrls.size > 0 && (
             <p style={{ fontSize: '12px', color: 'var(--color-accent-500)', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
               <Loader size={12} className="spin" /> Subiendo {uploadingUrls.size}...
+            </p>
+          )}
+          {failedUrls.size > 0 && uploadingUrls.size === 0 && (
+            <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+              <AlertTriangle size={12} /> {failedUrls.size} foto(s) con error — usá el botón "Reintentar" en cada foto
             </p>
           )}
         </div>
@@ -223,6 +244,18 @@ const Step4Photos = () => {
                         {uploadingUrls.has(url) && (
                           <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Loader size={24} color="white" className="spin" />
+                          </div>
+                        )}
+                        {/* Failed upload indicator with retry */}
+                        {failedUrls.has(url) && !uploadingUrls.has(url) && (
+                          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(220, 38, 38, 0.6)', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                            <AlertTriangle size={20} color="white" />
+                            <button
+                              onClick={(e) => { e.stopPropagation(); compressAndUpload(url, category.id) }}
+                              style={{ background: 'white', color: '#dc2626', border: 'none', borderRadius: '9999px', padding: '4px 12px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                              <RefreshCw size={12} /> Reintentar
+                            </button>
                           </div>
                         )}
                         <button 

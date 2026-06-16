@@ -335,19 +335,19 @@ export default function Landing() {
                 name: 'Buenos Aires',
                 desc: 'Naturaleza, navegación y escapadas a pocos minutos de la ciudad;',
                 img: '/buenos_aires.jpeg',
-                link: '/explorar?search=Buenos Aires'
+                link: '/explorar?zone=Buenos Aires'
               },
               {
                 name: 'Bariloche',
                 desc: 'Lagos, montaña y naturaleza en estado puro;',
                 img: '/bariloche.jpeg',
-                link: '/explorar?search=Bariloche'
+                link: '/explorar?zone=Bariloche'
               },
               {
                 name: 'Uruguay',
                 desc: 'Navegaciones entre costas históricas, naturaleza y pueblos de encanto',
                 img: '/WhatsApp Image 2026-06-08 at 5.27.36 PM.jpeg',
-                link: '/explorar?search=Uruguay'
+                link: '/explorar?zone=Uruguay'
               }
             ].map((dest, i) => (
               <Link key={i} to={dest.link} className="destination-card glass" style={{
