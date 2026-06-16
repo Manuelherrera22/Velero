@@ -82,7 +82,7 @@ export default async (req) => {
     
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px;">
-      <img src="https://kailu.travel/logo-kailu.jpg" alt="Kailu" width="160" height="160" style="border-radius:16px;" />
+      <img src="https://wocubdteitbvvsprhuxm.supabase.co/storage/v1/object/public/Branding/logo-azul.png" alt="Kailu" width="160" style="display:block;margin:0 auto;" />
     </div>
 
     <!-- Main Card -->
