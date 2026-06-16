@@ -271,13 +271,26 @@ export const useTripWizardStore = create(
     }),
     {
       name: 'trip-wizard-draft',
-      partialize: (state) => ({
-        ...state,
-        formData: {
-          ...state.formData,
-          images_meta: { ...initialData.images_meta } // Don't persist blob URLs
-        }
-      })
+      partialize: (state) => {
+        // Persist real uploaded URLs, strip only blob: URLs that can't survive refresh
+        const images = state.formData.images_meta || {};
+        const stripBlobs = (arr) => (arr || []).filter(u => typeof u === 'string' && !u.startsWith('blob:'));
+        const portada = (typeof images.portada === 'string' && !images.portada.startsWith('blob:')) ? images.portada : '';
+        
+        return {
+          ...state,
+          formData: {
+            ...state.formData,
+            images_meta: {
+              portada,
+              camarote: stripBlobs(images.camarote),
+              actividad: stripBlobs(images.actividad),
+              comidas: stripBlobs(images.comidas),
+              paisaje: stripBlobs(images.paisaje)
+            }
+          }
+        };
+      }
     }
   )
 )

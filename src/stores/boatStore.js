@@ -52,18 +52,25 @@ const useBoatStore = create((set, get) => ({
     set({ loading: true, error: null })
     try {
       // Wait for user to be available (handles race condition on page load)
-      const user = await waitForSession(6000)
+      // Reduced from 6s to 3s — if auth isn't ready in 3s, show empty state
+      const user = await waitForSession(3000)
       if (!user) {
         console.warn('[BoatStore] No session after waiting — boats will be empty')
         set({ boats: [], loading: false, _initialized: true })
         return []
       }
 
-      const { data, error } = await supabase
+      // Add timeout to the actual DB query to prevent infinite loading
+      const queryPromise = supabase
         .from('boats')
         .select('*')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false })
+
+      const { data, error } = await Promise.race([
+        queryPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado cargando embarcaciones')), 10000))
+      ])
 
       if (error) throw error
       set({ boats: data || [], loading: false, _initialized: true })

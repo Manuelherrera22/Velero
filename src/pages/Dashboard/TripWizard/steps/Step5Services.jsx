@@ -182,7 +182,7 @@ const Step5Services = () => {
           </div>
         )}
 
-        {loading ? (
+        {loading && !error ? (
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
