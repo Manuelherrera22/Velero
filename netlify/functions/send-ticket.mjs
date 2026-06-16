@@ -42,10 +42,9 @@ export default async (req) => {
 <body style="margin:0;padding:0;background:#0A1628;font-family:'Helvetica Neue',Arial,sans-serif;color:#fff;">
   <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
     
-    <!-- Header -->
+    <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px;">
-      <h1 style="font-size:28px;margin:0;color:#26C6C6;font-weight:800;letter-spacing:-0.5px;">⛵ KAILU</h1>
-      <p style="font-size:14px;color:#94A3B8;margin-top:4px;">Experiencias náuticas en Argentina</p>
+      <img src="https://kailu.travel/logo-kailu.jpg" alt="Kailu" width="160" height="160" style="border-radius:16px;" />
     </div>
 
     <!-- Greeting Message -->
@@ -54,14 +53,14 @@ export default async (req) => {
       <p style="margin:0 0 12px 0;font-size:15px;color:#E2E8F0;">Tu reserva ya fue realizada.</p>
       <p style="margin:0 0 12px 0;font-size:15px;color:#E2E8F0;">Adjunto encontrarás toda la información necesaria para tu experiencia.</p>
       <p style="margin:0 0 12px 0;font-size:15px;color:#E2E8F0;">Ahora sí, solo queda esperar el momento.</p>
-      <p style="margin:0;font-size:15px;font-weight:600;color:#26C6C6;">Nos vemos pronto.</p>
+      <p style="margin:0;font-size:15px;font-weight:600;color:#0babc3;">Nos vemos pronto.</p>
     </div>
 
     <!-- Main Card -->
-    <div style="background:rgba(30,41,59,0.8);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;">
+    <div style="background:#0d1b2e;border:1px solid rgba(11,171,195,0.15);border-radius:16px;overflow:hidden;">
       
       <!-- Ticket Header -->
-      <div style="background:linear-gradient(135deg,#00B4B4,#008080);padding:24px;text-align:center;">
+      <div style="background:linear-gradient(135deg,#0babc3,#088497);padding:24px;text-align:center;">
         <p style="font-size:14px;margin:0;opacity:0.9;">✅ RESERVA CONFIRMADA</p>
         <h2 style="font-size:24px;margin:8px 0 0;font-weight:700;">${trip}</h2>
       </div>
@@ -94,13 +93,13 @@ export default async (req) => {
         <!-- Total -->
         <div style="background:rgba(0,180,180,0.1);border-radius:12px;padding:16px;text-align:center;">
           <p style="font-size:11px;color:#94A3B8;margin:0;">TOTAL PAGADO</p>
-          <p style="font-size:28px;font-weight:800;color:#26C6C6;margin:4px 0 0;">${formatPrice(total)}</p>
+          <p style="font-size:28px;font-weight:800;color:#0babc3;margin:4px 0 0;">${formatPrice(total)}</p>
         </div>
 
         <!-- Booking ID -->
         <div style="text-align:center;margin-top:20px;">
           <p style="font-size:11px;color:#94A3B8;margin:0;">ID DE RESERVA</p>
-          <p style="font-size:14px;font-weight:600;font-family:monospace;color:#26C6C6;margin:4px 0 0;">${bookingId}</p>
+          <p style="font-size:14px;font-weight:600;font-family:monospace;color:#0babc3;margin:4px 0 0;">${bookingId}</p>
         </div>
       </div>
     </div>
@@ -115,10 +114,9 @@ export default async (req) => {
 
     <!-- Footer -->
     <div style="text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);">
-      <p style="font-size:12px;color:#64748B;margin:0;">
-        © ${new Date().getFullYear()} Kailu — Experiencias náuticas en Argentina
-      </p>
-      <p style="font-size:11px;color:#475569;margin:4px 0 0;">
+      <p style="font-size:13px;color:#0babc3;margin:0;font-weight:600;">kailu.travel</p>
+      <p style="font-size:12px;color:#64748B;margin:6px 0 0;">Experiencias náuticas en Argentina</p>
+      <p style="font-size:11px;color:#475569;margin:8px 0 0;">
         Este email fue enviado a ${email} por tu reserva en kailu.travel
       </p>
     </div>

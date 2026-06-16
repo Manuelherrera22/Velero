@@ -80,14 +80,13 @@ export default async (req) => {
 <body style="margin:0;padding:0;background:#0A1628;font-family:'Helvetica Neue',Arial,sans-serif;color:#fff;">
   <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
     
-    <!-- Header -->
+    <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px;">
-      <h1 style="font-size:28px;margin:0;color:#26C6C6;font-weight:800;letter-spacing:-0.5px;">⛵ KAILU</h1>
-      <p style="font-size:14px;color:#94A3B8;margin-top:4px;">Experiencias náuticas en Argentina</p>
+      <img src="https://kailu.travel/logo-kailu.jpg" alt="Kailu" width="160" height="160" style="border-radius:16px;" />
     </div>
 
     <!-- Main Card -->
-    <div style="background:rgba(30,41,59,0.8);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;padding:32px;">
+    <div style="background:#0d1b2e;border:1px solid rgba(11,171,195,0.15);border-radius:16px;overflow:hidden;padding:32px;">
       <h2 style="font-size:24px;margin:0 0 20px 0;font-weight:700;color:#fff;">${greeting}</h2>
       
       <div style="margin-bottom:32px;line-height:1.6;">
@@ -97,7 +96,7 @@ export default async (req) => {
       <!-- CTA Button -->
       <div style="text-align:center;">
         <a href="${ctaLink}" 
-           style="display:inline-block;background:#26C6C6;color:#0A1628;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:700;font-size:16px;box-shadow:0 4px 12px rgba(38,198,198,0.2);">
+           style="display:inline-block;background:#0babc3;color:#ffffff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:700;font-size:16px;letter-spacing:0.3px;">
           ${buttonText}
         </a>
       </div>
@@ -105,10 +104,11 @@ export default async (req) => {
 
     <!-- Footer -->
     <div style="text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);">
-      <p style="font-size:12px;color:#64748B;margin:0;">
-        © ${new Date().getFullYear()} Kailu — Experiencias náuticas en Argentina
+      <p style="font-size:13px;color:#0babc3;margin:0;font-weight:600;">kailu.travel</p>
+      <p style="font-size:12px;color:#64748B;margin:6px 0 0;">
+        Experiencias náuticas en Argentina
       </p>
-      <p style="font-size:11px;color:#475569;margin:4px 0 0;">
+      <p style="font-size:11px;color:#475569;margin:8px 0 0;">
         Este email fue enviado a ${email} porque te registraste en kailu.travel
       </p>
     </div>
