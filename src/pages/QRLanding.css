@@ -52,6 +52,11 @@
   margin: 0 auto;
 }
 
+.qr-landing__accent {
+  color: var(--color-accent-400);
+  -webkit-text-fill-color: var(--color-accent-400);
+}
+
 @media (max-width: 640px) {
   .qr-landing__title {
     font-size: var(--text-2xl);

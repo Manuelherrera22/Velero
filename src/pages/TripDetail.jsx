@@ -183,9 +183,12 @@ export default function TripDetail() {
   if (!loading && (!trip || isWrongTrip)) {
     return (
       <div className="protected-loading">
-        <Loader size={32} style={{ opacity: 0 }} />
-        <p>No se pudo cargar la travesía. Por favor, refresca la página.</p>
-        <Link to="/explorar" className="btn btn--accent mt-4">Volver a Explorar</Link>
+        <Compass size={48} style={{ color: 'var(--color-accent-400)', marginBottom: '8px' }} />
+        <p>No se pudo cargar la travesía.</p>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+          <button className="btn btn--accent" onClick={() => fetchTrip(id)}>Reintentar</button>
+          <Link to="/explorar" className="btn btn--ghost">Volver a Explorar</Link>
+        </div>
       </div>
     )
   }

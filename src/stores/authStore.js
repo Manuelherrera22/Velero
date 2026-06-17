@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import supabase from '../lib/supabase'
+import { withRetry } from '../utils/retry'
 
 /**
  * Auth Store — Manages authentication state
@@ -29,7 +30,10 @@ const useAuthStore = create((set, get) => ({
       }, 5000)
 
       // Get current session
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const { data: { session }, error } = await withRetry(
+        () => supabase.auth.getSession().then(r => { if (r.error) throw r.error; return r }),
+        { label: 'getSession', maxRetries: 2 }
+      ).catch(err => ({ data: { session: null }, error: err }))
       
       if (error) {
         // If the refresh token is invalid/expired, quietly sign out to clean local storage
@@ -68,16 +72,15 @@ const useAuthStore = create((set, get) => ({
   // Fetch user profile from profiles table
   fetchProfile: async (userId) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Profile fetch error:', error)
-        return null
-      }
+      const data = await withRetry(async () => {
+        const { data: d, error: e } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single()
+        if (e && e.code !== 'PGRST116') throw e
+        return d
+      }, { label: 'fetchProfile', maxRetries: 2 })
 
       return data
     } catch (err) {

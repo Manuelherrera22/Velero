@@ -5,7 +5,7 @@ import useTripStore from '../stores/tripStore'
 import './Search.css'
 
 export default function Search() {
-  const { trips, tags, isLoadingTrips: loading, fetchTrips, fetchTags } = useTripStore()
+  const { trips, tags, isLoadingTrips: loading, error, fetchTrips, fetchTags } = useTripStore()
   const [searchParams] = useSearchParams()
   const urlSearch = searchParams.get('search') || ''
   const urlZone = searchParams.get('zone') || ''
@@ -110,11 +110,21 @@ export default function Search() {
             {loading ? 'Buscando...' : `${trips.length} travesía${trips.length !== 1 ? 's' : ''} encontrada${trips.length !== 1 ? 's' : ''}`}
           </p>
 
-          {!loading && trips.length === 0 && (
+          {!loading && error && (
+            <div className="dashboard__empty" style={{ marginTop: 'var(--space-8)' }}>
+              <div className="dashboard__empty-icon"><Compass size={48} /></div>
+              <h3>Error al cargar</h3>
+              <p>No se pudieron cargar las travesías. Intentá de nuevo.</p>
+              <button className="btn btn--accent" style={{ marginTop: '12px' }} onClick={() => fetchTrips()}>Reintentar</button>
+            </div>
+          )}
+
+          {!loading && !error && trips.length === 0 && (
             <div className="dashboard__empty" style={{ marginTop: 'var(--space-8)' }}>
               <div className="dashboard__empty-icon"><Compass size={48} /></div>
               <h3>No encontramos travesías</h3>
               <p>Prueba cambiando los filtros o el texto de búsqueda.</p>
+              <button className="btn btn--ghost btn--sm" style={{ marginTop: '8px' }} onClick={() => fetchTrips()}>Recargar</button>
             </div>
           )}
 

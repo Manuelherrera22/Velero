@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import supabase from '../lib/supabase'
+import { withRetry } from '../utils/retry'
 
 const useTripStore = create((set, get) => ({
   // State
@@ -65,9 +66,12 @@ const useTripStore = create((set, get) => ({
         query = query.limit(filters.limit)
       }
 
-      const { data, error } = await query.abortSignal(AbortSignal.timeout(15000))
+      const data = await withRetry(async () => {
+        const { data: d, error: e } = await query.abortSignal(AbortSignal.timeout(15000))
+        if (e) throw e
+        return d
+      }, { label: 'fetchTrips', maxRetries: 2 })
 
-      if (error) throw error
       set({ trips: data || [], isLoadingTrips: false })
       return data || []
     } catch (error) {
@@ -79,18 +83,21 @@ const useTripStore = create((set, get) => ({
   // ── Fetch featured trips for landing page ──
   fetchFeaturedTrips: async () => {
     try {
-      const { data, error } = await supabase
-        .from('trips')
-        .select(`
-          *,
-          captain:profiles!captain_id(id, full_name, avatar_url, is_verified),
-          boat:boats!boat_id(id, name, type, length_m)
-        `)
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(6)
+      const data = await withRetry(async () => {
+        const { data: d, error: e } = await supabase
+          .from('trips')
+          .select(`
+            *,
+            captain:profiles!captain_id(id, full_name, avatar_url, is_verified),
+            boat:boats!boat_id(id, name, type, length_m)
+          `)
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(6)
+        if (e) throw e
+        return d
+      }, { label: 'fetchFeaturedTrips', maxRetries: 2 })
 
-      if (error) throw error
       set({ featuredTrips: data || [] })
     } catch (error) {
       console.error('Error fetching featured trips:', error)
@@ -102,18 +109,20 @@ const useTripStore = create((set, get) => ({
     set({ isLoadingTrip: true, error: null })
     try {
       // Fetch trip
-      const { data: trip, error: tripError } = await supabase
-        .from('trips')
-        .select(`
-          *,
-          captain:profiles!captain_id(id, full_name, avatar_url, is_verified, bio, location),
-          boat:boats!boat_id(*)
-        `)
-        .eq('id', tripId)
-        .single()
-        .abortSignal(AbortSignal.timeout(15000))
-
-      if (tripError) throw tripError
+      const trip = await withRetry(async () => {
+        const { data: d, error: e } = await supabase
+          .from('trips')
+          .select(`
+            *,
+            captain:profiles!captain_id(id, full_name, avatar_url, is_verified, bio, location),
+            boat:boats!boat_id(*)
+          `)
+          .eq('id', tripId)
+          .single()
+          .abortSignal(AbortSignal.timeout(15000))
+        if (e) throw e
+        return d
+      }, { label: 'fetchTrip', maxRetries: 2 })
 
       // Fetch dates
       const { data: dates } = await supabase

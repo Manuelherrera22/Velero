@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { Compass, MapPin, Star, Users, Anchor, ArrowRight, Sailboat, Waves } from 'lucide-react'
 import supabase from '../lib/supabase'
+import { withRetry } from '../utils/retry'
 import './QRLanding.css'
 
 export default function QRLanding() {
@@ -21,12 +22,16 @@ export default function QRLanding() {
     setLoading(true)
     try {
       // Get QR code details
-      const { data: qr } = await supabase
-        .from('qr_codes')
-        .select('*, hotel:hotels!hotel_id(*)')
-        .eq('code', code)
-        .eq('is_active', true)
-        .single()
+      const qr = await withRetry(async () => {
+        const { data: d, error: e } = await supabase
+          .from('qr_codes')
+          .select('*, hotel:hotels!hotel_id(*)')
+          .eq('code', code)
+          .eq('is_active', true)
+          .single()
+        if (e) throw e
+        return d
+      }, { label: 'fetchQR', maxRetries: 2 }).catch(() => null)
 
       if (!qr) {
         setLoading(false)
@@ -50,7 +55,12 @@ export default function QRLanding() {
         query = query.overlaps('tags', qr.trip_filters)
       }
 
-      const { data: tripsData } = await query
+      const tripsData = await withRetry(async () => {
+        const { data: d, error: e } = await query
+        if (e) throw e
+        return d
+      }, { label: 'fetchQRTrips', maxRetries: 2 }).catch(() => [])
+
       setTrips(tripsData || [])
     } catch (err) {
       console.error('QR fetch error:', err)
@@ -109,7 +119,7 @@ export default function QRLanding() {
       <div className="container">
         <div className="qr-landing__intro">
           <h1 className="qr-landing__title">
-            Descubre experiencias náuticas <span className="hero__title--accent">exclusivas para vos</span>
+            Descubre experiencias náuticas <span className="qr-landing__accent">exclusivas para vos</span>
           </h1>
           <p className="qr-landing__subtitle">
             Travesías seleccionadas especialmente para huéspedes de {hotel?.name || 'nuestro aliado'}. Reserva fácil, sin registro.
@@ -121,7 +131,6 @@ export default function QRLanding() {
             <div className="dashboard__empty-icon"><Compass size={48} /></div>
             <h3>Proximamente</h3>
             <p>Pronto habrán travesías disponibles en esta zona.</p>
-            <Link to="/explorar" className="btn btn--accent">Ver todas las travesías</Link>
           </div>
         ) : (
           <div className="search-grid" style={{ marginTop: 'var(--space-8)' }}>
@@ -199,11 +208,7 @@ export default function QRLanding() {
           </div>
         )}
 
-        <div style={{ textAlign: 'center', padding: 'var(--space-10) 0' }}>
-          <Link to="/explorar" className="btn btn--ghost btn--lg">
-            Ver todas las travesías <ArrowRight size={18} />
-          </Link>
-        </div>
+
       </div>
     </div>
   )
