@@ -104,6 +104,11 @@ export default function Checkout() {
     if (!currentTrip || currentTrip.id !== id) {
       fetchTrip(id)
     }
+    // Safety timeout: never show loading more than 8s
+    const t = setTimeout(() => {
+      const s = useTripStore.getState()
+      if (s.isLoadingTrip) useTripStore.setState({ isLoadingTrip: false })
+    }, 8000)
     // Pre-fill if user is logged in (Google, magic link, etc)
     if (user) {
       setFormData(prev => ({
@@ -114,6 +119,7 @@ export default function Checkout() {
         phone: profile?.phone || user.phone || prev.phone,
       }))
     }
+    return () => clearTimeout(t)
   }, [id, user])
 
   const trip = currentTrip
@@ -617,10 +623,20 @@ export default function Checkout() {
                       <option value="+54">🇦🇷 +54</option>
                       <option value="+55">🇧🇷 +55</option>
                       <option value="+56">🇨🇱 +56</option>
+                      <option value="+57">🇨🇴 +57</option>
+                      <option value="+51">🇵🇪 +51</option>
+                      <option value="+591">🇧🇴 +591</option>
+                      <option value="+593">🇪🇨 +593</option>
+                      <option value="+58">🇻🇪 +58</option>
+                      <option value="+52">🇲🇽 +52</option>
                       <option value="+598">🇺🇾 +598</option>
                       <option value="+595">🇵🇾 +595</option>
                       <option value="+1">🇺🇸 +1</option>
                       <option value="+34">🇪🇸 +34</option>
+                      <option value="+39">🇮🇹 +39</option>
+                      <option value="+33">🇫🇷 +33</option>
+                      <option value="+49">🇩🇪 +49</option>
+                      <option value="+44">🇬🇧 +44</option>
                     </select>
                     <input
                       id="checkout-phone"

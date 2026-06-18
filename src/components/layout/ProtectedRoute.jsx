@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import useAuthStore from '../../stores/authStore'
 import { Loader } from 'lucide-react'
 
@@ -11,9 +12,22 @@ import { Loader } from 'lucide-react'
  */
 export default function ProtectedRoute({ children, requiredRole = 'viewer' }) {
   const { user, profile, loading } = useAuthStore()
+  const [timedOut, setTimedOut] = useState(false)
 
-  // Safety: if still loading after 5s, redirect to login
-  if (loading) {
+  // Safety: if still loading after 6s, force through
+  useEffect(() => {
+    if (!loading) return
+    const t = setTimeout(() => {
+      if (useAuthStore.getState().loading) {
+        console.warn('[ProtectedRoute] Safety timeout — forcing loaded state')
+        useAuthStore.setState({ loading: false })
+        setTimedOut(true)
+      }
+    }, 6000)
+    return () => clearTimeout(t)
+  }, [loading])
+
+  if (loading && !timedOut) {
     return (
       <div className="protected-loading">
         <Loader size={32} className="spin" />
