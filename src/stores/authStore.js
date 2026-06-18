@@ -60,13 +60,7 @@ const useAuthStore = create((set, get) => ({
           const profile = await get().fetchProfile(session.user.id)
           set({ user: session.user, session, profile, loading: false })
         } else if (event === 'SIGNED_OUT') {
-          // Debounce: verify it's a real sign-out, not a transient refresh failure
-          setTimeout(async () => {
-            const { data: { session: currentSession } } = await supabase.auth.getSession()
-            if (!currentSession) {
-              set({ user: null, session: null, profile: null, loading: false })
-            }
-          }, 1500)
+          set({ user: null, session: null, profile: null, loading: false })
         }
       })
     } catch (error) {
