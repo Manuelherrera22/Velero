@@ -197,7 +197,7 @@ const useTripStore = create((set, get) => ({
           `)
           .eq('captain_id', user.id)
           .order('created_at', { ascending: false })
-          .abortSignal(AbortSignal.timeout(12000))
+          .abortSignal(AbortSignal.timeout(6000))
 
         if (e) throw e
         return d

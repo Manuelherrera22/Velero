@@ -152,37 +152,35 @@ const TripWizard = () => {
           setIsLoadingTrip(true)
           const targetId = isEditing ? id : copyFromId
           
-          // Fetch trip
+          // Fetch trip (critical — must succeed)
           const { data: trip, error: tripError } = await supabase
             .from('trips')
             .select('*')
             .eq('id', targetId)
             .single()
+            .abortSignal(AbortSignal.timeout(6000))
             
           if (tripError) throw tripError
 
-          // Fetch dates
-          const { data: dates } = await supabase
-            .from('trip_dates')
-            .select('*')
-            .eq('trip_id', targetId)
+          // Fetch dates, addons, bookings count in PARALLEL (not sequential)
+          const [datesRes, addonsRes, bookingsRes] = await Promise.allSettled([
+            supabase.from('trip_dates').select('*').eq('trip_id', targetId)
+              .abortSignal(AbortSignal.timeout(5000)),
+            supabase.from('trip_addons').select('*').eq('trip_id', targetId).eq('is_active', true)
+              .abortSignal(AbortSignal.timeout(5000)),
+            isEditing
+              ? supabase.from('bookings').select('*', { count: 'exact', head: true })
+                  .eq('trip_id', targetId).in('status', ['pending', 'confirmed', 'completed'])
+                  .abortSignal(AbortSignal.timeout(5000))
+              : Promise.resolve({ count: 0 })
+          ])
 
-          // Fetch addons
-          const { data: addons } = await supabase
-            .from('trip_addons')
-            .select('*')
-            .eq('trip_id', targetId)
-            .eq('is_active', true)
-            
+          const dates = datesRes.status === 'fulfilled' ? datesRes.value.data : []
+          const addons = addonsRes.status === 'fulfilled' ? addonsRes.value.data : []
+          const bookingsCount = bookingsRes.status === 'fulfilled' ? (bookingsRes.value.count || 0) : 0
+
           if (isEditing) {
-            // Check for active bookings
-            const { count } = await supabase
-              .from('bookings')
-              .select('*', { count: 'exact', head: true })
-              .eq('trip_id', targetId)
-              .in('status', ['pending', 'confirmed', 'completed'])
-
-            useTripWizardStore.getState().initForEdit(trip, dates, count > 0, addons)
+            useTripWizardStore.getState().initForEdit(trip, dates, bookingsCount > 0, addons)
           } else {
             useTripWizardStore.getState().copyFromTrip(trip, dates, addons)
           }
@@ -198,6 +196,12 @@ const TripWizard = () => {
         }
       }
       loadTripForEdit()
+
+      // Safety timeout: NEVER show loading for more than 12 seconds
+      const safetyTimer = setTimeout(() => {
+        setIsLoadingTrip(false)
+      }, 12000)
+      return () => clearTimeout(safetyTimer)
     } else {
       // Check if there's a persisted draft from localStorage before resetting
       const persisted = useTripWizardStore.getState().formData

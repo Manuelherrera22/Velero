@@ -23,7 +23,7 @@ const useBoatStore = create((set, get) => ({
         .select('*')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false })
-        .abortSignal(AbortSignal.timeout(12000))
+        .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
       set({ boats: data || [], loading: false, _initialized: true })
