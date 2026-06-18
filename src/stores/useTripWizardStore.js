@@ -192,9 +192,35 @@ export const useTripWizardStore = create(
 
       // Init for Edit
       initForEdit: (tripData, datesData, hasBookings = false, addonsData = []) => {
-        const loadedData = tripData.metadata || { ...initialData };
-        loadedData.deposit_percentage = tripData.deposit_percentage ?? 100.0;
-        loadedData.navigation_zone_id = tripData.navigation_zone_id || '';
+        // Start with metadata (contains role_in_activity, duration, images_meta, etc.)
+        const metaData = tripData.metadata || {};
+        
+        // Map top-level DB fields to form fields (these are NOT in metadata)
+        const dbFields = {
+          id: tripData.id,
+          title: tripData.title || '',
+          description: tripData.description || '',
+          location: tripData.location || '',
+          price_per_person: tripData.price_per_person || 0,
+          full_boat_price: tripData.full_boat_price || null,
+          allow_full_boat: tripData.allow_full_boat || false,
+          min_passengers: tripData.min_passengers || 1,
+          max_passengers: tripData.max_passengers || tripData.capacity || 6,
+          capacity: tripData.capacity || tripData.max_passengers || 6,
+          pension_type: tripData.pension_type || '',
+          included_services: tripData.included_services || ['Seguro', 'Capitán', 'Salvavidas'],
+          excluded_services: tripData.excluded_services || [],
+          allowed_payment_methods: tripData.allowed_payment_methods || ['PayPal'],
+          requires_full_payment: tripData.requires_full_payment !== false,
+          deposit_percentage: tripData.deposit_percentage ?? 100.0,
+          navigation_zone_id: tripData.navigation_zone_id || '',
+          itinerary: tripData.itinerary || [],
+          tags: tripData.tags || [],
+          boat_id: tripData.boat_id || null,
+        };
+
+        // Merge: initialData defaults → metadata → DB fields (DB fields win)
+        const loadedData = { ...initialData, ...metaData, ...dbFields };
         
         if (datesData && datesData.length > 0) {
           const durationDays = loadedData.duration_days || 1;
@@ -242,15 +268,37 @@ export const useTripWizardStore = create(
 
         set({
           currentStep: 1,
-          formData: { ...initialData, ...loadedData, id: tripData.id },
+          formData: loadedData,
           hasBookings: hasBookings
         });
       },
 
       copyFromTrip: (tripData, datesData, addonsData = []) => {
-        const loadedData = tripData.metadata || { ...initialData };
-        loadedData.deposit_percentage = tripData.deposit_percentage ?? 100.0;
-        loadedData.navigation_zone_id = tripData.navigation_zone_id || '';
+        const metaData = tripData.metadata || {};
+        
+        const dbFields = {
+          title: tripData.title ? tripData.title + ' (Copia)' : '',
+          description: tripData.description || '',
+          location: tripData.location || '',
+          price_per_person: tripData.price_per_person || 0,
+          full_boat_price: tripData.full_boat_price || null,
+          allow_full_boat: tripData.allow_full_boat || false,
+          min_passengers: tripData.min_passengers || 1,
+          max_passengers: tripData.max_passengers || tripData.capacity || 6,
+          capacity: tripData.capacity || tripData.max_passengers || 6,
+          pension_type: tripData.pension_type || '',
+          included_services: tripData.included_services || ['Seguro', 'Capitán', 'Salvavidas'],
+          excluded_services: tripData.excluded_services || [],
+          allowed_payment_methods: tripData.allowed_payment_methods || ['PayPal'],
+          requires_full_payment: tripData.requires_full_payment !== false,
+          deposit_percentage: tripData.deposit_percentage ?? 100.0,
+          navigation_zone_id: tripData.navigation_zone_id || '',
+          itinerary: tripData.itinerary || [],
+          tags: tripData.tags || [],
+          boat_id: tripData.boat_id || null,
+        };
+
+        const loadedData = { ...initialData, ...metaData, ...dbFields, id: null };
         
         if (datesData && datesData.length > 0) {
           loadedData.custom_dates = datesData.map(d => ({
@@ -275,7 +323,7 @@ export const useTripWizardStore = create(
 
         set({
           currentStep: 1,
-          formData: { ...initialData, ...loadedData, id: null, title: loadedData.title ? loadedData.title + ' (Copia)' : '' },
+          formData: loadedData,
           hasBookings: false
         });
       }
