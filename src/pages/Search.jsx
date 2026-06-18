@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Search as SearchIcon, MapPin, Compass, Star, Clock, Anchor, Users } from 'lucide-react'
 import useTripStore from '../stores/tripStore'
+import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus'
 import './Search.css'
 
 export default function Search() {
@@ -26,6 +27,9 @@ export default function Search() {
       fetchTrips()
     }
   }, [urlSearch, urlZone])
+
+  const refetchSearch = useCallback(() => { fetchTrips(); fetchTags() }, [fetchTrips, fetchTags])
+  useRefetchOnFocus(refetchSearch)
 
   const handleSearch = () => {
     const filters = {}

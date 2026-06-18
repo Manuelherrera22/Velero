@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { 
   Anchor, Shield, CalendarCheck, Leaf, Star, 
@@ -6,6 +6,7 @@ import {
   Clock, ChevronRight, Sparkles, Quote
 } from 'lucide-react'
 import useTripStore from '../stores/tripStore'
+import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus'
 import './Landing.css'
 
 const HERO_IMAGES = [
@@ -195,6 +196,9 @@ export default function Landing() {
   useEffect(() => {
     fetchFeaturedTrips()
   }, [])
+
+  const refetchFeatured = useCallback(() => { fetchFeaturedTrips() }, [fetchFeaturedTrips])
+  useRefetchOnFocus(refetchFeatured)
 
   useEffect(() => {
     const timer = setInterval(() => {

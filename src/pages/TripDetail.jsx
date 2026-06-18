@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { MapPin, Clock, Users, Star, Anchor, ArrowLeft, CalendarDays, Plus, Minus, Shield, ChevronRight, ChevronLeft, Compass, Loader, MessageCircle, Image } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus'
 import useTripStore from '../stores/tripStore'
 import useAuthStore from '../stores/authStore'
 import './TripDetail.css'
@@ -167,6 +168,9 @@ export default function TripDetail() {
   useEffect(() => {
     fetchTrip(id)
   }, [id])
+
+  const refetchTrip = useCallback(() => { fetchTrip(id) }, [fetchTrip, id])
+  useRefetchOnFocus(refetchTrip)
 
   const isWrongTrip = trip && trip.id !== id;
 

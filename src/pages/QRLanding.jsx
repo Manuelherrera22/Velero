@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { Compass, MapPin, Star, Users, Anchor, ArrowRight, Sailboat, Waves } from 'lucide-react'
 import supabase from '../lib/supabase'
 import { withRetry } from '../utils/retry'
+import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus'
 import './QRLanding.css'
 
 export default function QRLanding() {
@@ -17,6 +18,9 @@ export default function QRLanding() {
   useEffect(() => {
     if (code) fetchQRData()
   }, [code])
+
+  const refetchQR = useCallback(() => { if (code) fetchQRData() }, [code])
+  useRefetchOnFocus(refetchQR)
 
   const fetchQRData = async () => {
     setLoading(true)

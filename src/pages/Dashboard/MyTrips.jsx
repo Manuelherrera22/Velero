@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Plus, MoreVertical, Compass, AlertCircle } from 'lucide-react'
 import useTripStore from '../../stores/tripStore'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 import './Dashboard.css'
 
 export default function MyTrips() {
@@ -18,6 +19,9 @@ export default function MyTrips() {
   useEffect(() => { 
     fetchMyTrips() 
   }, [])
+
+  const refetch = useCallback(() => { fetchMyTrips() }, [fetchMyTrips])
+  useRefetchOnFocus(refetch)
 
   // Close dropdown if clicking outside
   useEffect(() => {
