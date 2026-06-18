@@ -264,7 +264,7 @@ export default function Profile() {
               {editing ? (
                 <input className="input" value={formData.location} onChange={(e) => updateField('location', e.target.value)} placeholder="Buenos Aires, Argentina" />
               ) : (
-                <p>{profile?.location || '—'}</p>
+                <p>{profile?.location || profile?.business_location || '—'}</p>
               )}
             </div>
 
@@ -311,6 +311,8 @@ export default function Profile() {
                       onChange={async (e) => {
                         const zoneId = e.target.value || null
                         setSelectedZone(e.target.value)
+                        // Update profile
+                        await supabase.from('profiles').update({ navigation_zone_id: zoneId }).eq('id', profile.id)
                         if (myHotel) {
                           await supabase.from('hotels').update({ navigation_zone_id: zoneId }).eq('id', myHotel.id)
                         }
@@ -322,7 +324,7 @@ export default function Profile() {
                       ))}
                     </select>
                   ) : (
-                    <p>{zones.find(z => z.id === selectedZone)?.name || '—'}</p>
+                    <p>{zones.find(z => z.id === (selectedZone || profile?.navigation_zone_id))?.name || '—'}</p>
                   )}
                 </div>
               </>

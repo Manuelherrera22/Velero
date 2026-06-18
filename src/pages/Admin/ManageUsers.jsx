@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Users, CheckCircle, XCircle, Loader, Shield, User } from 'lucide-react'
 import supabase from '../../lib/supabase'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([])
@@ -11,6 +12,9 @@ export default function ManageUsers() {
   useEffect(() => { fetchUsers()
     const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
   }, [filter])
+
+  const refetch = useCallback(() => { fetchUsers() }, [filter])
+  useRefetchOnFocus(refetch)
 
   const fetchUsers = async () => {
     setLoading(true)

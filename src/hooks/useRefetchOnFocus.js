@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom'
  * @param {Function} callback - Function to call when tab becomes visible or route changes
  * @param {number} minInterval - Minimum ms between re-fetches (default 3s)
  */
-export function useRefetchOnFocus(callback, minInterval = 3000) {
+export function useRefetchOnFocus(callback, minInterval = 1000) {
   const lastFetch = useRef(0)
   const timerRef = useRef(null)
   const location = useLocation()
@@ -25,9 +25,10 @@ export function useRefetchOnFocus(callback, minInterval = 3000) {
         if (now - lastFetch.current > minInterval) {
           lastFetch.current = now
           if (timerRef.current) clearTimeout(timerRef.current)
+          // Fast refetch — 300ms is enough to let the tab settle
           timerRef.current = setTimeout(() => {
             callback()
-          }, 1500)
+          }, 300)
         }
       }
     }

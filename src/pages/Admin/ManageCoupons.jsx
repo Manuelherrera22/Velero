@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Tag, Plus, X, Save, Loader, Calendar, Percent, DollarSign } from 'lucide-react'
 import supabase from '../../lib/supabase'
 import useAuthStore from '../../stores/authStore'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 
 export default function ManageCoupons() {
   const [coupons, setCoupons] = useState([])
@@ -16,6 +17,9 @@ export default function ManageCoupons() {
   useEffect(() => { fetchCoupons()
     const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
   }, [])
+
+  const refetch = useCallback(() => { fetchCoupons() }, [])
+  useRefetchOnFocus(refetch)
 
   const fetchCoupons = async () => {
     setLoading(true)

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Eye, Check, X, MapPin, Users, AlertCircle, Loader } from 'lucide-react'
 import supabase from '../../lib/supabase'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 
 export default function ReviewTrips() {
   const [trips, setTrips] = useState([])
@@ -14,6 +15,9 @@ export default function ReviewTrips() {
   useEffect(() => { fetchTrips()
     const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
   }, [filter])
+
+  const refetch = useCallback(() => { fetchTrips() }, [filter])
+  useRefetchOnFocus(refetch)
 
   const fetchTrips = async () => {
     setLoading(true)

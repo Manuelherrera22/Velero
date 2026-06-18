@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { BarChart3, DollarSign, Users, Ship, CalendarCheck, TrendingUp, QrCode, MapPin, Download, ChevronDown, ChevronUp, Filter, X, AlertTriangle, Anchor, Plus } from 'lucide-react'
 import supabase from '../../lib/supabase'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 import './AdminMetrics.css'
 
 export default function AdminMetrics() {
@@ -53,6 +54,9 @@ export default function AdminMetrics() {
     const t = setTimeout(() => setLoading(false), 8000)
     return () => clearTimeout(t)
   }, [])
+
+  const refetchMetrics = useCallback(() => { fetchMetrics() }, [])
+  useRefetchOnFocus(refetchMetrics)
 
   const handleAddZone = async (e) => {
     e.preventDefault()

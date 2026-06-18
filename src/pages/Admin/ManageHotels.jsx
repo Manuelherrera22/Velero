@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Building2, Plus, X, Save, Loader, MapPin, QrCode, Percent, Copy, Check, DollarSign, Download } from 'lucide-react'
 import { QRCodeCanvas } from 'qrcode.react'
 import supabase from '../../lib/supabase'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 
 export default function ManageHotels() {
   const [hotels, setHotels] = useState([])
@@ -25,6 +26,9 @@ export default function ManageHotels() {
     fetchZones()
     const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
   }, [])
+
+  const refetchAll = useCallback(() => { fetchHotels(); fetchAffiliates() }, [])
+  useRefetchOnFocus(refetchAll)
 
   const fetchAffiliates = async () => {
     try {
