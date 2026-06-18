@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Navigate, Link, useSearchParams } from 'react-router-dom'
 import { Compass, CalendarDays, Users, MapPin, Download, Clock, CheckCircle, XCircle, Loader, AlertCircle, Ticket } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import useBookingStore from '../stores/bookingStore'
+import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus'
 import './MyTrips.css'
 
 const WhatsAppIcon = ({ size = 14 }) => (
@@ -61,6 +62,9 @@ export default function MyTrips() {
     const t = setTimeout(() => { useBookingStore.setState({ loading: false }) }, 8000)
     return () => clearTimeout(t)
   }, [user, paymentStatus, paymentId, externalReference])
+
+  const refetch = useCallback(() => { if (user) fetchMyBookings() }, [user, fetchMyBookings])
+  useRefetchOnFocus(refetch)
 
   if (!user) return <Navigate to="/login" replace />
 

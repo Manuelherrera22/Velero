@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { QrCode, Plus, Check, Copy, Loader, MapPin, Download, X } from 'lucide-react'
 import { QRCodeCanvas } from 'qrcode.react'
 import supabase from '../../lib/supabase'
 import useAuthStore from '../../stores/authStore'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 
 export default function AffiliateQRs() {
   const [hotels, setHotels] = useState([])
@@ -17,6 +18,9 @@ export default function AffiliateQRs() {
     const t = setTimeout(() => setLoading(false), 8000)
     return () => clearTimeout(t)
   }, [])
+
+  const refetch = useCallback(() => { fetchHotelsAndQRs() }, [])
+  useRefetchOnFocus(refetch)
 
   const fetchHotelsAndQRs = async () => {
     try {

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DollarSign, CheckCircle2, Calendar, MapPin } from 'lucide-react'
 import supabase from '../../lib/supabase'
 import useAuthStore from '../../stores/authStore'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 
 export default function AffiliateCommissions() {
   const [bookings, setBookings] = useState([])
@@ -12,6 +13,9 @@ export default function AffiliateCommissions() {
     const t = setTimeout(() => setLoading(false), 8000)
     return () => clearTimeout(t)
   }, [])
+
+  const refetch = useCallback(() => { fetchCommissions() }, [])
+  useRefetchOnFocus(refetch)
 
   const fetchCommissions = async () => {
     try {

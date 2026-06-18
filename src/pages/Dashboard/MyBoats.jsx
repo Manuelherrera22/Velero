@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, MoreVertical, Sailboat, AlertCircle, X } from 'lucide-react'
 import useBoatStore from '../../stores/boatStore'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 import './Dashboard.css'
 
 export default function MyBoats() {
@@ -17,6 +18,9 @@ export default function MyBoats() {
   useEffect(() => { 
     fetchMyBoats() 
   }, [])
+
+  const refetch = useCallback(() => { fetchMyBoats() }, [fetchMyBoats])
+  useRefetchOnFocus(refetch)
 
   useEffect(() => {
     const handleClickOutside = () => setActiveMenuId(null)

@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { CalendarCheck, MapPin, User, Phone, Ship, CheckCircle2 } from 'lucide-react'
 import useBookingStore from '../../stores/bookingStore'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 
 export default function Bookings() {
   const { bookings, loading, fetchCaptainBookings } = useBookingStore()
@@ -10,6 +11,9 @@ export default function Bookings() {
     const t = setTimeout(() => { useBookingStore.setState({ loading: false }) }, 8000)
     return () => clearTimeout(t)
   }, [])
+
+  const refetch = useCallback(() => { fetchCaptainBookings() }, [fetchCaptainBookings])
+  useRefetchOnFocus(refetch)
 
   const statusLabels = {
     pending: 'Pendiente',

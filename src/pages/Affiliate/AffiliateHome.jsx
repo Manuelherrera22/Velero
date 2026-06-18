@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { QrCode, DollarSign, Target, MousePointerClick, TrendingUp } from 'lucide-react'
 import supabase from '../../lib/supabase'
 import useAuthStore from '../../stores/authStore'
+import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 
 export default function AffiliateHome() {
   const [stats, setStats] = useState({
@@ -17,6 +18,9 @@ export default function AffiliateHome() {
     const t = setTimeout(() => setLoading(false), 8000)
     return () => clearTimeout(t)
   }, [])
+
+  const refetch = useCallback(() => { fetchMetrics() }, [])
+  useRefetchOnFocus(refetch)
 
   const fetchMetrics = async () => {
     try {
