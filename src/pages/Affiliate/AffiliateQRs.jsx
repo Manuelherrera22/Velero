@@ -21,14 +21,39 @@ export default function AffiliateQRs() {
   const fetchHotelsAndQRs = async () => {
     try {
       const user = useAuthStore.getState().user
+      const profile = useAuthStore.getState().profile
       if (!user) return
 
-      const { data } = await supabase
+      let { data } = await supabase
         .from('hotels')
         .select('*, qr_codes(*)')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false })
         .abortSignal(AbortSignal.timeout(6000))
+
+      // Auto-create hotel for affiliate if none exists
+      if ((!data || data.length === 0) && profile?.role === 'affiliate') {
+        const hotelName = profile.business_name || profile.full_name || 'Mi Negocio'
+        const hotelLocation = profile.business_location || profile.location || ''
+        
+        const { data: newHotel, error: createErr } = await supabase
+          .from('hotels')
+          .insert({
+            name: hotelName,
+            location: hotelLocation,
+            owner_id: user.id,
+            commission_percent: 10,
+            commission_type: 'percentage',
+          })
+          .select('*, qr_codes(*)')
+          .single()
+
+        if (!createErr && newHotel) {
+          data = [newHotel]
+        } else {
+          console.error('Error auto-creating hotel:', createErr)
+        }
+      }
 
       setHotels(data || [])
     } catch (err) {
