@@ -67,10 +67,10 @@ const useTripStore = create((set, get) => ({
       }
 
       const data = await withRetry(async () => {
-        const { data: d, error: e } = await query.abortSignal(AbortSignal.timeout(15000))
+        const { data: d, error: e } = await query.abortSignal(AbortSignal.timeout(5000))
         if (e) throw e
         return d
-      }, { label: 'fetchTrips', maxRetries: 2 })
+      }, { label: 'fetchTrips', maxRetries: 2, baseDelay: 500 })
 
       set({ trips: data || [], isLoadingTrips: false })
       return data || []
@@ -119,7 +119,7 @@ const useTripStore = create((set, get) => ({
           `)
           .eq('id', tripId)
           .single()
-          .abortSignal(AbortSignal.timeout(15000))
+          .abortSignal(AbortSignal.timeout(5000))
         if (e) throw e
         return d
       }, { label: 'fetchTrip', maxRetries: 2 })
@@ -132,7 +132,7 @@ const useTripStore = create((set, get) => ({
         .eq('is_active', true)
         .gte('date', new Date().toISOString().split('T')[0])
         .order('date', { ascending: true })
-        .abortSignal(AbortSignal.timeout(15000))
+        .abortSignal(AbortSignal.timeout(5000))
 
       // Fetch addons
       const { data: addons } = await supabase
@@ -140,7 +140,7 @@ const useTripStore = create((set, get) => ({
         .select('*')
         .eq('trip_id', tripId)
         .eq('is_active', true)
-        .abortSignal(AbortSignal.timeout(15000))
+        .abortSignal(AbortSignal.timeout(5000))
 
       // Fetch reviews
       const { data: reviews } = await supabase

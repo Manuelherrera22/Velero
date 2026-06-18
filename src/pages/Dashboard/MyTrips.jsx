@@ -23,6 +23,15 @@ export default function MyTrips() {
   const refetch = useCallback(() => { fetchMyTrips() }, [fetchMyTrips])
   useRefetchOnFocus(refetch)
 
+  // Safety: if loading hangs for 10s, auto-retry
+  useEffect(() => {
+    if (!loading) return
+    const timeout = setTimeout(() => {
+      if (useTripStore.getState().loading) fetchMyTrips()
+    }, 10000)
+    return () => clearTimeout(timeout)
+  }, [loading, fetchMyTrips])
+
   // Close dropdown if clicking outside
   useEffect(() => {
     const handleClickOutside = () => setActiveMenuId(null)

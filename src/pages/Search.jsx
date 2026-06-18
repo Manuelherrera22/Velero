@@ -31,6 +31,18 @@ export default function Search() {
   const refetchSearch = useCallback(() => { fetchTrips(); fetchTags() }, [fetchTrips, fetchTags])
   useRefetchOnFocus(refetchSearch)
 
+  // Safety timeout: if loading hangs for 10s, force a retry automatically
+  useEffect(() => {
+    if (!loading) return
+    const timeout = setTimeout(() => {
+      if (useTripStore.getState().isLoadingTrips) {
+        console.warn('[Search] Loading timeout reached, forcing retry...')
+        fetchTrips()
+      }
+    }, 10000)
+    return () => clearTimeout(timeout)
+  }, [loading, fetchTrips])
+
   const handleSearch = () => {
     const filters = {}
     if (searchQuery) filters.search = searchQuery
