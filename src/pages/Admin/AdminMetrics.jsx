@@ -48,7 +48,11 @@ export default function AdminMetrics() {
   const [newZoneName, setNewZoneName] = useState('')
   const [zoneActionLoading, setZoneActionLoading] = useState(false)
 
-  useEffect(() => { fetchMetrics() }, [])
+  useEffect(() => {
+    fetchMetrics()
+    const t = setTimeout(() => setLoading(false), 8000)
+    return () => clearTimeout(t)
+  }, [])
 
   const handleAddZone = async (e) => {
     e.preventDefault()
