@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Sailboat, Compass, Anchor, Building2, ArrowRight, Eye, EyeOff, Loader, Check } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import supabase from '../lib/supabase'
+import { MapPin as MapPinIcon } from 'lucide-react'
 import './Register.css'
 
 const ROLE_CONFIG = {
@@ -58,6 +59,18 @@ export default function Register() {
   const config = ROLE_CONFIG[role]
   const RoleIcon = config.icon
 
+  // Fetch navigation zones for affiliates
+  useEffect(() => {
+    if (role === 'affiliate') {
+      supabase
+        .from('navigation_zones')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name', { ascending: true })
+        .then(({ data }) => { if (data) setZones(data) })
+    }
+  }, [role])
+
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -66,6 +79,8 @@ export default function Register() {
   const [businessLocation, setBusinessLocation] = useState('')
   const [bankAlias, setBankAlias] = useState('')
   const [bankHolder, setBankHolder] = useState('')
+  const [navigationZoneId, setNavigationZoneId] = useState('')
+  const [zones, setZones] = useState([])
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -100,7 +115,8 @@ export default function Register() {
         business_name: role === 'affiliate' && businessName.trim() ? businessName.trim() : null,
         business_location: role === 'affiliate' && businessLocation.trim() ? businessLocation.trim() : null,
         bank_alias: role === 'affiliate' && bankAlias.trim() ? bankAlias.trim() : null,
-        bank_holder: role === 'affiliate' && bankHolder.trim() ? bankHolder.trim() : null
+        bank_holder: role === 'affiliate' && bankHolder.trim() ? bankHolder.trim() : null,
+        navigation_zone_id: role === 'affiliate' && navigationZoneId ? navigationZoneId : null
       }
       
       const result = await signUp(email, password, fullName.trim(), role, metadata)
@@ -172,6 +188,23 @@ export default function Register() {
                   value={businessLocation}
                   onChange={(e) => setBusinessLocation(e.target.value)}
                 />
+              </div>
+              <div className="input-group">
+                <label className="register-label"><MapPinIcon size={14} style={{ display: 'inline', verticalAlign: '-2px' }} /> Zona de navegación *</label>
+                <select
+                  className="input"
+                  value={navigationZoneId}
+                  onChange={(e) => setNavigationZoneId(e.target.value)}
+                  required
+                >
+                  <option value="">Seleccioná una zona</option>
+                  {zones.map(z => (
+                    <option key={z.id} value={z.id}>{z.name}</option>
+                  ))}
+                </select>
+                <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '4px' }}>
+                  Zona donde deseas ofrecer travesías a tus huéspedes/clientes.
+                </p>
               </div>
               <div className="input-group">
                 <label className="register-label">Alias o CBU *</label>

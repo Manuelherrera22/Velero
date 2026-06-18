@@ -51,6 +51,7 @@ export default function AffiliateQRs() {
             owner_id: user.id,
             commission_percent: 0,
             commission_type: 'pending',
+            navigation_zone_id: profile.navigation_zone_id || null,
           })
           .select('*, qr_codes(*)')
           .single()
