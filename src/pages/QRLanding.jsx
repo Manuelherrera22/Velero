@@ -29,7 +29,7 @@ export default function QRLanding() {
       const qr = await withRetry(async () => {
         const { data: d, error: e } = await supabase
           .from('qr_codes')
-          .select('*, hotel:hotels!hotel_id(*)')
+          .select('*, hotel:hotels!hotel_id(*, navigation_zone:navigation_zones!navigation_zone_id(name))')
           .eq('code', code)
           .eq('is_active', true)
           .single()
@@ -118,7 +118,7 @@ export default function QRLanding() {
               <div>
                 <p className="qr-hotel-header__label">Experiencias seleccionadas junto a</p>
                 <h2 className="qr-hotel-header__name">{hotel.name}</h2>
-                {qrData?.zone && <p className="qr-hotel-header__zone">Zona: {qrData.zone}</p>}
+                {(hotel.navigation_zone?.name || qrData?.zone) && <p className="qr-hotel-header__zone">Zona: {hotel.navigation_zone?.name || qrData.zone}</p>}
               </div>
             </div>
           </div>
