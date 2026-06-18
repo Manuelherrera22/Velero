@@ -29,7 +29,7 @@ export default function ManageHotels() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, email, business_name, business_location, bank_alias, bank_holder')
+        .select('id, full_name, email, business_name, business_location, bank_alias, bank_holder, navigation_zone_id')
         .eq('role', 'affiliate')
         .abortSignal(AbortSignal.timeout(6000))
       if (error) throw error
@@ -187,7 +187,7 @@ export default function ManageHotels() {
                         commission_percent: 10,
                         commission_type: 'percentage',
                         owner_id: aff.id,
-                        navigation_zone_id: ''
+                        navigation_zone_id: aff.navigation_zone_id || ''
                       })
                       setShowForm(true)
                     }}
