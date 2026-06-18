@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { QrCode, Plus, Check, Copy, Loader, MapPin, Download, X } from 'lucide-react'
 import { QRCodeCanvas } from 'qrcode.react'
 import supabase from '../../lib/supabase'
@@ -12,6 +12,8 @@ export default function AffiliateQRs() {
   const [generatingFor, setGeneratingFor] = useState(null)
   const [qrHotelId, setQrHotelId] = useState(null)
   const [qrZoneName, setQrZoneName] = useState('')
+
+  const creatingHotelRef = useRef(false)
 
   useEffect(() => {
     fetchHotelsAndQRs()
@@ -35,8 +37,9 @@ export default function AffiliateQRs() {
         .order('created_at', { ascending: false })
         .abortSignal(AbortSignal.timeout(6000))
 
-      // Auto-create hotel for affiliate if none exists
-      if ((!data || data.length === 0) && profile?.role === 'affiliate') {
+      // Auto-create hotel for affiliate if none exists (once only)
+      if ((!data || data.length === 0) && profile?.role === 'affiliate' && !creatingHotelRef.current) {
+        creatingHotelRef.current = true
         const hotelName = profile.business_name || profile.full_name || 'Mi Negocio'
         const hotelLocation = profile.business_location || profile.location || ''
         
@@ -46,8 +49,8 @@ export default function AffiliateQRs() {
             name: hotelName,
             location: hotelLocation,
             owner_id: user.id,
-            commission_percent: 10,
-            commission_type: 'percentage',
+            commission_percent: 0,
+            commission_type: 'pending',
           })
           .select('*, qr_codes(*)')
           .single()
@@ -145,8 +148,10 @@ export default function AffiliateQRs() {
                 </p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <span className="coupon-card__code" style={{ fontSize: '11px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.2)' }}>
-                  Comisión: {hotel.commission_type === 'percentage' ? '' : '$'}{hotel.commission_percent}{hotel.commission_type === 'percentage' ? '%' : ''}
+                <span className="coupon-card__code" style={{ fontSize: '11px', background: hotel.commission_type === 'pending' ? 'rgba(156, 163, 175, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: hotel.commission_type === 'pending' ? '#9ca3af' : '#f59e0b', borderColor: hotel.commission_type === 'pending' ? 'rgba(156, 163, 175, 0.2)' : 'rgba(245, 158, 11, 0.2)' }}>
+                  {hotel.commission_type === 'pending' 
+                    ? 'Comisión: Pendiente de asignación' 
+                    : `Comisión: ${hotel.commission_type === 'percentage' ? '' : '$'}${hotel.commission_percent}${hotel.commission_type === 'percentage' ? '%' : ''}`}
                 </span>
               </div>
             </div>
