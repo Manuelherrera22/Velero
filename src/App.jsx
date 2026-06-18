@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
-import supabase from './lib/supabase'
 import useAuthStore from './stores/authStore'
 import Landing from './pages/Landing'
 import Search from './pages/Search'
@@ -39,39 +38,6 @@ function App() {
     }
   }, [location.pathname, location.hash])
 
-  // Re-validate session when tab becomes visible (fixes stale data on tab switch)
-  useEffect(() => {
-    const handleVisibility = async () => {
-      if (document.visibilityState !== 'visible') return
-      try {
-        // Force Supabase to check and refresh the token
-        const { data: { session }, error } = await supabase.auth.getSession()
-        if (error) {
-          console.warn('Session refresh failed on visibility:', error.message)
-          // If token is completely invalid, re-initialize auth cleanly
-          if (error.message?.includes('Refresh Token') || error.status === 400) {
-            useAuthStore.setState({ user: null, session: null, profile: null, loading: false })
-          }
-          return
-        }
-        if (session?.user) {
-          // Always update the session in the store (token might have been refreshed)
-          const currentProfile = useAuthStore.getState().profile
-          if (!currentProfile || currentProfile.id !== session.user.id) {
-            const profile = await useAuthStore.getState().fetchProfile(session.user.id)
-            useAuthStore.setState({ user: session.user, session, profile, loading: false })
-          } else {
-            // Just update session/user (token refreshed) but keep existing profile
-            useAuthStore.setState({ user: session.user, session, loading: false })
-          }
-        }
-      } catch (err) {
-        console.warn('Visibility check failed:', err)
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
-  }, [])
 
   return (
     <div className="app">

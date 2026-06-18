@@ -5,14 +5,15 @@ import { useEffect, useRef } from 'react'
  * This ensures data is always fresh after the user switches tabs,
  * without requiring F5 or any manual action.
  * 
- * Adds a small delay (300ms) to let the auth session refresh complete
- * before re-fetching data.
+ * Uses a 1.5s delay to let Supabase's internal auth token refresh 
+ * complete before re-fetching data (avoids Web Lock conflicts).
  * 
  * @param {Function} callback - Function to call when tab becomes visible
- * @param {number} minInterval - Minimum ms between re-fetches (default 2s)
+ * @param {number} minInterval - Minimum ms between re-fetches (default 3s)
  */
-export function useRefetchOnFocus(callback, minInterval = 2000) {
+export function useRefetchOnFocus(callback, minInterval = 3000) {
   const lastFetch = useRef(0)
+  const timerRef = useRef(null)
 
   useEffect(() => {
     const handleVisibility = () => {
@@ -20,14 +21,20 @@ export function useRefetchOnFocus(callback, minInterval = 2000) {
         const now = Date.now()
         if (now - lastFetch.current > minInterval) {
           lastFetch.current = now
-          // Small delay to let auth session refresh first (App.jsx visibility handler)
-          setTimeout(() => {
+          // Clear any pending refetch
+          if (timerRef.current) clearTimeout(timerRef.current)
+          // Delay to let Supabase auth token refresh settle
+          // (avoids Web Lock API conflicts that cause AbortError)
+          timerRef.current = setTimeout(() => {
             callback()
-          }, 300)
+          }, 1500)
         }
       }
     }
     document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
   }, [callback, minInterval])
 }
