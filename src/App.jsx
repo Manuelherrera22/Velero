@@ -39,23 +39,34 @@ function App() {
     }
   }, [location.pathname, location.hash])
 
-  // Re-validate session when tab becomes visible (fixes F5 issue on tab switch)
+  // Re-validate session when tab becomes visible (fixes stale data on tab switch)
   useEffect(() => {
     const handleVisibility = async () => {
-      if (document.visibilityState === 'visible') {
-        try {
-          const { data: { session } } = await supabase.auth.getSession()
-          if (session?.user) {
-            const currentUser = useAuthStore.getState().user
-            // Only re-fetch if session exists but store might be stale
-            if (!currentUser || currentUser.id !== session.user.id) {
-              const profile = await useAuthStore.getState().fetchProfile(session.user.id)
-              useAuthStore.setState({ user: session.user, session, profile, loading: false })
-            }
+      if (document.visibilityState !== 'visible') return
+      try {
+        // Force Supabase to check and refresh the token
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          console.warn('Session refresh failed on visibility:', error.message)
+          // If token is completely invalid, re-initialize auth cleanly
+          if (error.message?.includes('Refresh Token') || error.status === 400) {
+            useAuthStore.setState({ user: null, session: null, profile: null, loading: false })
           }
-        } catch (err) {
-          console.warn('Visibility check failed:', err)
+          return
         }
+        if (session?.user) {
+          // Always update the session in the store (token might have been refreshed)
+          const currentProfile = useAuthStore.getState().profile
+          if (!currentProfile || currentProfile.id !== session.user.id) {
+            const profile = await useAuthStore.getState().fetchProfile(session.user.id)
+            useAuthStore.setState({ user: session.user, session, profile, loading: false })
+          } else {
+            // Just update session/user (token refreshed) but keep existing profile
+            useAuthStore.setState({ user: session.user, session, loading: false })
+          }
+        }
+      } catch (err) {
+        console.warn('Visibility check failed:', err)
       }
     }
     document.addEventListener('visibilitychange', handleVisibility)

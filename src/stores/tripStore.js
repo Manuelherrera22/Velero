@@ -192,11 +192,15 @@ const useTripStore = create((set, get) => ({
   fetchMyTrips: async () => {
     set({ loading: true, error: null })
     try {
-      const data = await withRetry(async () => {
-        const { data: { session } } = await supabase.auth.getSession()
-        const user = session?.user
-        if (!user) throw new Error('No autenticado')
+      // Use user from auth store instead of getSession() — avoids race with token refresh
+      const { default: useAuthStore } = await import('./authStore')
+      const user = useAuthStore.getState().user
+      if (!user) {
+        set({ loading: false })
+        return []
+      }
 
+      const data = await withRetry(async () => {
         const { data: d, error: e } = await supabase
           .from('trips')
           .select(`
@@ -205,10 +209,11 @@ const useTripStore = create((set, get) => ({
           `)
           .eq('captain_id', user.id)
           .order('created_at', { ascending: false })
+          .abortSignal(AbortSignal.timeout(5000))
 
         if (e) throw e
         return d
-      }, { label: 'fetchMyTrips', maxRetries: 3, baseDelay: 1000 })
+      }, { label: 'fetchMyTrips', maxRetries: 1, baseDelay: 500 })
 
       set({ trips: data || [], loading: false })
       return data || []

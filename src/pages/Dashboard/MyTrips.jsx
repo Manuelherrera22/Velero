@@ -23,14 +23,17 @@ export default function MyTrips() {
   const refetch = useCallback(() => { fetchMyTrips() }, [fetchMyTrips])
   useRefetchOnFocus(refetch)
 
-  // Safety: if loading hangs for 10s, auto-retry
+  // Safety: if loading hangs for 6s, force it to stop (prevents infinite loading)
   useEffect(() => {
     if (!loading) return
     const timeout = setTimeout(() => {
-      if (useTripStore.getState().loading) fetchMyTrips()
-    }, 4000)
+      if (useTripStore.getState().loading) {
+        console.warn('[MyTrips] Loading stuck, forcing stop')
+        useTripStore.setState({ loading: false })
+      }
+    }, 6000)
     return () => clearTimeout(timeout)
-  }, [loading, fetchMyTrips])
+  }, [loading])
 
   // Close dropdown if clicking outside
   useEffect(() => {

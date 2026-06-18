@@ -6,10 +6,10 @@ import { useEffect, useRef } from 'react'
  * without requiring F5 or any manual action.
  * 
  * @param {Function} callback - Function to call when tab becomes visible
- * @param {number} minInterval - Minimum ms between re-fetches (default 5s)
+ * @param {number} minInterval - Minimum ms between re-fetches (default 2s)
  */
-export function useRefetchOnFocus(callback, minInterval = 5000) {
-  const lastFetch = useRef(Date.now())
+export function useRefetchOnFocus(callback, minInterval = 2000) {
+  const lastFetch = useRef(0)
 
   useEffect(() => {
     const handleVisibility = () => {
