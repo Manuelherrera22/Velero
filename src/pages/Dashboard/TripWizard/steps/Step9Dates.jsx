@@ -439,8 +439,16 @@ const Step9Dates = () => {
           border-color: rgba(0, 180, 180, 0.4) !important;
           background-color: white !important;
         }
-        .date-row-hover:hover .date-remove-btn {
+        .date-remove-btn {
           opacity: 1 !important;
+        }
+        @media (min-width: 768px) {
+          .date-remove-btn {
+            opacity: 0 !important;
+          }
+          .date-row-hover:hover .date-remove-btn {
+            opacity: 1 !important;
+          }
         }
         .date-remove-btn:hover {
           color: var(--color-error-500) !important;
