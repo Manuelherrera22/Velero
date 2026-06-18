@@ -108,7 +108,7 @@ const useTripStore = create((set, get) => ({
   fetchTrip: async (tripId) => {
     set({ isLoadingTrip: true, error: null })
     try {
-      // Fetch trip
+      // Fetch trip (critical — must succeed)
       const trip = await withRetry(async () => {
         const { data: d, error: e } = await supabase
           .from('trips')
@@ -124,34 +124,22 @@ const useTripStore = create((set, get) => ({
         return d
       }, { label: 'fetchTrip', maxRetries: 2 })
 
-      // Fetch dates
-      const { data: dates } = await supabase
-        .from('trip_dates')
-        .select('*')
-        .eq('trip_id', tripId)
-        .eq('is_active', true)
-        .gte('date', new Date().toISOString().split('T')[0])
-        .order('date', { ascending: true })
-        .abortSignal(AbortSignal.timeout(12000))
+      // Fetch dates, addons, reviews in parallel — each with its own timeout
+      // If any fails, we still show the trip with partial data
+      const [datesResult, addonsResult, reviewsResult] = await Promise.allSettled([
+        supabase.from('trip_dates').select('*').eq('trip_id', tripId).eq('is_active', true)
+          .gte('date', new Date().toISOString().split('T')[0]).order('date', { ascending: true })
+          .abortSignal(AbortSignal.timeout(8000)),
+        supabase.from('trip_addons').select('*').eq('trip_id', tripId).eq('is_active', true)
+          .abortSignal(AbortSignal.timeout(8000)),
+        supabase.from('reviews').select(`*, user:profiles!user_id(full_name, avatar_url)`)
+          .eq('trip_id', tripId).eq('is_published', true).order('created_at', { ascending: false })
+          .abortSignal(AbortSignal.timeout(8000)),
+      ])
 
-      // Fetch addons
-      const { data: addons } = await supabase
-        .from('trip_addons')
-        .select('*')
-        .eq('trip_id', tripId)
-        .eq('is_active', true)
-        .abortSignal(AbortSignal.timeout(12000))
-
-      // Fetch reviews
-      const { data: reviews } = await supabase
-        .from('reviews')
-        .select(`
-          *,
-          user:profiles!user_id(full_name, avatar_url)
-        `)
-        .eq('trip_id', tripId)
-        .eq('is_published', true)
-        .order('created_at', { ascending: false })
+      const dates = datesResult.status === 'fulfilled' ? datesResult.value.data : []
+      const addons = addonsResult.status === 'fulfilled' ? addonsResult.value.data : []
+      const reviews = reviewsResult.status === 'fulfilled' ? reviewsResult.value.data : []
 
       // Calculate average rating
       const avgRating = reviews?.length

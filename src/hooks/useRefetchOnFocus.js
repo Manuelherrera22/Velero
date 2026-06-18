@@ -5,6 +5,9 @@ import { useEffect, useRef } from 'react'
  * This ensures data is always fresh after the user switches tabs,
  * without requiring F5 or any manual action.
  * 
+ * Adds a small delay (300ms) to let the auth session refresh complete
+ * before re-fetching data.
+ * 
  * @param {Function} callback - Function to call when tab becomes visible
  * @param {number} minInterval - Minimum ms between re-fetches (default 2s)
  */
@@ -15,10 +18,12 @@ export function useRefetchOnFocus(callback, minInterval = 2000) {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         const now = Date.now()
-        // Only re-fetch if enough time has passed (avoid rapid re-fetches)
         if (now - lastFetch.current > minInterval) {
           lastFetch.current = now
-          callback()
+          // Small delay to let auth session refresh first (App.jsx visibility handler)
+          setTimeout(() => {
+            callback()
+          }, 300)
         }
       }
     }
