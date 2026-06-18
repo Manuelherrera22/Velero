@@ -359,10 +359,12 @@
 @media (max-width: 768px) {
   .checkout-layout {
     grid-template-columns: 1fr;
+    gap: var(--space-4);
   }
 
   .checkout-summary {
     order: -1; /* Render summary before the form steps and payment button on mobile */
+    position: static;
   }
 
   .checkout-progress span:not(.checkout-progress__num) {
