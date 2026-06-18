@@ -100,12 +100,15 @@ const Step9Dates = () => {
   }
 
   const handleRemoveDate = (id) => {
-    const dateObj = formData.custom_dates.find(d => d.id === id);
-    const dateHasBookings = dateObj && dateObj.available_spots < (formData.max_passengers || 6);
-
-    if (dateHasBookings) {
-      alert("No puedes eliminar esta fecha porque ya tiene reservas. Si necesitas reprogramar o cancelarla por mal tiempo o fuerza mayor, comunícate con nosotros escribiendo a soporte@kailu.travel o por WhatsApp para coordinar con los pasajeros.");
-      return;
+    // Only block deletion if the wizard confirmed active bookings exist on THIS date
+    if (hasBookings) {
+      const dateObj = formData.custom_dates.find(d => d.id === id);
+      // Only block if spots were actually consumed (available < max)
+      const spotsConsumed = dateObj && dateObj.available_spots < (formData.max_passengers || 6);
+      if (spotsConsumed) {
+        alert("No puedes eliminar esta fecha porque ya tiene reservas activas. Contactá a soporte@kailu.travel para coordinar.");
+        return;
+      }
     }
     updateFormData({
       custom_dates: formData.custom_dates.filter(d => d.id !== id)

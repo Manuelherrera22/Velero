@@ -19,6 +19,21 @@ export default function Profile() {
     bank_holder: profile?.bank_holder || '',
   })
 
+  // Sync form when profile loads/changes (profile may load after component mounts)
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        full_name: profile.full_name || '',
+        phone: profile.phone || '',
+        location: profile.location || '',
+        business_name: profile.business_name || '',
+        business_location: profile.business_location || '',
+        bank_alias: profile.bank_alias || '',
+        bank_holder: profile.bank_holder || '',
+      })
+    }
+  }, [profile])
+
   // Navigation zones for affiliates
   const [zones, setZones] = useState([])
   const [myHotel, setMyHotel] = useState(null)
@@ -127,7 +142,10 @@ export default function Profile() {
 
     setPasswordSaving(true)
     try {
-      const { error } = await supabase.auth.updateUser({ password })
+      const { error } = await Promise.race([
+        supabase.auth.updateUser({ password }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout al actualizar contraseña. Intentá de nuevo.')), 6000))
+      ])
       if (error) throw error
       setPasswordSuccess(true)
       setPassword('')
