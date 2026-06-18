@@ -13,6 +13,7 @@ export default function ManageHotels() {
   const [zones, setZones] = useState([])
   const [qrHotelId, setQrHotelId] = useState(null)
   const [qrZoneName, setQrZoneName] = useState('')
+  const [editingHotelId, setEditingHotelId] = useState(null)
   const [form, setForm] = useState({
     name: '', location: '', contact_email: '', contact_phone: '', 
     commission_percent: 10, commission_type: 'percentage', owner_id: '', navigation_zone_id: ''
@@ -76,7 +77,8 @@ export default function ManageHotels() {
   const handleCreate = async () => {
     if (!form.name) return
     setSaving(true)
-    const { error } = await supabase.from('hotels').insert({
+    
+    const hotelData = {
       name: form.name,
       location: form.location,
       contact_email: form.contact_email || null,
@@ -85,15 +87,27 @@ export default function ManageHotels() {
       commission_type: form.commission_type || 'percentage',
       owner_id: form.owner_id || null,
       navigation_zone_id: form.navigation_zone_id || null,
-    })
+    }
+
+    let error
+    if (editingHotelId) {
+      // Update existing hotel (auto-created by affiliate)
+      const result = await supabase.from('hotels').update(hotelData).eq('id', editingHotelId)
+      error = result.error
+    } else {
+      // Create new hotel
+      const result = await supabase.from('hotels').insert(hotelData)
+      error = result.error
+    }
     
     if (error) {
-      console.error("Error inserting hotel:", error)
-      alert("Hubo un error al crear el aliado: " + error.message)
+      console.error("Error saving hotel:", error)
+      alert("Hubo un error al guardar el aliado: " + error.message)
     }
 
     setSaving(false)
     setShowForm(false)
+    setEditingHotelId(null)
     setForm({ name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10, commission_type: 'percentage', owner_id: '', navigation_zone_id: '' })
     fetchHotels()
     fetchAffiliates()
@@ -140,7 +154,11 @@ export default function ManageHotels() {
 
   const updateField = (f, v) => setForm(p => ({ ...p, [f]: v }))
 
-  const pendingAffiliates = affiliates.filter(aff => !hotels.some(h => h.owner_id === aff.id))
+  // Pending = no hotel at all, OR hotel with commission_type='pending' (auto-created)
+  const pendingAffiliates = affiliates.filter(aff => {
+    const existingHotel = hotels.find(h => h.owner_id === aff.id)
+    return !existingHotel || existingHotel.commission_type === 'pending'
+  })
 
   return (
     <div className="dash-page">
@@ -179,15 +197,17 @@ export default function ManageHotels() {
                   <button 
                     className="btn btn--accent btn--sm"
                     onClick={() => {
+                      const existingHotel = hotels.find(h => h.owner_id === aff.id)
+                      setEditingHotelId(existingHotel?.id || null)
                       setForm({
-                        name: aff.business_name || '',
-                        location: aff.business_location || '',
-                        contact_email: aff.email || '',
-                        contact_phone: '',
-                        commission_percent: 10,
-                        commission_type: 'percentage',
+                        name: existingHotel?.name || aff.business_name || '',
+                        location: existingHotel?.location || aff.business_location || '',
+                        contact_email: existingHotel?.contact_email || aff.email || '',
+                        contact_phone: existingHotel?.contact_phone || '',
+                        commission_percent: existingHotel?.commission_type !== 'pending' ? existingHotel?.commission_percent : 10,
+                        commission_type: existingHotel?.commission_type !== 'pending' ? existingHotel?.commission_type : 'percentage',
                         owner_id: aff.id,
-                        navigation_zone_id: aff.navigation_zone_id || ''
+                        navigation_zone_id: existingHotel?.navigation_zone_id || aff.navigation_zone_id || ''
                       })
                       setShowForm(true)
                     }}
@@ -279,7 +299,7 @@ export default function ManageHotels() {
           </div>
 
           <button className="btn btn--accent" onClick={handleCreate} disabled={saving} style={{ alignSelf: 'flex-end' }}>
-            {saving ? <Loader size={16} className="spin" /> : <><Save size={16} /> Crear Aliado</>}
+            {saving ? <Loader size={16} className="spin" /> : <><Save size={16} /> {editingHotelId ? 'Aprobar y Guardar' : 'Crear Aliado'}</>}
           </button>
         </div>
       )}
