@@ -39,7 +39,7 @@ export default function Search() {
         console.warn('[Search] Loading timeout reached, forcing retry...')
         fetchTrips()
       }
-    }, 10000)
+    }, 4000)
     return () => clearTimeout(timeout)
   }, [loading, fetchTrips])
 

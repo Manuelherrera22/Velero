@@ -28,7 +28,7 @@ export default function MyTrips() {
     if (!loading) return
     const timeout = setTimeout(() => {
       if (useTripStore.getState().loading) fetchMyTrips()
-    }, 10000)
+    }, 4000)
     return () => clearTimeout(timeout)
   }, [loading, fetchMyTrips])
 
