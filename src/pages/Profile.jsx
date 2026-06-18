@@ -132,8 +132,8 @@ export default function Profile() {
               <h1>{profile?.full_name || 'Sin nombre'}</h1>
               <p>{user.email || user.phone}</p>
               <div className="profile-header__badges">
-                <span className={`badge badge--${profile?.role === 'admin' ? 'error' : profile?.role === 'publisher' ? 'warning' : 'info'}`}>
-                  {profile?.role === 'admin' ? 'Admin' : profile?.role === 'publisher' ? 'Capitán' : 'Viajero'}
+                <span className={`badge badge--${profile?.role === 'admin' ? 'error' : profile?.role === 'publisher' ? 'warning' : profile?.role === 'affiliate' ? 'success' : 'info'}`}>
+                  {profile?.role === 'admin' ? 'Admin' : profile?.role === 'publisher' ? 'Capitán' : profile?.role === 'affiliate' ? 'Aliado' : 'Viajero'}
                 </span>
                 {profile?.is_verified && (
                   <span className="badge badge--success">

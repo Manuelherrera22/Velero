@@ -192,20 +192,24 @@ const useTripStore = create((set, get) => ({
   fetchMyTrips: async () => {
     set({ loading: true, error: null })
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const user = session?.user
-      if (!user) throw new Error('No autenticado')
+      const data = await withRetry(async () => {
+        const { data: { session } } = await supabase.auth.getSession()
+        const user = session?.user
+        if (!user) throw new Error('No autenticado')
 
-      const { data, error } = await supabase
-        .from('trips')
-        .select(`
-          *,
-          boat:boats!boat_id(id, name, type)
-        `)
-        .eq('captain_id', user.id)
-        .order('created_at', { ascending: false })
+        const { data: d, error: e } = await supabase
+          .from('trips')
+          .select(`
+            *,
+            boat:boats!boat_id(id, name, type)
+          `)
+          .eq('captain_id', user.id)
+          .order('created_at', { ascending: false })
 
-      if (error) throw error
+        if (e) throw e
+        return d
+      }, { label: 'fetchMyTrips', maxRetries: 3, baseDelay: 1000 })
+
       set({ trips: data || [], loading: false })
       return data || []
     } catch (error) {

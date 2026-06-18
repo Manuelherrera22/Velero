@@ -10,16 +10,18 @@ export default function ManageHotels() {
   const [saving, setSaving] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
   const [affiliates, setAffiliates] = useState([])
+  const [zones, setZones] = useState([])
   const [qrHotelId, setQrHotelId] = useState(null)
   const [qrZoneName, setQrZoneName] = useState('')
   const [form, setForm] = useState({
     name: '', location: '', contact_email: '', contact_phone: '', 
-    commission_percent: 10, commission_type: 'percentage', owner_id: ''
+    commission_percent: 10, commission_type: 'percentage', owner_id: '', navigation_zone_id: ''
   })
 
   useEffect(() => { 
     fetchHotels() 
     fetchAffiliates()
+    fetchZones()
   }, [])
 
   const fetchAffiliates = async () => {
@@ -32,6 +34,21 @@ export default function ManageHotels() {
       setAffiliates(data || [])
     } catch (err) {
       console.error("Error fetching affiliates:", err)
+    }
+  }
+
+  const fetchZones = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('navigation_zones')
+        .select('*')
+        .eq('is_active', true)
+        .order('name', { ascending: true })
+      if (!error && data) {
+        setZones(data)
+      }
+    } catch (err) {
+      console.error("Error fetching zones:", err)
     }
   }
 
@@ -63,6 +80,7 @@ export default function ManageHotels() {
       commission_percent: parseFloat(form.commission_percent) || 10,
       commission_type: form.commission_type || 'percentage',
       owner_id: form.owner_id || null,
+      navigation_zone_id: form.navigation_zone_id || null,
     })
     
     if (error) {
@@ -72,7 +90,7 @@ export default function ManageHotels() {
 
     setSaving(false)
     setShowForm(false)
-    setForm({ name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10, commission_type: 'percentage', owner_id: '' })
+    setForm({ name: '', location: '', contact_email: '', contact_phone: '', commission_percent: 10, commission_type: 'percentage', owner_id: '', navigation_zone_id: '' })
     fetchHotels()
     fetchAffiliates()
   }
@@ -164,7 +182,8 @@ export default function ManageHotels() {
                         contact_phone: '',
                         commission_percent: 10,
                         commission_type: 'percentage',
-                        owner_id: aff.id
+                        owner_id: aff.id,
+                        navigation_zone_id: ''
                       })
                       setShowForm(true)
                     }}
@@ -192,6 +211,18 @@ export default function ManageHotels() {
             <div className="input-group">
               <label>Ubicación</label>
               <input className="input" placeholder="Ej: Puerto Madero, CABA" value={form.location} onChange={(e) => updateField('location', e.target.value)} />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="input-group">
+              <label>Zona de navegación</label>
+              <select className="input" value={form.navigation_zone_id} onChange={(e) => updateField('navigation_zone_id', e.target.value)}>
+                <option value="">-- Sin zona asignada --</option>
+                {zones.map(z => (
+                  <option key={z.id} value={z.id}>{z.name}</option>
+                ))}
+              </select>
             </div>
           </div>
 

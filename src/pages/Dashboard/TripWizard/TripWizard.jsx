@@ -199,7 +199,14 @@ const TripWizard = () => {
       }
       loadTripForEdit()
     } else {
-      useTripWizardStore.getState().resetWizard()
+      // Check if there's a persisted draft from localStorage before resetting
+      const persisted = useTripWizardStore.getState().formData
+      if (persisted && (persisted.id || persisted.title)) {
+        // There's a draft in progress — don't reset, let the user continue
+        console.log('[Wizard] Restoring draft:', persisted.title || persisted.id)
+      } else {
+        useTripWizardStore.getState().resetWizard()
+      }
     }
 
     // Prefetch boats so they are ready by Step 5

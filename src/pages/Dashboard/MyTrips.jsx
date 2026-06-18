@@ -5,7 +5,7 @@ import useTripStore from '../../stores/tripStore'
 import './Dashboard.css'
 
 export default function MyTrips() {
-  const { trips, loading, fetchMyTrips, deleteTrip } = useTripStore()
+  const { trips, loading, error, fetchMyTrips, deleteTrip } = useTripStore()
   const navigate = useNavigate()
   
   // State for the Delete Modal
@@ -77,6 +77,15 @@ export default function MyTrips() {
           <div className="dash-pane__empty">
             <div className="dash-spinner"></div>
             <p style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Cargando flotas...</p>
+          </div>
+        )}
+
+        {/* Error state */}
+        {!loading && error && trips.length === 0 && (
+          <div className="dash-pane__empty">
+            <Compass size={48} style={{ color: 'rgba(11, 171, 195, 0.3)', marginBottom: '16px' }} />
+            <p style={{ fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '12px' }}>No se pudieron cargar las travesías</p>
+            <button className="btn btn--accent btn--sm" onClick={() => fetchMyTrips()}>Reintentar</button>
           </div>
         )}
 

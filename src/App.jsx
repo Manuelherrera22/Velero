@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import supabase from './lib/supabase'
 import useAuthStore from './stores/authStore'
 import Landing from './pages/Landing'
 import Search from './pages/Search'
@@ -37,6 +38,29 @@ function App() {
       window.scrollTo(0, 0)
     }
   }, [location.pathname, location.hash])
+
+  // Re-validate session when tab becomes visible (fixes F5 issue on tab switch)
+  useEffect(() => {
+    const handleVisibility = async () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.user) {
+            const currentUser = useAuthStore.getState().user
+            // Only re-fetch if session exists but store might be stale
+            if (!currentUser || currentUser.id !== session.user.id) {
+              const profile = await useAuthStore.getState().fetchProfile(session.user.id)
+              useAuthStore.setState({ user: session.user, session, profile, loading: false })
+            }
+          }
+        } catch (err) {
+          console.warn('Visibility check failed:', err)
+        }
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [])
 
   return (
     <div className="app">
