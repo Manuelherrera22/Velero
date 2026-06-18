@@ -52,7 +52,7 @@ export default function QRLanding() {
       let query = supabase
         .from('trips')
         .select(`*, captain:profiles!captain_id(full_name, is_verified)`)
-        .eq('status', 'published')
+        .in('status', ['published', 'unlisted'])
         .order('created_at', { ascending: false })
 
       // Filter by hotel's navigation zone (most important filter)

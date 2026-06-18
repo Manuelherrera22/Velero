@@ -87,7 +87,7 @@ export default async (req) => {
 
         <div style="border-bottom:1px dashed rgba(255,255,255,0.1);padding-bottom:20px;margin-bottom:20px;">
           <p style="font-size:11px;color:#94A3B8;margin:0;">PUNTO DE ENCUENTRO</p>
-          <p style="font-size:16px;font-weight:600;margin:4px 0 0;">${booking?.location || 'Se confirmará por email/WhatsApp'}</p>
+          <p style="font-size:16px;font-weight:600;margin:4px 0 0;">${trip?.location || booking?.location || 'Se confirmará por email/WhatsApp'}</p>
         </div>
 
         <!-- Total -->

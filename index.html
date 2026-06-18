@@ -34,23 +34,8 @@
           names.forEach(function(n) { caches.delete(n); });
         });
       }
-      // Auto-reload on new deploy: check every 60s if index.html changed
-      (function() {
-        var currentScripts = document.querySelectorAll('script[src]');
-        var currentHash = '';
-        currentScripts.forEach(function(s) { currentHash += s.src; });
-        setInterval(function() {
-          fetch('/?_v=' + Date.now(), { cache: 'no-store' })
-            .then(function(r) { return r.text(); })
-            .then(function(html) {
-              var match = html.match(/src="(\/assets\/index-[^"]+\.js)"/);
-              if (match && currentHash && currentHash.indexOf(match[1]) === -1) {
-                window.location.reload();
-              }
-            })
-            .catch(function() {});
-        }, 60000);
-      })();
+
+
     </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
