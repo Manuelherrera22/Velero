@@ -12,6 +12,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
+    // Bypass navigator.locks API — it causes 5000ms timeout when browser
+    // throttles background tabs (e.g., user has many tabs open).
+    // This is safe for single-tab apps. The server handles concurrent refreshes gracefully.
+    lock: async (name, acquireTimeout, fn) => await fn(),
   },
 })
 
