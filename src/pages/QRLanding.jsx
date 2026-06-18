@@ -55,6 +55,11 @@ export default function QRLanding() {
         .eq('status', 'published')
         .order('created_at', { ascending: false })
 
+      // Filter by hotel's navigation zone (most important filter)
+      if (qr.hotel?.navigation_zone_id) {
+        query = query.eq('navigation_zone_id', qr.hotel.navigation_zone_id)
+      }
+
       if (qr.trip_filters?.length > 0) {
         query = query.overlaps('tags', qr.trip_filters)
       }

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
-import { User, Mail, Phone, MapPin, Shield, LogOut, Edit3, Save, Loader, Lock, CheckCircle, Eye, EyeOff, Building2, CreditCard, Plus } from 'lucide-react'
+import { User, Mail, Phone, MapPin, Shield, LogOut, Edit3, Save, Loader, Lock, CheckCircle, Eye, EyeOff, Building2, CreditCard, Plus, Compass } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import supabase from '../lib/supabase'
 import './Profile.css'
@@ -18,6 +18,27 @@ export default function Profile() {
     bank_alias: profile?.bank_alias || '',
     bank_holder: profile?.bank_holder || '',
   })
+
+  // Navigation zones for affiliates
+  const [zones, setZones] = useState([])
+  const [myHotel, setMyHotel] = useState(null)
+  const [selectedZone, setSelectedZone] = useState('')
+
+  useEffect(() => {
+    if (profile?.role === 'affiliate') {
+      // Fetch navigation zones
+      supabase.from('navigation_zones').select('*').order('name').then(({ data }) => {
+        setZones(data || [])
+      })
+      // Fetch the aliado's hotel
+      supabase.from('hotels').select('*').eq('owner_id', profile.id).limit(1).single().then(({ data }) => {
+        if (data) {
+          setMyHotel(data)
+          setSelectedZone(data.navigation_zone_id || '')
+        }
+      })
+    }
+  }, [profile])
 
   const [searchParams] = useSearchParams()
   // Password state
@@ -261,6 +282,29 @@ export default function Profile() {
                     <input className="input" value={formData.bank_holder} onChange={(e) => updateField('bank_holder', e.target.value)} placeholder="Nombre del titular" />
                   ) : (
                     <p>{profile?.bank_holder || '—'}</p>
+                  )}
+                </div>
+                <div className="profile-field">
+                  <label><Compass size={14} /> Zona de navegación</label>
+                  {editing ? (
+                    <select
+                      className="input"
+                      value={selectedZone}
+                      onChange={async (e) => {
+                        const zoneId = e.target.value || null
+                        setSelectedZone(e.target.value)
+                        if (myHotel) {
+                          await supabase.from('hotels').update({ navigation_zone_id: zoneId }).eq('id', myHotel.id)
+                        }
+                      }}
+                    >
+                      <option value="">Seleccionar zona...</option>
+                      {zones.map(z => (
+                        <option key={z.id} value={z.id}>{z.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p>{zones.find(z => z.id === selectedZone)?.name || '—'}</p>
                   )}
                 </div>
               </>
