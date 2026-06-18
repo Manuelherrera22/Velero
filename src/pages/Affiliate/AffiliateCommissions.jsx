@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { DollarSign, CheckCircle2, Calendar, MapPin } from 'lucide-react'
 import supabase from '../../lib/supabase'
+import useAuthStore from '../../stores/authStore'
 
 export default function AffiliateCommissions() {
   const [bookings, setBookings] = useState([])
@@ -12,8 +13,7 @@ export default function AffiliateCommissions() {
 
   const fetchCommissions = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const user = session?.user
+      const user = useAuthStore.getState().user
       if (!user) return
 
       // Get user's hotel QRs

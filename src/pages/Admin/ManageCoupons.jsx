@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Tag, Plus, X, Save, Loader, Calendar, Percent, DollarSign } from 'lucide-react'
 import supabase from '../../lib/supabase'
+import useAuthStore from '../../stores/authStore'
 
 export default function ManageCoupons() {
   const [coupons, setCoupons] = useState([])
@@ -66,8 +67,7 @@ export default function ManageCoupons() {
       return
     }
 
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
+    const user = useAuthStore.getState().user
 
     // Append T12:00:00 to dates to prevent timezone rollback
     await supabase.from('coupons').insert({

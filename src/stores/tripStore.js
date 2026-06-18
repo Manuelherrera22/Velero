@@ -215,8 +215,8 @@ const useTripStore = create((set, get) => ({
   createTrip: async (tripData) => {
     set({ loading: true, error: null })
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const user = session?.user
+      const { default: useAuthStore } = await import('./authStore')
+      const user = useAuthStore.getState().user
       if (!user) throw new Error('No autenticado')
 
       const { data, error } = await supabase

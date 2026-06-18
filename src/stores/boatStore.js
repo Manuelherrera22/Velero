@@ -1,45 +1,6 @@
 import { create } from 'zustand'
 import supabase from '../lib/supabase'
-
-// Helper: wait until supabase has a session (or timeout)
-const waitForSession = async (maxWaitMs = 5000) => {
-  try {
-    // First try: instant check
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session?.user) return session.user
-
-    // If no session yet, wait for auth state change
-    return new Promise((resolve) => {
-      let isResolved = false
-
-      const timeout = setTimeout(() => {
-        if (!isResolved) {
-          isResolved = true
-          resolve(null)
-        }
-      }, maxWaitMs)
-
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (session?.user && !isResolved) {
-          isResolved = true
-          clearTimeout(timeout)
-          resolve(session.user)
-          // Defer unsubscribe to avoid undefined error if called synchronously
-          setTimeout(() => subscription?.unsubscribe(), 0)
-        }
-      })
-
-      // If it resolved synchronously, cleanup immediately
-      if (isResolved) {
-        clearTimeout(timeout)
-        subscription?.unsubscribe()
-      }
-    })
-  } catch (err) {
-    console.error("Error waiting for session:", err)
-    return null
-  }
-}
+import useAuthStore from './authStore'
 
 const useBoatStore = create((set, get) => ({
   boats: [],
@@ -47,30 +8,22 @@ const useBoatStore = create((set, get) => ({
   error: null,
   _initialized: false,
 
-  // Fetch boats for the current user — waits for auth if needed
+  // Fetch boats for the current user
   fetchMyBoats: async () => {
     set({ loading: true, error: null })
     try {
-      // Wait for user to be available (handles race condition on page load)
-      // Reduced from 6s to 3s — if auth isn't ready in 3s, show empty state
-      const user = await waitForSession(3000)
+      const user = useAuthStore.getState().user
       if (!user) {
-        console.warn('[BoatStore] No session after waiting — boats will be empty')
         set({ boats: [], loading: false, _initialized: true })
         return []
       }
 
-      // Add timeout to the actual DB query to prevent infinite loading
-      const queryPromise = supabase
+      const { data, error } = await supabase
         .from('boats')
         .select('*')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false })
-
-      const { data, error } = await Promise.race([
-        queryPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado cargando embarcaciones')), 10000))
-      ])
+        .abortSignal(AbortSignal.timeout(12000))
 
       if (error) throw error
       set({ boats: data || [], loading: false, _initialized: true })
@@ -86,8 +39,7 @@ const useBoatStore = create((set, get) => ({
   createBoat: async (boatData) => {
     set({ loading: true, error: null })
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const user = session?.user
+      const user = useAuthStore.getState().user
       if (!user) throw new Error('No autenticado')
 
       const { data, error } = await supabase

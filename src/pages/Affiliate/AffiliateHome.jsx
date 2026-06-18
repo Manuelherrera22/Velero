@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { QrCode, DollarSign, Target, MousePointerClick, TrendingUp } from 'lucide-react'
 import supabase from '../../lib/supabase'
+import useAuthStore from '../../stores/authStore'
 
 export default function AffiliateHome() {
   const [stats, setStats] = useState({
@@ -17,8 +18,7 @@ export default function AffiliateHome() {
 
   const fetchMetrics = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const user = session?.user
+      const user = useAuthStore.getState().user
       if (!user) throw new Error("No user")
 
       // Get user's hotel(s)

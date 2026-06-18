@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { QrCode, Plus, Check, Copy, Loader, MapPin, Download, X } from 'lucide-react'
 import { QRCodeCanvas } from 'qrcode.react'
 import supabase from '../../lib/supabase'
+import useAuthStore from '../../stores/authStore'
 
 export default function AffiliateQRs() {
   const [hotels, setHotels] = useState([])
@@ -17,8 +18,7 @@ export default function AffiliateQRs() {
 
   const fetchHotelsAndQRs = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const user = session?.user
+      const user = useAuthStore.getState().user
       if (!user) return
 
       const { data } = await supabase
