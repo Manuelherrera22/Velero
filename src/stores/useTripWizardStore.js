@@ -339,6 +339,7 @@ export const useTripWizardStore = create(
         
         return {
           ...state,
+          totalSteps: 9, // Always force correct value (old localStorage may have 8)
           pendingUploads: 0, // Always reset on reload — transient runtime value
           formData: {
             ...state.formData,
