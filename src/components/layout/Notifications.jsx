@@ -29,14 +29,27 @@ export default function Notifications() {
 
   const fetchNotifications = async () => {
     setLoading(true)
+    try {
+      // Global timeout: don't let notifications block the UI for more than 6s
+      await Promise.race([
+        _fetchNotificationsInner(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 6000))
+      ])
+    } catch {
+      // Timeout or error — just show no notifications
+    }
+    setLoading(false)
+  }
+
+  const _fetchNotificationsInner = async () => {
     const notifs = []
 
     if (profile?.role === 'admin') {
-      // Check pending trips
       const { count: pendingTrips } = await supabase
         .from('trips')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending')
+        .abortSignal(AbortSignal.timeout(5000))
 
       if (pendingTrips > 0) {
         notifs.push({
@@ -49,12 +62,12 @@ export default function Notifications() {
         })
       }
 
-      // Check unverified users
       const { count: unverifiedUsers } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
         .eq('role', 'publisher')
         .eq('is_verified', false)
+        .abortSignal(AbortSignal.timeout(5000))
 
       if (unverifiedUsers > 0) {
         notifs.push({
@@ -67,22 +80,21 @@ export default function Notifications() {
         })
       }
     } else if (profile?.role === 'publisher') {
-      // Check pending bookings for this captain
-      // We need to find trips owned by this captain, then bookings for those trips
       const { data: myTrips } = await supabase
         .from('trips')
         .select('id')
         .eq('captain_id', user.id)
+        .abortSignal(AbortSignal.timeout(5000))
 
       if (myTrips && myTrips.length > 0) {
         const tripIds = myTrips.map(t => t.id)
         
-        // Pending bookings
         const { count: pendingBookings } = await supabase
           .from('bookings')
           .select('*', { count: 'exact', head: true })
           .in('trip_id', tripIds)
           .eq('status', 'pending')
+          .abortSignal(AbortSignal.timeout(5000))
 
         if (pendingBookings > 0) {
           notifs.push({
@@ -95,12 +107,12 @@ export default function Notifications() {
           })
         }
 
-        // Confirmed / Completed bookings
         const { count: confirmedBookings } = await supabase
           .from('bookings')
           .select('*', { count: 'exact', head: true })
           .in('trip_id', tripIds)
           .in('status', ['confirmed', 'completed'])
+          .abortSignal(AbortSignal.timeout(5000))
 
         if (confirmedBookings > 0) {
           notifs.push({
@@ -116,7 +128,6 @@ export default function Notifications() {
     }
 
     setNotifications(notifs)
-    setLoading(false)
   }
 
   const unreadCount = notifications.length

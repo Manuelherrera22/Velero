@@ -9,6 +9,8 @@ export default function AffiliateCommissions() {
 
   useEffect(() => {
     fetchCommissions()
+    const t = setTimeout(() => setLoading(false), 8000)
+    return () => clearTimeout(t)
   }, [])
 
   const fetchCommissions = async () => {
@@ -21,6 +23,7 @@ export default function AffiliateCommissions() {
         .from('hotels')
         .select('id, qr_codes(code)')
         .eq('owner_id', user.id)
+        .abortSignal(AbortSignal.timeout(6000))
 
       const qrCodes = hotels?.flatMap(h => h.qr_codes.map(qr => qr.code)) || []
 
@@ -43,6 +46,7 @@ export default function AffiliateCommissions() {
         `)
         .in('qr_code', qrCodes)
         .order('created_at', { ascending: false })
+        .abortSignal(AbortSignal.timeout(6000))
 
       setBookings(bookingsData || [])
     } catch (err) {

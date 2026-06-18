@@ -11,7 +11,9 @@ export default function ReviewTrips() {
   const [rejectReason, setRejectReason] = useState('')
   const [actionLoading, setActionLoading] = useState(null)
 
-  useEffect(() => { fetchTrips() }, [filter])
+  useEffect(() => { fetchTrips()
+    const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
+  }, [filter])
 
   const fetchTrips = async () => {
     setLoading(true)
@@ -25,7 +27,7 @@ export default function ReviewTrips() {
         query = query.eq('status', filter)
       }
 
-      const { data, error } = await query
+      const { data, error } = await query.abortSignal(AbortSignal.timeout(6000))
       if (error) throw error
       setTrips(data || [])
     } catch (e) {

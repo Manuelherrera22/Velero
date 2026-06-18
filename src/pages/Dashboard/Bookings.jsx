@@ -5,7 +5,11 @@ import useBookingStore from '../../stores/bookingStore'
 export default function Bookings() {
   const { bookings, loading, fetchCaptainBookings } = useBookingStore()
 
-  useEffect(() => { fetchCaptainBookings() }, [])
+  useEffect(() => {
+    fetchCaptainBookings()
+    const t = setTimeout(() => { useBookingStore.setState({ loading: false }) }, 8000)
+    return () => clearTimeout(t)
+  }, [])
 
   const statusLabels = {
     pending: 'Pendiente',

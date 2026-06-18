@@ -14,6 +14,8 @@ export default function AffiliateQRs() {
 
   useEffect(() => {
     fetchHotelsAndQRs()
+    const t = setTimeout(() => setLoading(false), 8000)
+    return () => clearTimeout(t)
   }, [])
 
   const fetchHotelsAndQRs = async () => {
@@ -26,6 +28,7 @@ export default function AffiliateQRs() {
         .select('*, qr_codes(*)')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false })
+        .abortSignal(AbortSignal.timeout(6000))
 
       setHotels(data || [])
     } catch (err) {

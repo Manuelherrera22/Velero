@@ -23,6 +23,8 @@ export default function Review() {
 
   useEffect(() => {
     fetchBooking()
+    const t = setTimeout(() => setLoading(false), 8000)
+    return () => clearTimeout(t)
   }, [bookingId])
 
   const fetchBooking = async () => {
@@ -32,6 +34,7 @@ export default function Review() {
       .from('bookings')
       .select(`*, trip:trips!trip_id(id, title, location, captain_id)`)
       .eq('id', bookingId)
+      .abortSignal(AbortSignal.timeout(6000))
       .single()
 
     if (bookingData) {
@@ -43,6 +46,7 @@ export default function Review() {
         .from('reviews')
         .select('*')
         .eq('booking_id', bookingId)
+        .abortSignal(AbortSignal.timeout(6000))
         .single()
 
       if (review) {

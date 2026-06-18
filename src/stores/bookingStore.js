@@ -70,6 +70,7 @@ const useBookingStore = create((set, get) => ({
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
+        .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
       set({ bookings: data || [], loading: false })
@@ -92,6 +93,7 @@ const useBookingStore = create((set, get) => ({
         .from('trips')
         .select('id')
         .eq('captain_id', user.id)
+        .abortSignal(AbortSignal.timeout(6000))
 
       if (!trips?.length) {
         set({ bookings: [], loading: false })
@@ -110,6 +112,7 @@ const useBookingStore = create((set, get) => ({
         `)
         .in('trip_id', tripIds)
         .order('created_at', { ascending: false })
+        .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
       set({ bookings: data || [], loading: false })

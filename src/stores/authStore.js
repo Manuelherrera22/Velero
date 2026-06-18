@@ -78,6 +78,7 @@ const useAuthStore = create((set, get) => ({
           .select('*')
           .eq('id', userId)
           .single()
+          .abortSignal(AbortSignal.timeout(6000))
         if (e && e.code !== 'PGRST116') throw e
         return d
       }, { label: 'fetchProfile', maxRetries: 2 })

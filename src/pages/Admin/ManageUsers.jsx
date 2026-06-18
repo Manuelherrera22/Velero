@@ -8,7 +8,9 @@ export default function ManageUsers() {
   const [filter, setFilter] = useState('all') // all, publisher, affiliate, viewer
   const [actionLoading, setActionLoading] = useState(null)
 
-  useEffect(() => { fetchUsers() }, [filter])
+  useEffect(() => { fetchUsers()
+    const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
+  }, [filter])
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -22,7 +24,7 @@ export default function ManageUsers() {
         query = query.eq('role', filter)
       }
 
-      const { data, error } = await query
+      const { data, error } = await query.abortSignal(AbortSignal.timeout(6000))
       if (error) throw error
       setUsers(data || [])
     } catch (e) {

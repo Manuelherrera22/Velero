@@ -13,12 +13,14 @@ export default function ManageCoupons() {
     code: '', type: 'percentage', value: '', valid_from: '', valid_until: '', max_uses: 100,
   })
 
-  useEffect(() => { fetchCoupons() }, [])
+  useEffect(() => { fetchCoupons()
+    const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
+  }, [])
 
   const fetchCoupons = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase.from('coupons').select('*').order('created_at', { ascending: false })
+      const { data, error } = await supabase.from('coupons').select('*').order('created_at', { ascending: false }).abortSignal(AbortSignal.timeout(6000))
       if (error) throw error
       setCoupons(data || [])
     } catch (err) {
@@ -60,6 +62,7 @@ export default function ManageCoupons() {
       .select('id')
       .eq('code', codeUpper)
       .limit(1)
+      .abortSignal(AbortSignal.timeout(6000))
 
     if (existing && existing.length > 0) {
       alert("⚠️ Error: Ya existe un cupón con este código (incluso en históricos). Por favor usa otro nombre.")

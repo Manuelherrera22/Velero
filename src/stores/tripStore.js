@@ -94,6 +94,7 @@ const useTripStore = create((set, get) => ({
           .eq('status', 'published')
           .order('created_at', { ascending: false })
           .limit(6)
+          .abortSignal(AbortSignal.timeout(6000))
         if (e) throw e
         return d
       }, { label: 'fetchFeaturedTrips', maxRetries: 2 })
@@ -168,6 +169,7 @@ const useTripStore = create((set, get) => ({
         .from('tags')
         .select('*')
         .order('name')
+        .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
       set({ tags: data || [] })
