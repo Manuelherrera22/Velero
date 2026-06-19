@@ -46,10 +46,12 @@ export default function QRLanding() {
       setHotel(qr.hotel)
 
       // Increment scan count atomically
-      await supabase.rpc('increment_scan_count', { qr_id: qr.id }).catch(() => {
+      try {
+        await supabase.rpc('increment_scan_count', { qr_id: qr.id })
+      } catch {
         // Fallback: manual increment if RPC doesn't exist
         supabase.from('qr_codes').update({ scan_count: (qr.scan_count || 0) + 1 }).eq('id', qr.id)
-      })
+      }
 
       // Fetch trips matching the QR filters
       let query = supabase
