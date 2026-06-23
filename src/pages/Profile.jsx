@@ -70,6 +70,30 @@ export default function Profile() {
   const handleSave = async () => {
     setSaving(true)
     const result = await updateProfile(formData)
+    
+    // Si es afiliado, sincronizar nombre y ubicación del negocio con la tabla hotels
+    if (result.success && profile?.role === 'affiliate') {
+      try {
+        const updates = {}
+        if (formData.business_name) updates.name = formData.business_name
+        if (formData.business_location) updates.location = formData.business_location
+        
+        if (Object.keys(updates).length > 0) {
+          await supabase
+            .from('hotels')
+            .update(updates)
+            .eq('owner_id', user.id)
+          
+          // Actualizar el estado local del hotel
+          if (myHotel) {
+            setMyHotel({ ...myHotel, ...updates })
+          }
+        }
+      } catch (err) {
+        console.error('Error syncing hotel name:', err)
+      }
+    }
+
     setSaving(false)
     if (!result.success) {
       alert('Hubo un error al guardar: ' + result.error)
