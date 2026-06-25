@@ -99,9 +99,10 @@ const useTripStore = create((set, get) => ({
         return d
       }, { label: 'fetchFeaturedTrips', maxRetries: 2 })
 
-      set({ featuredTrips: data || [] })
+      set({ featuredTrips: data || [], error: null })
     } catch (error) {
       console.error('Error fetching featured trips:', error)
+      set({ error: error.message })
     }
   },
 

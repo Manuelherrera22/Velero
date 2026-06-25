@@ -197,11 +197,6 @@ const TripWizard = () => {
       }
       loadTripForEdit()
 
-      // Safety timeout: NEVER show loading for more than 12 seconds
-      const safetyTimer = setTimeout(() => {
-        setIsLoadingTrip(false)
-      }, 12000)
-      return () => clearTimeout(safetyTimer)
     } else {
       // Check if there's a persisted draft from localStorage before resetting
       const persisted = useTripWizardStore.getState().formData

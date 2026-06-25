@@ -23,40 +23,43 @@ export default function Review() {
 
   useEffect(() => {
     fetchBooking()
-    const t = setTimeout(() => setLoading(false), 8000)
-    return () => clearTimeout(t)
   }, [bookingId])
 
   const fetchBooking = async () => {
     setLoading(true)
-    
-    const { data: bookingData } = await supabase
-      .from('bookings')
-      .select(`*, trip:trips!trip_id(id, title, location, captain_id)`)
-      .eq('id', bookingId)
-      .abortSignal(AbortSignal.timeout(6000))
-      .single()
-
-    if (bookingData) {
-      setBooking(bookingData)
-      setTrip(bookingData.trip)
-
-      // Check if already reviewed
-      const { data: review } = await supabase
-        .from('reviews')
-        .select('*')
-        .eq('booking_id', bookingId)
+    try {
+      const { data: bookingData, error: bookingError } = await supabase
+        .from('bookings')
+        .select(`*, trip:trips!trip_id(id, title, location, captain_id)`)
+        .eq('id', bookingId)
         .abortSignal(AbortSignal.timeout(6000))
         .single()
 
-      if (review) {
-        setExistingReview(review)
-        setRating(review.rating)
-        setComment(review.comment || '')
-      }
-    }
+      if (bookingError) throw bookingError
 
-    setLoading(false)
+      if (bookingData) {
+        setBooking(bookingData)
+        setTrip(bookingData.trip)
+
+        // Check if already reviewed
+        const { data: review } = await supabase
+          .from('reviews')
+          .select('*')
+          .eq('booking_id', bookingId)
+          .abortSignal(AbortSignal.timeout(6000))
+          .single()
+
+        if (review) {
+          setExistingReview(review)
+          setRating(review.rating)
+          setComment(review.comment || '')
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching booking for review:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = async () => {

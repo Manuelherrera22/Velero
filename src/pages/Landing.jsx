@@ -187,7 +187,7 @@ const FAQS = {
 
 export default function Landing() {
   const revealRefs = useRef([])
-  const { featuredTrips, fetchFeaturedTrips } = useTripStore()
+  const { featuredTrips, error: tripsError, fetchFeaturedTrips } = useTripStore()
   const [openFaq, setOpenFaq] = useState(null)
   const [activeFaqCategory, setActiveFaqCategory] = useState('generales')
   const [currentBgIndex, setCurrentBgIndex] = useState(0)
@@ -210,7 +210,8 @@ export default function Landing() {
     return () => clearInterval(timer)
   }, [])
 
-  const displayTrips = featuredTrips.length > 0 ? featuredTrips : MOCK_TRIPS
+  // Only show mock trips on first launch (no real trips yet). If fetch failed, show empty.
+  const displayTrips = featuredTrips.length > 0 ? featuredTrips : (!tripsError ? MOCK_TRIPS : [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
