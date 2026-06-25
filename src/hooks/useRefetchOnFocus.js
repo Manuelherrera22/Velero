@@ -1,23 +1,23 @@
 import { useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
 
 /**
- * Hook that re-runs a callback when:
- * 1. The browser tab becomes visible again (tab switching)
- * 2. The route changes (SPA navigation between panels)
+ * Hook that re-runs a callback when the browser tab becomes visible again.
  * 
- * This ensures data is always fresh after the user switches tabs or panels,
+ * This ensures data is always fresh after the user switches tabs,
  * without requiring F5 or any manual action.
  * 
- * @param {Function} callback - Function to call when tab becomes visible or route changes
- * @param {number} minInterval - Minimum ms between re-fetches (default 3s)
+ * NOTE: Route-change refetching was removed to avoid double-fetches.
+ * Each component's own useEffect handles the initial fetch on mount.
+ * This hook ONLY handles tab visibility changes.
+ * 
+ * @param {Function} callback - Function to call when tab becomes visible
+ * @param {number} minInterval - Minimum ms between re-fetches (default 5s)
  */
-export function useRefetchOnFocus(callback, minInterval = 1000) {
-  const lastFetch = useRef(0)
+export function useRefetchOnFocus(callback, minInterval = 5000) {
+  const lastFetch = useRef(Date.now()) // Start as "just fetched" to avoid immediate re-fetch
   const timerRef = useRef(null)
-  const location = useLocation()
 
-  // Re-fetch on tab visibility change
+  // Re-fetch on tab visibility change only
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
@@ -25,7 +25,7 @@ export function useRefetchOnFocus(callback, minInterval = 1000) {
         if (now - lastFetch.current > minInterval) {
           lastFetch.current = now
           if (timerRef.current) clearTimeout(timerRef.current)
-          // Fast refetch — 300ms is enough to let the tab settle
+          // Small delay to let the tab settle
           timerRef.current = setTimeout(() => {
             callback()
           }, 300)
@@ -38,13 +38,4 @@ export function useRefetchOnFocus(callback, minInterval = 1000) {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
   }, [callback, minInterval])
-
-  // Re-fetch on route change (SPA navigation)
-  useEffect(() => {
-    const now = Date.now()
-    if (now - lastFetch.current > minInterval) {
-      lastFetch.current = now
-      callback()
-    }
-  }, [location.pathname]) // eslint-disable-line react-hooks/exhaustive-deps
 }

@@ -14,6 +14,7 @@ export default function QRLanding() {
   const [hotel, setHotel] = useState(null)
   const [trips, setTrips] = useState([])
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
 
   useEffect(() => {
     if (code) fetchQRData()
@@ -24,6 +25,7 @@ export default function QRLanding() {
 
   const fetchQRData = async () => {
     setLoading(true)
+    setFetchError(null)
     try {
       // Get QR code details
       const qr = await withRetry(async () => {
@@ -35,7 +37,11 @@ export default function QRLanding() {
           .single()
         if (e) throw e
         return d
-      }, { label: 'fetchQR', maxRetries: 2 }).catch(() => null)
+      }, { label: 'fetchQR', maxRetries: 2 }).catch(err => {
+        console.error('QR fetch failed:', err)
+        setFetchError('No se pudo cargar el código QR. Verificá tu conexión e intentá de nuevo.')
+        return null
+      })
 
       if (!qr) {
         setLoading(false)
@@ -73,7 +79,11 @@ export default function QRLanding() {
         const { data: d, error: e } = await query
         if (e) throw e
         return d
-      }, { label: 'fetchQRTrips', maxRetries: 2 }).catch(() => [])
+      }, { label: 'fetchQRTrips', maxRetries: 2 }).catch(err => {
+        console.error('Trips fetch failed:', err)
+        setFetchError('No se pudieron cargar las travesías. Verificá tu conexión e intentá de nuevo.')
+        return []
+      })
 
       setTrips(tripsData || [])
     } catch (err) {
@@ -108,6 +118,21 @@ export default function QRLanding() {
       <div className="protected-loading">
         <Waves size={32} className="spin" style={{ color: 'var(--color-accent-400)' }} />
         <p>Buscando travesías...</p>
+      </div>
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <div className="qr-landing">
+        <div className="container" style={{ textAlign: 'center', padding: 'var(--space-24) 0' }}>
+          <Sailboat size={64} style={{ color: 'var(--color-accent-400)', marginBottom: 'var(--space-4)' }} />
+          <h2>Oops</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-6)' }}>{fetchError}</p>
+          <button className="btn btn--accent btn--lg" onClick={() => fetchQRData()}>
+            Reintentar
+          </button>
+        </div>
       </div>
     )
   }

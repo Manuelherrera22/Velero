@@ -16,20 +16,29 @@ const useAuthStore = create((set, get) => ({
   profile: null,
   session: null,
   loading: true,
+  initialized: false,
   error: null,
+  _subscription: null,
 
   // Initialize auth — call once on app mount
   initialize: async () => {
-    try {
-      // Safety timeout: force loading=false after 5s
-      const timeout = setTimeout(() => {
-        if (get().loading) {
-          console.warn('Auth init timeout — forcing loaded state')
-          set({ loading: false })
-        }
-      }, 5000)
+    // Prevent double initialization (React StrictMode, HMR)
+    if (get().initialized || get()._subscription) return
 
-      // Get current session
+    try {
+      // 1. Register auth listener FIRST to catch events during getSession
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
+          const profile = await get().fetchProfile(session.user.id)
+          set({ user: session.user, session, profile, loading: false, initialized: true })
+        } else if (event === 'SIGNED_OUT') {
+          set({ user: null, session: null, profile: null, loading: false, initialized: true })
+        }
+      })
+
+      set({ _subscription: subscription })
+
+      // 2. Then get current session
       const { data: { session }, error } = await withRetry(
         () => supabase.auth.getSession().then(r => { if (r.error) throw r.error; return r }),
         { label: 'getSession', maxRetries: 2 }
@@ -37,9 +46,9 @@ const useAuthStore = create((set, get) => ({
       
       if (error) {
         // If the refresh token is invalid/expired, quietly sign out to clean local storage
-        if (error.message.includes('Refresh Token') || error.status === 400) {
+        if (error.message?.includes('Refresh Token') || error.status === 400) {
           await supabase.auth.signOut().catch(() => {})
-          set({ loading: false })
+          set({ loading: false, initialized: true })
           return // Exit without throwing, so we don't show the error to the user
         }
         throw error
@@ -47,25 +56,13 @@ const useAuthStore = create((set, get) => ({
 
       if (session?.user) {
         const profile = await get().fetchProfile(session.user.id)
-        set({ user: session.user, session, profile, loading: false })
+        set({ user: session.user, session, profile, loading: false, initialized: true })
       } else {
-        set({ loading: false })
+        set({ loading: false, initialized: true })
       }
-
-      clearTimeout(timeout)
-
-      // Listen for auth changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
-          const profile = await get().fetchProfile(session.user.id)
-          set({ user: session.user, session, profile, loading: false })
-        } else if (event === 'SIGNED_OUT') {
-          set({ user: null, session: null, profile: null, loading: false })
-        }
-      })
     } catch (error) {
       console.error('Auth initialization error:', error)
-      set({ loading: false, error: error.message })
+      set({ loading: false, initialized: true, error: error.message })
     }
   },
 

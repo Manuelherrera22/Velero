@@ -104,12 +104,7 @@ export default function Checkout() {
     if (!currentTrip || currentTrip.id !== id) {
       fetchTrip(id)
     }
-    // Safety timeout: never show loading more than 8s
-    const t = setTimeout(() => {
-      const s = useTripStore.getState()
-      if (s.isLoadingTrip) useTripStore.setState({ isLoadingTrip: false })
-    }, 8000)
-    // Pre-fill if user is logged in (Google, magic link, etc)
+    // Pre-fill if user is logged in
     if (user) {
       setFormData(prev => ({
         ...prev,
@@ -119,7 +114,6 @@ export default function Checkout() {
         phone: profile?.phone || user.phone || prev.phone,
       }))
     }
-    return () => clearTimeout(t)
   }, [id, user])
 
   const trip = currentTrip

@@ -18,11 +18,6 @@ export default function MyTrips() {
 
   useEffect(() => { 
     fetchMyTrips()
-    // Safety: never show loading more than 8s
-    const t = setTimeout(() => {
-      if (useTripStore.getState().loading) useTripStore.setState({ loading: false })
-    }, 8000)
-    return () => clearTimeout(t)
   }, [])
 
   const refetch = useCallback(() => { fetchMyTrips() }, [fetchMyTrips])

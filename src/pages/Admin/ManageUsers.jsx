@@ -9,9 +9,7 @@ export default function ManageUsers() {
   const [filter, setFilter] = useState('all') // all, publisher, affiliate, viewer
   const [actionLoading, setActionLoading] = useState(null)
 
-  useEffect(() => { fetchUsers()
-    const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
-  }, [filter])
+  useEffect(() => { fetchUsers() }, [filter])
 
   const refetch = useCallback(() => { fetchUsers() }, [filter])
   useRefetchOnFocus(refetch)

@@ -14,9 +14,7 @@ export default function ManageCoupons() {
     code: '', type: 'percentage', value: '', valid_from: '', valid_until: '', max_uses: 100,
   })
 
-  useEffect(() => { fetchCoupons()
-    const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
-  }, [])
+  useEffect(() => { fetchCoupons() }, [])
 
   const refetch = useCallback(() => { fetchCoupons() }, [])
   useRefetchOnFocus(refetch)

@@ -25,6 +25,7 @@ import ProtectedRoute from './components/layout/ProtectedRoute'
 
 function App() {
   const initialize = useAuthStore((s) => s.initialize)
+  const authLoading = useAuthStore((s) => s.loading)
   const location = useLocation()
 
   useEffect(() => {
@@ -38,6 +39,22 @@ function App() {
     }
   }, [location.pathname, location.hash])
 
+  // Don't render any routes until auth is resolved
+  // This prevents race conditions where pages fetch data before user is available
+  if (authLoading) {
+    return (
+      <div className="app">
+        <Header />
+        <main className="main-content">
+          <div className="protected-loading">
+            <div className="spin" style={{ width: 32, height: 32, border: '3px solid rgba(0,180,180,0.2)', borderTopColor: 'var(--color-accent-400)', borderRadius: '50%' }} />
+            <p>Cargando...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
   return (
     <div className="app">

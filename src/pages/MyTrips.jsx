@@ -59,8 +59,6 @@ export default function MyTrips() {
         confirmPaymentAsync()
       }
     }
-    const t = setTimeout(() => { useBookingStore.setState({ loading: false }) }, 8000)
-    return () => clearTimeout(t)
   }, [user, paymentStatus, paymentId, externalReference])
 
   const refetch = useCallback(() => { if (user) fetchMyBookings() }, [user, fetchMyBookings])

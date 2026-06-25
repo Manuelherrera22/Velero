@@ -167,15 +167,6 @@ export default function TripDetail() {
 
   useEffect(() => {
     fetchTrip(id)
-    // Safety timeout: NEVER show loading for more than 8 seconds
-    const safetyTimer = setTimeout(() => {
-      const { isLoadingTrip } = useTripStore.getState()
-      if (isLoadingTrip) {
-        console.warn('[TripDetail] Safety timeout — forcing load end')
-        useTripStore.setState({ isLoadingTrip: false })
-      }
-    }, 8000)
-    return () => clearTimeout(safetyTimer)
   }, [id])
 
   const refetchTrip = useCallback(() => { fetchTrip(id) }, [fetchTrip, id])

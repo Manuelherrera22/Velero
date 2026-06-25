@@ -8,8 +8,6 @@ export default function Bookings() {
 
   useEffect(() => {
     fetchCaptainBookings()
-    const t = setTimeout(() => { useBookingStore.setState({ loading: false }) }, 8000)
-    return () => clearTimeout(t)
   }, [])
 
   const refetch = useCallback(() => { fetchCaptainBookings() }, [fetchCaptainBookings])

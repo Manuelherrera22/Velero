@@ -12,9 +12,7 @@ export default function ReviewTrips() {
   const [rejectReason, setRejectReason] = useState('')
   const [actionLoading, setActionLoading] = useState(null)
 
-  useEffect(() => { fetchTrips()
-    const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
-  }, [filter])
+  useEffect(() => { fetchTrips() }, [filter])
 
   const refetch = useCallback(() => { fetchTrips() }, [filter])
   useRefetchOnFocus(refetch)

@@ -24,7 +24,6 @@ export default function ManageHotels() {
     fetchHotels() 
     fetchAffiliates()
     fetchZones()
-    const t = setTimeout(() => setLoading(false), 8000); return () => clearTimeout(t)
   }, [])
 
   const refetchAll = useCallback(() => { fetchHotels(); fetchAffiliates() }, [])

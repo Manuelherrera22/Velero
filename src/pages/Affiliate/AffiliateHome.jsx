@@ -15,8 +15,6 @@ export default function AffiliateHome() {
 
   useEffect(() => {
     fetchMetrics()
-    const t = setTimeout(() => setLoading(false), 8000)
-    return () => clearTimeout(t)
   }, [])
 
   const refetch = useCallback(() => { fetchMetrics() }, [])
