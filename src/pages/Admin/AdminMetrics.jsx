@@ -184,67 +184,67 @@ export default function AdminMetrics() {
       const nowStr = new Date().toISOString().split('T')[0]
       const limitStr = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-      // Fetch all metrics in parallel
+      // Fetch all metrics in parallel (with timeout + resilience)
+      const sig = AbortSignal.timeout(12000)
       const [
-        { count: totalBookings },
-        { count: confirmedBookings },
-        { count: pendingBookings },
-        { count: cancelledBookings },
-        { count: completedBookings },
-        { data: bookingsData },
-        { count: totalTrips },
-        { count: publishedTrips },
-        { count: pendingTrips },
-        { count: draftTrips },
-        { count: rejectedTrips },
-        { count: totalUsers },
-        { count: viewerUsers },
-        { count: publisherUsers },
-        { count: affiliateUsers },
-        { count: adminUsers },
-        { count: totalBoats },
-        { data: qrData },
-        { data: topTripsData },
-        { data: hotelsData },
-        { data: recentData },
-        { data: alertsData },
-        { data: zonesData },
-      ] = await Promise.all([
-        applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true })),
-        applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'confirmed')),
-        applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'pending')),
-        applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'cancelled')),
-        applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'completed')),
-        applyDateFilter(supabase.from('bookings').select('total, status, created_at, guest_name, guest_email, quantity').in('status', ['confirmed', 'completed'])),
-        applyDateFilter(supabase.from('trips').select('*', { count: 'exact', head: true })),
-        applyDateFilter(supabase.from('trips').select('*', { count: 'exact', head: true }).eq('status', 'published')),
-        applyDateFilter(supabase.from('trips').select('*', { count: 'exact', head: true }).eq('status', 'pending')),
-        applyDateFilter(supabase.from('trips').select('*', { count: 'exact', head: true }).eq('status', 'draft')),
-        applyDateFilter(supabase.from('trips').select('*', { count: 'exact', head: true }).eq('status', 'rejected')),
-        applyDateFilter(supabase.from('profiles').select('*', { count: 'exact', head: true })),
-        applyDateFilter(supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'viewer')),
-        applyDateFilter(supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'publisher')),
-        applyDateFilter(supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'affiliate')),
-        applyDateFilter(supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'admin')),
-        supabase.from('boats').select('*', { count: 'exact', head: true }),
-        supabase.from('qr_codes').select('scan_count'),
-        supabase.from('trips').select('id, title, location, price_per_person, currency, bookings(id)').eq('status', 'published').order('created_at', { ascending: false }).limit(10),
-        supabase.from('hotels').select('*, qr_codes(scan_count)').order('created_at', { ascending: false }),
-        applyDateFilter(supabase.from('bookings').select('*, trip:trips!trip_id(title)').order('created_at', { ascending: false }).limit(8)),
-        // Capacity alerts
-        supabase
-          .from('trip_dates')
+        bTotal, bConfirmed, bPending, bCancelled, bCompleted, bData,
+        tTotal, tPublished, tPending, tDraft, tRejected,
+        uTotal, uViewer, uPublisher, uAffiliate, uAdmin,
+        boatCount, qrResult, topTripsResult, hotelsResult, recentResult,
+        alertsResult, zonesResult,
+      ] = await Promise.allSettled([
+        applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).abortSignal(sig)),
+        applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'confirmed').abortSignal(sig)),
+        applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'pending').abortSignal(sig)),
+        applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'cancelled').abortSignal(sig)),
+        applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'completed').abortSignal(sig)),
+        applyDateFilter(supabase.from('bookings').select('total, status, created_at, guest_name, guest_email, quantity').in('status', ['confirmed', 'completed']).abortSignal(sig)),
+        applyDateFilter(supabase.from('trips').select('*', { count: 'exact', head: true }).abortSignal(sig)),
+        applyDateFilter(supabase.from('trips').select('*', { count: 'exact', head: true }).eq('status', 'published').abortSignal(sig)),
+        applyDateFilter(supabase.from('trips').select('*', { count: 'exact', head: true }).eq('status', 'pending').abortSignal(sig)),
+        applyDateFilter(supabase.from('trips').select('*', { count: 'exact', head: true }).eq('status', 'draft').abortSignal(sig)),
+        applyDateFilter(supabase.from('trips').select('*', { count: 'exact', head: true }).eq('status', 'rejected').abortSignal(sig)),
+        applyDateFilter(supabase.from('profiles').select('*', { count: 'exact', head: true }).abortSignal(sig)),
+        applyDateFilter(supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'viewer').abortSignal(sig)),
+        applyDateFilter(supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'publisher').abortSignal(sig)),
+        applyDateFilter(supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'affiliate').abortSignal(sig)),
+        applyDateFilter(supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'admin').abortSignal(sig)),
+        supabase.from('boats').select('*', { count: 'exact', head: true }).abortSignal(sig),
+        supabase.from('qr_codes').select('scan_count').abortSignal(sig),
+        supabase.from('trips').select('id, title, location, price_per_person, currency, bookings(id)').eq('status', 'published').order('created_at', { ascending: false }).limit(10).abortSignal(sig),
+        supabase.from('hotels').select('*, qr_codes(scan_count)').order('created_at', { ascending: false }).abortSignal(sig),
+        applyDateFilter(supabase.from('bookings').select('*, trip:trips!trip_id(title)').order('created_at', { ascending: false }).limit(8).abortSignal(sig)),
+        supabase.from('trip_dates')
           .select('id, date, start_time, available_spots, trip:trips!trip_id(id, title, location, capacity, min_passengers, max_passengers, captain:profiles!captain_id(id, full_name, email, phone))')
-          .gte('date', nowStr)
-          .lte('date', limitStr)
-          .eq('is_active', true)
-          .order('date', { ascending: true }),
-        // Navigation zones
-        supabase
-          .from('navigation_zones')
-          .select('*')
-          .order('name', { ascending: true }),
+          .gte('date', nowStr).lte('date', limitStr).eq('is_active', true).order('date', { ascending: true }).abortSignal(sig),
+        supabase.from('navigation_zones').select('*').order('name', { ascending: true }).abortSignal(sig),
       ])
+
+      // Helper: safely extract from settled result
+      const val = (r) => r.status === 'fulfilled' ? r.value : {}
+      const totalBookings = val(bTotal).count || 0
+      const confirmedBookings = val(bConfirmed).count || 0
+      const pendingBookings = val(bPending).count || 0
+      const cancelledBookings = val(bCancelled).count || 0
+      const completedBookings = val(bCompleted).count || 0
+      const bookingsData = val(bData).data || []
+      const totalTrips = val(tTotal).count || 0
+      const publishedTrips = val(tPublished).count || 0
+      const pendingTrips = val(tPending).count || 0
+      const draftTrips = val(tDraft).count || 0
+      const rejectedTrips = val(tRejected).count || 0
+      const totalUsers = val(uTotal).count || 0
+      const viewerUsers = val(uViewer).count || 0
+      const publisherUsers = val(uPublisher).count || 0
+      const affiliateUsers = val(uAffiliate).count || 0
+      const adminUsers = val(uAdmin).count || 0
+      const totalBoats = val(boatCount).count || 0
+      const qrData = val(qrResult).data || []
+      const topTripsData = val(topTripsResult).data || []
+      const hotelsData = val(hotelsResult).data || []
+      const recentData = val(recentResult).data || []
+      const alertsData = val(alertsResult).data || []
+      const zonesData = val(zonesResult).data || []
 
       const totalRevenue = (bookingsData || []).reduce((s, b) => s + (b.total || 0), 0)
       const totalQRScans = (qrData || []).reduce((s, q) => s + (q.scan_count || 0), 0)
