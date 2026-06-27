@@ -106,7 +106,7 @@ const useBookingStore = create((set, get) => ({
         .from('bookings')
         .select(`
           *,
-          trip:trips!trip_id(id, title, location, captain:profiles!captain_id(phone), boat:boats!boat_id(name)),
+          trip:trips!trip_id(id, title, location, requires_full_payment, deposit_percentage, captain:profiles!captain_id(phone), boat:boats!boat_id(name)),
           trip_date:trip_dates!trip_date_id(date, start_time),
           user:profiles!user_id(full_name, email, phone)
         `)
