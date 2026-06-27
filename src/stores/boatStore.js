@@ -4,17 +4,18 @@ import useAuthStore from './authStore'
 
 const useBoatStore = create((set, get) => ({
   boats: [],
-  loading: false,
+  isLoadingBoats: false,  // fetchMyBoats
+  isSaving: false,         // createBoat, updateBoat
   error: null,
   _initialized: false,
 
   // Fetch boats for the current user
   fetchMyBoats: async () => {
-    set({ loading: true, error: null })
+    set({ isLoadingBoats: true, error: null })
     try {
       const user = useAuthStore.getState().user
       if (!user) {
-        set({ boats: [], loading: false, _initialized: true })
+        set({ boats: [], isLoadingBoats: false, _initialized: true })
         return []
       }
 
@@ -26,18 +27,18 @@ const useBoatStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
-      set({ boats: data || [], loading: false, _initialized: true })
+      set({ boats: data || [], isLoadingBoats: false, _initialized: true })
       return data || []
     } catch (error) {
       console.error('Error fetching boats:', error)
-      set({ error: error.message, boats: [], loading: false, _initialized: true })
+      set({ error: error.message, boats: [], isLoadingBoats: false, _initialized: true })
       return []
     }
   },
 
   // Create a boat
   createBoat: async (boatData) => {
-    set({ loading: true, error: null })
+    set({ isSaving: true, error: null })
     try {
       const user = useAuthStore.getState().user
       if (!user) throw new Error('No autenticado')
@@ -49,17 +50,17 @@ const useBoatStore = create((set, get) => ({
         .single()
 
       if (error) throw error
-      set((state) => ({ boats: [data, ...state.boats], loading: false }))
+      set((state) => ({ boats: [data, ...state.boats], isSaving: false }))
       return { success: true, data }
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isSaving: false })
       return { success: false, error: error.message }
     }
   },
 
   // Update a boat
   updateBoat: async (boatId, updates) => {
-    set({ loading: true, error: null })
+    set({ isSaving: true, error: null })
     try {
       const { data, error } = await supabase
         .from('boats')
@@ -71,11 +72,11 @@ const useBoatStore = create((set, get) => ({
       if (error) throw error
       set((state) => ({
         boats: state.boats.map(b => b.id === boatId ? data : b),
-        loading: false,
+        isSaving: false,
       }))
       return { success: true, data }
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isSaving: false })
       return { success: false, error: error.message }
     }
   },

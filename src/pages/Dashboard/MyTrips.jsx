@@ -6,7 +6,7 @@ import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 import './Dashboard.css'
 
 export default function MyTrips() {
-  const { trips, loading, error, fetchMyTrips, deleteTrip } = useTripStore()
+  const { trips, isLoadingMyTrips: loading, error, fetchMyTrips, deleteTrip } = useTripStore()
   const navigate = useNavigate()
   
   // State for the Delete Modal

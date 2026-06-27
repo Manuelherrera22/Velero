@@ -11,7 +11,7 @@ export default function TripEditor() {
   const navigate = useNavigate()
   const isEditing = !!tripId
 
-  const { fetchTrip, createTrip, updateTrip, addTripDate, removeTripDate, addTripAddon, removeTripAddon, uploadTripImage, removeTripImage, tripDates, tripAddons, currentTrip, tags, fetchTags, loading } = useTripStore()
+  const { fetchTrip, createTrip, updateTrip, addTripDate, removeTripDate, addTripAddon, removeTripAddon, uploadTripImage, removeTripImage, tripDates, tripAddons, currentTrip, tags, fetchTags, isSaving: loading } = useTripStore()
   const { boats, fetchMyBoats } = useBoatStore()
 
   const [form, setForm] = useState({

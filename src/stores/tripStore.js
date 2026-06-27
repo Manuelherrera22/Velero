@@ -10,9 +10,14 @@ const useTripStore = create((set, get) => ({
   tripDates: [],
   tripAddons: [],
   tags: [],
-  loading: false,
-  isLoadingTrips: false,
-  isLoadingTrip: false,
+  // Separated loading states — each operation has its own flag
+  // to prevent navigation conflicts (e.g., editing a trip shouldn't
+  // block the trips list from rendering)
+  isLoadingTrips: false,    // fetchTrips (public search)
+  isLoadingTrip: false,     // fetchTrip (single trip detail)
+  isLoadingMyTrips: false,  // fetchMyTrips (captain dashboard)
+  isLoadingFeatured: false, // fetchFeaturedTrips (landing)
+  isSaving: false,          // createTrip, updateTrip, deleteTrip
   error: null,
 
   // ── Fetch published trips (public) ──
@@ -82,6 +87,7 @@ const useTripStore = create((set, get) => ({
 
   // ── Fetch featured trips for landing page ──
   fetchFeaturedTrips: async () => {
+    set({ isLoadingFeatured: true })
     try {
       const data = await withRetry(async () => {
         const { data: d, error: e } = await supabase
@@ -99,10 +105,10 @@ const useTripStore = create((set, get) => ({
         return d
       }, { label: 'fetchFeaturedTrips', maxRetries: 2 })
 
-      set({ featuredTrips: data || [], error: null })
+      set({ featuredTrips: data || [], error: null, isLoadingFeatured: false })
     } catch (error) {
       console.error('Error fetching featured trips:', error)
-      set({ error: error.message })
+      set({ error: error.message, isLoadingFeatured: false })
     }
   },
 
@@ -181,13 +187,13 @@ const useTripStore = create((set, get) => ({
 
   // ── Captain: fetch my trips ──
   fetchMyTrips: async () => {
-    set({ loading: true, error: null })
+    set({ isLoadingMyTrips: true, error: null })
     try {
       // Use user from auth store instead of getSession() — avoids race with token refresh
       const { default: useAuthStore } = await import('./authStore')
       const user = useAuthStore.getState().user
       if (!user) {
-        set({ loading: false })
+        set({ isLoadingMyTrips: false })
         return []
       }
 
@@ -206,17 +212,17 @@ const useTripStore = create((set, get) => ({
         return d
       }, { label: 'fetchMyTrips', maxRetries: 1, baseDelay: 500 })
 
-      set({ trips: data || [], loading: false })
+      set({ trips: data || [], isLoadingMyTrips: false })
       return data || []
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isLoadingMyTrips: false })
       return []
     }
   },
 
   // ── Captain: create trip ──
   createTrip: async (tripData) => {
-    set({ loading: true, error: null })
+    set({ isSaving: true, error: null })
     try {
       const { default: useAuthStore } = await import('./authStore')
       const user = useAuthStore.getState().user
@@ -233,17 +239,17 @@ const useTripStore = create((set, get) => ({
         .single()
 
       if (error) throw error
-      set({ loading: false })
+      set({ isSaving: false })
       return { success: true, data }
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isSaving: false })
       return { success: false, error: error.message }
     }
   },
 
   // ── Captain: update trip ──
   updateTrip: async (tripId, updates) => {
-    set({ loading: true, error: null })
+    set({ isSaving: true, error: null })
     try {
       const { data, error } = await supabase
         .from('trips')
@@ -253,16 +259,16 @@ const useTripStore = create((set, get) => ({
         .single()
 
       if (error) throw error
-      set({ loading: false })
+      set({ isSaving: false })
       return { success: true, data }
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isSaving: false })
       return { success: false, error: error.message }
     }
   },
 
   deleteTrip: async (tripId) => {
-    set({ loading: true, error: null })
+    set({ isSaving: true, error: null })
     try {
       const { error } = await supabase
         .from('trips')
@@ -273,11 +279,11 @@ const useTripStore = create((set, get) => ({
       
       set((state) => ({ 
         trips: state.trips.filter(t => t.id !== tripId),
-        loading: false 
+        isSaving: false 
       }))
       return { success: true }
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isSaving: false })
       return { success: false, error: error.message }
     }
   },

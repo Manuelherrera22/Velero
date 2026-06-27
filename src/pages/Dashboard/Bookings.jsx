@@ -5,7 +5,7 @@ import useAuthStore from '../../stores/authStore'
 import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 
 export default function Bookings() {
-  const { bookings, loading, fetchCaptainBookings } = useBookingStore()
+  const { bookings, isLoadingBookings: loading, fetchCaptainBookings } = useBookingStore()
   const { profile } = useAuthStore()
 
   useEffect(() => {

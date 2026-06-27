@@ -5,12 +5,13 @@ import useAuthStore from './authStore'
 const useBookingStore = create((set, get) => ({
   bookings: [],
   currentBooking: null,
-  loading: false,
+  isLoadingBookings: false,  // fetchMyBookings, fetchCaptainBookings
+  isCreating: false,          // createBooking
   error: null,
 
   // Create a booking (supports guest checkout)
   createBooking: async (bookingData) => {
-    set({ loading: true, error: null })
+    set({ isCreating: true, error: null })
     try {
       // Separate addons from booking data — 'addons' is not a column in bookings table
       const { addons, ...bookingInsert } = bookingData
@@ -47,17 +48,17 @@ const useBookingStore = create((set, get) => ({
         }
       }
 
-      set({ currentBooking: data, loading: false })
+      set({ currentBooking: data, isCreating: false })
       return { success: true, data }
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isCreating: false })
       return { success: false, error: error.message }
     }
   },
 
   // Fetch user's bookings
   fetchMyBookings: async () => {
-    set({ loading: true, error: null })
+    set({ isLoadingBookings: true, error: null })
     try {
       const user = useAuthStore.getState().user
       if (!user) throw new Error('No autenticado')
@@ -74,17 +75,17 @@ const useBookingStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
-      set({ bookings: data || [], loading: false })
+      set({ bookings: data || [], isLoadingBookings: false })
       return data || []
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isLoadingBookings: false })
       return []
     }
   },
 
   // Fetch bookings for captain's trips
   fetchCaptainBookings: async () => {
-    set({ loading: true, error: null })
+    set({ isLoadingBookings: true, error: null })
     try {
       const user = useAuthStore.getState().user
       if (!user) throw new Error('No autenticado')
@@ -97,7 +98,7 @@ const useBookingStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(6000))
 
       if (!trips?.length) {
-        set({ bookings: [], loading: false })
+        set({ bookings: [], isLoadingBookings: false })
         return []
       }
 
@@ -116,10 +117,10 @@ const useBookingStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
-      set({ bookings: data || [], loading: false })
+      set({ bookings: data || [], isLoadingBookings: false })
       return data || []
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, isLoadingBookings: false })
       return []
     }
   },

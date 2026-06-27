@@ -6,7 +6,7 @@ import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 import './Dashboard.css'
 
 export default function MyBoats() {
-  const { boats, loading, fetchMyBoats, deleteBoat, createBoat } = useBoatStore()
+  const { boats, isLoadingBoats: loading, fetchMyBoats, deleteBoat, createBoat } = useBoatStore()
   
   const [boatToDelete, setBoatToDelete] = useState(null)
   const [activeMenuId, setActiveMenuId] = useState(null)
