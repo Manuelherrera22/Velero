@@ -156,9 +156,37 @@ export default function Bookings() {
               {/* Passengers / mode */}
               <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 {booking.metadata?.bookingMode === 'private' 
-                  ? `${booking.metadata?.passengers?.length || booking.metadata?.actualGuests || 'Velero Completo'}` 
+                  ? `Velero Privado (hasta ${booking.metadata?.capacity || booking.quantity})` 
                   : `${booking.quantity} persona${booking.quantity > 1 ? 's' : ''}`}
               </div>
+
+              {/* Passenger details (names + documents) */}
+              {booking.metadata?.passengers?.length > 0 && (
+                <div style={{ 
+                  marginTop: '8px', 
+                  padding: '8px 12px', 
+                  backgroundColor: 'rgba(148, 163, 184, 0.06)', 
+                  borderRadius: '8px', 
+                  fontSize: 'var(--text-xs)',
+                  borderLeft: '3px solid var(--color-primary-500)'
+                }}>
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px', fontSize: 'var(--text-sm)' }}>
+                    Pasajeros
+                  </div>
+                  {booking.metadata.passengers.map((p, i) => (
+                    <div key={i} style={{ 
+                      display: 'flex', justifyContent: 'space-between', 
+                      padding: '3px 0',
+                      borderBottom: i < booking.metadata.passengers.length - 1 ? '1px solid rgba(148, 163, 184, 0.1)' : 'none'
+                    }}>
+                      <span style={{ color: 'var(--text-primary)' }}>{p.name || `Pasajero ${i + 1}`}</span>
+                      <span style={{ color: 'var(--text-secondary)' }}>
+                        {p.id_type === 'passport' ? 'Pasaporte' : 'DNI'}: {p.id_number || '—'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Captain financial breakdown */}
               <div style={{ 

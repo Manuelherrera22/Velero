@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Mail, Phone, User, CreditCard, Shield, CheckCircle, Loader, Tag, AlertCircle, Download, Globe, FileText, Plus, Trash2 } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
@@ -21,7 +21,7 @@ export default function Checkout() {
   const navigate = useNavigate()
   const { user, profile } = useAuthStore()
   const { createBooking, validateCoupon } = useBookingStore()
-  const { currentTrip, tripDates, tripAddons, fetchTrip, loading: tripLoading, error: tripError } = useTripStore()
+  const { currentTrip, tripDates, tripAddons, fetchTrip, isLoadingTrip: tripLoading, error: tripError } = useTripStore()
 
   const [step, setStep] = useState(1) // 1: contact, 2: confirm email, 3: payment, 4: confirmation
   const [loading, setLoading] = useState(false)
@@ -46,8 +46,9 @@ export default function Checkout() {
   const selectedAddonsParam = searchParams.get('addons')
   const mode = searchParams.get('mode') || 'shared'
   const qrCode = searchParams.get('qr')
-  let selectedAddons = {}
-  try { selectedAddons = JSON.parse(selectedAddonsParam || '{}') } catch {}
+  const selectedAddons = useMemo(() => {
+    try { return JSON.parse(selectedAddonsParam || '{}') } catch { return {} }
+  }, [selectedAddonsParam])
 
   // Passengers list
   const [passengers, setPassengers] = useState([
@@ -73,11 +74,16 @@ export default function Checkout() {
     }
   }, [id])
 
-  // Save to sessionStorage on change
+  // Save to sessionStorage on change (debounced to avoid excessive serialization)
+  const saveTimerRef = useRef(null)
   useEffect(() => {
-    if (passengers.length > 0 || formData.name) {
-      sessionStorage.setItem(`checkout_${id}`, JSON.stringify({ passengers, formData, selectedAddons }))
-    }
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(() => {
+      if (passengers.length > 0 || formData.name) {
+        sessionStorage.setItem(`checkout_${id}`, JSON.stringify({ passengers, formData, selectedAddons }))
+      }
+    }, 500)
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current) }
   }, [passengers, formData, selectedAddons, id])
 
   const updatePassenger = (idx, field, value) => {
@@ -246,6 +252,7 @@ export default function Checkout() {
           .select('id')
           .eq('email', formData.email.trim().toLowerCase())
           .maybeSingle()
+          .abortSignal(AbortSignal.timeout(6000))
           
         if (existingUser) {
           setError('Ya existe un usuario registrado con este email. Por favor, iniciá sesión para continuar.')
@@ -359,6 +366,8 @@ export default function Checkout() {
 
         // 2. Create Mercado Pago Preference
         try {
+          const mpController = new AbortController()
+          const mpTimeout = setTimeout(() => mpController.abort(), 15000)
           const mpResponse = await fetch('/api/create-preference', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -369,8 +378,10 @@ export default function Checkout() {
               price: advanceAmount, // Monto exacto a cobrar online (Anticipo + Tasa)
               email: formData.email,
               name: formData.name
-            })
+            }),
+            signal: mpController.signal,
           })
+          clearTimeout(mpTimeout)
           
           if (!mpResponse.ok) {
             const errText = await mpResponse.text()

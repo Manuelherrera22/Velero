@@ -20,6 +20,7 @@ const useBookingStore = create((set, get) => ({
         .insert(bookingInsert)
         .select()
         .single()
+        .abortSignal(AbortSignal.timeout(10000))
 
       if (error) throw error
 
@@ -34,7 +35,7 @@ const useBookingStore = create((set, get) => ({
           total: addon.price * (addon.quantity || 1),
         }))
 
-        await supabase.from('booking_addons').insert(addonInserts)
+        await supabase.from('booking_addons').insert(addonInserts).abortSignal(AbortSignal.timeout(10000))
       }
 
       // Increment coupon uses if applicable
