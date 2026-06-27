@@ -22,7 +22,7 @@ const AVAILABLE_SERVICES = [
 const Step5Services = () => {
   const { formData, toggleService, updateFormData, hasBookings, addCustomService } = useTripWizardStore()
   const [customServiceInput, setCustomServiceInput] = React.useState('')
-  const { boats, loading, error, fetchMyBoats } = useBoatStore()
+  const { boats, isLoadingBoats: loading, error, fetchMyBoats } = useBoatStore()
   const navigate = useNavigate()
 
   React.useEffect(() => {
