@@ -75,7 +75,7 @@ const useBookingStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
-      set({ bookings: data || [], isLoadingBookings: false })
+      set({ bookings: data || [], isLoadingBookings: false, error: null })
       return data || []
     } catch (error) {
       set({ error: error.message, isLoadingBookings: false })
@@ -98,7 +98,7 @@ const useBookingStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(6000))
 
       if (!trips?.length) {
-        set({ bookings: [], isLoadingBookings: false })
+        set({ bookings: [], isLoadingBookings: false, error: null })
         return []
       }
 
@@ -117,7 +117,7 @@ const useBookingStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
-      set({ bookings: data || [], isLoadingBookings: false })
+      set({ bookings: data || [], isLoadingBookings: false, error: null })
       return data || []
     } catch (error) {
       set({ error: error.message, isLoadingBookings: false })

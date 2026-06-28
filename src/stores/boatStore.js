@@ -15,7 +15,7 @@ const useBoatStore = create((set, get) => ({
     try {
       const user = useAuthStore.getState().user
       if (!user) {
-        set({ boats: [], isLoadingBoats: false, _initialized: true })
+        set({ boats: [], isLoadingBoats: false, error: null, _initialized: true })
         return []
       }
 
@@ -27,7 +27,7 @@ const useBoatStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
-      set({ boats: data || [], isLoadingBoats: false, _initialized: true })
+      set({ boats: data || [], isLoadingBoats: false, error: null, _initialized: true })
       return data || []
     } catch (error) {
       console.error('Error fetching boats:', error)

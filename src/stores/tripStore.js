@@ -77,7 +77,7 @@ const useTripStore = create((set, get) => ({
         return d
       }, { label: 'fetchTrips', maxRetries: 2, baseDelay: 500 })
 
-      set({ trips: data || [], isLoadingTrips: false })
+      set({ trips: data || [], isLoadingTrips: false, error: null })
       return data || []
     } catch (error) {
       set({ error: error.message, isLoadingTrips: false })
@@ -159,6 +159,7 @@ const useTripStore = create((set, get) => ({
         tripDates: dates || [],
         tripAddons: addons || [],
         isLoadingTrip: false,
+        error: null,
       })
 
       return { trip: { ...trip, avgRating, reviewCount: reviews?.length || 0 }, dates, addons, reviews }
@@ -212,7 +213,7 @@ const useTripStore = create((set, get) => ({
         return d
       }, { label: 'fetchMyTrips', maxRetries: 1, baseDelay: 500 })
 
-      set({ trips: data || [], isLoadingMyTrips: false })
+      set({ trips: data || [], isLoadingMyTrips: false, error: null })
       return data || []
     } catch (error) {
       set({ error: error.message, isLoadingMyTrips: false })
