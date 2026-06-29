@@ -13,7 +13,8 @@ import useAuthStore from '../../stores/authStore'
  * @param {'viewer'|'publisher'|'admin'} [props.requiredRole] - Minimum role required
  */
 export default function ProtectedRoute({ children, requiredRole = 'viewer' }) {
-  const { user, profile } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const profile = useAuthStore((s) => s.profile)
 
   if (!user) {
     return <Navigate to="/login" replace />

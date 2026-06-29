@@ -8,7 +8,7 @@ import './Review.css'
 export default function Review() {
   const { bookingId } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
 
   const [booking, setBooking] = useState(null)
   const [trip, setTrip] = useState(null)

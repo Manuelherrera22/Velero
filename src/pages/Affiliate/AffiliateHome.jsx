@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { QrCode, DollarSign, Target, MousePointerClick, TrendingUp } from 'lucide-react'
 import supabase from '../../lib/supabase'
 import useAuthStore from '../../stores/authStore'
@@ -12,6 +12,7 @@ export default function AffiliateHome() {
     activeQRs: 0,
   })
   const [loading, setLoading] = useState(true)
+  const hasLoadedOnce = useRef(false)
 
   useEffect(() => {
     fetchMetrics()
@@ -21,6 +22,7 @@ export default function AffiliateHome() {
   useRefetchOnFocus(refetch)
 
   const fetchMetrics = async () => {
+    if (!hasLoadedOnce.current) setLoading(true)
     try {
       const user = useAuthStore.getState().user
       if (!user) throw new Error("No user")
@@ -75,6 +77,7 @@ export default function AffiliateHome() {
     } catch (err) {
       console.error('Error fetching affiliate metrics:', err)
     } finally {
+      hasLoadedOnce.current = true
       setLoading(false)
     }
   }

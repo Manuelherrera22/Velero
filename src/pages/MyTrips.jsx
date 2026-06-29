@@ -23,7 +23,8 @@ const STATUS_MAP = {
 }
 
 export default function MyTrips() {
-  const { user, profile } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const profile = useAuthStore((s) => s.profile)
   const { bookings, fetchMyBookings, isLoadingBookings: loading } = useBookingStore()
   const [activeTab, setActiveTab] = useState('upcoming')
   const [searchParams] = useSearchParams()

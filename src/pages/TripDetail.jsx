@@ -21,7 +21,8 @@ export default function TripDetail() {
   const [searchParams] = useSearchParams()
   const { currentTrip: trip, tripDates, tripAddons, isLoadingTrip: loading, fetchTrip, clearCurrentTrip } = useTripStore()
   
-  const { user, profile } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const profile = useAuthStore((s) => s.profile)
 
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false)
   const [inquiryForm, setInquiryForm] = useState({ name: '', email: '', message: '' })

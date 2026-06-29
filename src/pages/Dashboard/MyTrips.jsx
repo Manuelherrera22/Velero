@@ -77,8 +77,8 @@ export default function MyTrips() {
           </button>
         </div>
 
-        {/* Loading state */}
-        {loading && (
+        {/* Loading state — only show spinner on first load, not on background refetch */}
+        {loading && trips.length === 0 && (
           <div className="dash-pane__empty">
             <div className="dash-spinner"></div>
             <p style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Cargando flotas...</p>

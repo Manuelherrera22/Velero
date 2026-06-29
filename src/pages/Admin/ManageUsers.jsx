@@ -132,7 +132,7 @@ export default function ManageUsers() {
         ))}
       </div>
 
-      {loading && <div className="protected-loading"><p>Cargando usuarios...</p></div>}
+      {loading && users.length === 0 && <div className="protected-loading"><p>Cargando usuarios...</p></div>}
 
       {!loading && users.length === 0 && (
         <div className="dashboard__empty">

@@ -307,7 +307,7 @@ export default function ManageHotels() {
         </div>
       )}
 
-      {loading && <div className="protected-loading"><p>Cargando...</p></div>}
+      {loading && hotels.length === 0 && <div className="protected-loading"><p>Cargando...</p></div>}
 
       {!loading && hotels.length === 0 && !showForm && (
         <div className="dashboard__empty">

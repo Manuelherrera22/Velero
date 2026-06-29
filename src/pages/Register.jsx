@@ -42,7 +42,10 @@ const ROLE_CONFIG = {
 export default function Register() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { signUp, error, clearError, isAuthenticated } = useAuthStore()
+  const signUp = useAuthStore((s) => s.signUp)
+  const error = useAuthStore((s) => s.error)
+  const clearError = useAuthStore((s) => s.clearError)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
   // Redirect if already authenticated
   useEffect(() => {

@@ -5,7 +5,7 @@ import { Info } from 'lucide-react'
 
 const Step8Pricing = () => {
   const { formData, updateFormData, hasBookings } = useTripWizardStore()
-  const { profile } = useAuthStore()
+  const profile = useAuthStore((s) => s.profile)
   const commissionRate = profile?.captain_commission_rate || 20 // Fallback to default 20% commission
 
   const handleTogglePaymentMethod = (method) => {

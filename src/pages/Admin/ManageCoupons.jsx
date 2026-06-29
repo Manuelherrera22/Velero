@@ -161,7 +161,7 @@ export default function ManageCoupons() {
         </div>
       )}
 
-      {loading && <div className="protected-loading"><p>Cargando...</p></div>}
+      {loading && coupons.length === 0 && <div className="protected-loading"><p>Cargando...</p></div>}
 
       {!loading && coupons.length === 0 && !showForm && (
         <div className="dashboard__empty">

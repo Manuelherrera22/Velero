@@ -11,7 +11,9 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, profile, signOut } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const profile = useAuthStore((s) => s.profile)
+  const signOut = useAuthStore((s) => s.signOut)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)

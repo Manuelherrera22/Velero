@@ -6,7 +6,10 @@ import supabase from '../lib/supabase'
 import './Profile.css'
 
 export default function Profile() {
-  const { user, profile, signOut, updateProfile } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const profile = useAuthStore((s) => s.profile)
+  const signOut = useAuthStore((s) => s.signOut)
+  const updateProfile = useAuthStore((s) => s.updateProfile)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({

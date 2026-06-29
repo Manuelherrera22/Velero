@@ -35,7 +35,11 @@ export default function Login() {
   const user = useAuthStore(state => state.user)
   const profile = useAuthStore(state => state.profile)
   const isAuthenticated = !!user
-  const { signInWithEmail, signInWithPhone, verifyPhoneOtp, error, clearError } = useAuthStore()
+  const signInWithEmail = useAuthStore((s) => s.signInWithEmail)
+  const signInWithPhone = useAuthStore((s) => s.signInWithPhone)
+  const verifyPhoneOtp = useAuthStore((s) => s.verifyPhoneOtp)
+  const error = useAuthStore((s) => s.error)
+  const clearError = useAuthStore((s) => s.clearError)
 
   // Redirect if already authenticated
   useEffect(() => {

@@ -7,7 +7,7 @@ import './Login.css'
 
 export default function ResetPassword() {
   const navigate = useNavigate()
-  const { profile } = useAuthStore()
+  const profile = useAuthStore((s) => s.profile)
   
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')

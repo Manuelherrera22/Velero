@@ -5,7 +5,8 @@ import supabase from '../../lib/supabase'
 import useAuthStore from '../../stores/authStore'
 
 export default function Notifications() {
-  const { profile, user } = useAuthStore()
+  const profile = useAuthStore((s) => s.profile)
+  const user = useAuthStore((s) => s.user)
   const [isOpen, setIsOpen] = useState(false)
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(false)

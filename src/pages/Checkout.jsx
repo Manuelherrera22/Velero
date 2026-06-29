@@ -19,7 +19,8 @@ export default function Checkout() {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { user, profile } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const profile = useAuthStore((s) => s.profile)
   const { createBooking, validateCoupon } = useBookingStore()
   const { currentTrip, tripDates, tripAddons, fetchTrip, isLoadingTrip: tripLoading, error: tripError } = useTripStore()
 

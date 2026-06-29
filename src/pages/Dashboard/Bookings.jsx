@@ -6,7 +6,7 @@ import { useRefetchOnFocus } from '../../hooks/useRefetchOnFocus'
 
 export default function Bookings() {
   const { bookings, isLoadingBookings: loading, fetchCaptainBookings } = useBookingStore()
-  const { profile } = useAuthStore()
+  const profile = useAuthStore((s) => s.profile)
 
   useEffect(() => {
     fetchCaptainBookings()
@@ -78,7 +78,7 @@ export default function Bookings() {
         <h1 className="dashboard__title">Reservas</h1>
       </div>
 
-      {loading && <div className="protected-loading"><p>Cargando...</p></div>}
+      {loading && bookings.length === 0 && <div className="protected-loading"><p>Cargando...</p></div>}
 
       {!loading && bookings.length === 0 && (
         <div className="dashboard__empty">

@@ -131,7 +131,7 @@ export default function MyBoats() {
         </div>
 
         {/* Loading */}
-        {loading && (
+        {loading && boats.length === 0 && (
           <div className="dash-pane__empty">
             <div className="dash-spinner"></div>
             <p style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Cargando flota...</p>

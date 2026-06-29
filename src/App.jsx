@@ -23,12 +23,16 @@ import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 
+// Version tag — check in console to confirm which build is deployed
+const BUILD_VERSION = '2026-06-29-v3'
+
 function App() {
   const initialize = useAuthStore((s) => s.initialize)
   const authLoading = useAuthStore((s) => s.loading)
   const location = useLocation()
 
   useEffect(() => {
+    console.log(`[Kailu] Build ${BUILD_VERSION} loaded`)
     initialize()
   }, [initialize])
 

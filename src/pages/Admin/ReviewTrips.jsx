@@ -92,7 +92,7 @@ export default function ReviewTrips() {
         ))}
       </div>
 
-      {loading && <div className="protected-loading"><p>Cargando...</p></div>}
+      {loading && trips.length === 0 && <div className="protected-loading"><p>Cargando...</p></div>}
 
       {!loading && trips.length === 0 && (
         <div className="dashboard__empty">
