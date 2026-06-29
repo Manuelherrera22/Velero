@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import supabase from '../lib/supabase'
 import { withRetry } from '../utils/retry'
+import useAuthStore from './authStore'
 
 const useTripStore = create((set, get) => ({
   // State
@@ -191,7 +192,6 @@ const useTripStore = create((set, get) => ({
     set({ isLoadingMyTrips: true, error: null })
     try {
       // Use user from auth store instead of getSession() — avoids race with token refresh
-      const { default: useAuthStore } = await import('./authStore')
       const user = useAuthStore.getState().user
       if (!user) {
         set({ isLoadingMyTrips: false })
@@ -225,7 +225,6 @@ const useTripStore = create((set, get) => ({
   createTrip: async (tripData) => {
     set({ isSaving: true, error: null })
     try {
-      const { default: useAuthStore } = await import('./authStore')
       const user = useAuthStore.getState().user
       if (!user) throw new Error('No autenticado')
 
