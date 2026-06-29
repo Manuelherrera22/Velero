@@ -236,14 +236,22 @@ const useAuthStore = create((set, get) => ({
 
   // Sign out
   signOut: async () => {
-    // Clear state immediately to avoid UI freezing
-    set({ user: null, session: null, profile: null })
+    console.log('[Auth] signOut: clearing state')
+    // 1. Clear Zustand state immediately
+    set({ user: null, session: null, profile: null, loading: false })
+    
+    // 2. Clear ALL local storage (Supabase tokens live here)
+    try { localStorage.clear() } catch (_) {}
+    try { sessionStorage.clear() } catch (_) {}
+    
+    // 3. Tell Supabase to invalidate the session on the server too
     try {
-      await supabase.auth.signOut()
-      localStorage.clear()
+      await supabase.auth.signOut({ scope: 'global' })
     } catch (err) {
-      console.error('Signout error:', err)
+      console.error('[Auth] signOut error:', err)
     }
+    
+    console.log('[Auth] signOut: complete')
   },
 
   // Computed
