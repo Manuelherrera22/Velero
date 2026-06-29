@@ -143,7 +143,7 @@ export default function ManageUsers() {
       )}
 
       <div className="metrics-tables" style={{ gridTemplateColumns: '1fr' }}>
-        {!loading && users.length > 0 && (
+        {users.length > 0 && (
           <div className="metrics-table glass">
             <h3 className="metrics-table__title"><Users size={18} /> Directorio de Usuarios</h3>
             <div className="metrics-table__rows">

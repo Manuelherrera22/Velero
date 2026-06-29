@@ -154,8 +154,8 @@ export default function MyBoats() {
           </div>
         )}
 
-        {/* Data Table */}
-        {!loading && boats.length > 0 && (
+        {/* Data Table — always visible when boats exist */}
+        {boats.length > 0 && (
           <div style={{ overflowX: 'auto', width: '100%', paddingBottom: '128px' }}>
             <table className="dash-table">
               <thead>

@@ -24,7 +24,7 @@ import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 
 // Version tag — check in console to confirm which build is deployed
-const BUILD_VERSION = '2026-06-29-v3'
+const BUILD_VERSION = '2026-06-29-v4'
 
 function App() {
   const initialize = useAuthStore((s) => s.initialize)

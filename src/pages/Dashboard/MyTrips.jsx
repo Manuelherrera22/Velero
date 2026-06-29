@@ -110,8 +110,8 @@ export default function MyTrips() {
           </div>
         )}
 
-        {/* The Data Table */}
-        {!loading && trips.length > 0 && (
+        {/* The Data Table — always visible when trips exist (even during background refetch) */}
+        {trips.length > 0 && (
           <div style={{ overflowX: 'auto', width: '100%', paddingBottom: '128px' }}>
             <table className="dash-table">
               <thead>

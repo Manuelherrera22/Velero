@@ -178,7 +178,7 @@ export default function ManageHotels() {
         </div>
 
         {/* Pending Ally Registration Queue */}
-        {!loading && pendingAffiliates.length > 0 && (
+        {pendingAffiliates.length > 0 && (
           <div className="item-card glass" style={{ marginBottom: 'var(--space-6)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
             <div className="item-card__header" style={{ marginBottom: 'var(--space-4)' }}>
               <h3 className="item-card__title" style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '8px' }}>

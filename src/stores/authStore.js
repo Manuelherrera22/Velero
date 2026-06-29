@@ -43,8 +43,17 @@ const useAuthStore = create((set, get) => ({
           // ONLY update session token — do NOT re-fetch profile or touch user/profile.
           set({ session })
         } else if (event === 'SIGNED_IN' && session?.user) {
-          const profile = await get().fetchProfile(session.user.id)
-          set({ user: session.user, session, profile, loading: false, initialized: true })
+          // If the same user is already loaded, just refresh the session silently.
+          // Supabase fires SIGNED_IN on every tab focus — don't re-fetch profile each time.
+          const currentUser = get().user
+          if (currentUser?.id === session.user.id) {
+            console.log('[Auth] listener: same user, silent session refresh')
+            set({ session })
+          } else {
+            console.log('[Auth] listener: new user, fetching profile')
+            const profile = await get().fetchProfile(session.user.id)
+            set({ user: session.user, session, profile, loading: false, initialized: true })
+          }
         } else if (event === 'SIGNED_OUT') {
           set({ user: null, session: null, profile: null, loading: false, initialized: true })
         }
