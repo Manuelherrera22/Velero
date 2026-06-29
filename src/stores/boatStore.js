@@ -11,6 +11,8 @@ const useBoatStore = create((set, get) => ({
 
   // Fetch boats for the current user
   fetchMyBoats: async () => {
+    const t0 = Date.now()
+    console.log('[Boats] fetchMyBoats started')
     set({ isLoadingBoats: true, error: null })
     try {
       const user = useAuthStore.getState().user
@@ -27,6 +29,7 @@ const useBoatStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
+      console.log(`[Boats] fetchMyBoats OK: ${data?.length} boats in ${Date.now() - t0}ms`)
       set({ boats: data || [], isLoadingBoats: false, error: null, _initialized: true })
       return data || []
     } catch (error) {

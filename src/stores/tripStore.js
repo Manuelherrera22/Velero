@@ -189,11 +189,14 @@ const useTripStore = create((set, get) => ({
 
   // ── Captain: fetch my trips ──
   fetchMyTrips: async () => {
+    const t0 = Date.now()
+    console.log('[Trips] fetchMyTrips started')
     set({ isLoadingMyTrips: true, error: null })
     try {
       // Use user from auth store instead of getSession() — avoids race with token refresh
       const user = useAuthStore.getState().user
       if (!user) {
+        console.log('[Trips] fetchMyTrips: no user, skipped')
         set({ isLoadingMyTrips: false })
         return []
       }
@@ -213,9 +216,11 @@ const useTripStore = create((set, get) => ({
         return d
       }, { label: 'fetchMyTrips', maxRetries: 1, baseDelay: 500 })
 
+      console.log(`[Trips] fetchMyTrips OK: ${data?.length} trips in ${Date.now() - t0}ms`)
       set({ trips: data || [], isLoadingMyTrips: false, error: null })
       return data || []
     } catch (error) {
+      console.error(`[Trips] fetchMyTrips FAILED in ${Date.now() - t0}ms:`, error.message)
       set({ error: error.message, isLoadingMyTrips: false })
       return []
     }

@@ -23,6 +23,7 @@ export function useRefetchOnFocus(callback, minInterval = 5000) {
       if (document.visibilityState === 'visible') {
         const now = Date.now()
         if (now - lastFetch.current > minInterval) {
+          console.log(`[Refetch] tab visible, refetching (${Math.round((now - lastFetch.current) / 1000)}s since last)`)
           lastFetch.current = now
           if (timerRef.current) clearTimeout(timerRef.current)
           // Small delay to let the tab settle

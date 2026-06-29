@@ -30,16 +30,17 @@ const useAuthStore = create((set, get) => ({
     // both call fetchProfile, and the second set() re-renders App.jsx,
     // which unmounts + remounts all child routes, discarding in-flight data fetches.
     let isInitializing = true
+    console.log('[Auth] initialize started')
 
     try {
       // 1. Register auth listener FIRST — but it will SKIP events while isInitializing=true
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         // During init, getSession() handles everything. Ignore listener events.
-        if (isInitializing) return
+        if (isInitializing) { console.log(`[Auth] listener: skipped ${event} (initializing)`); return }
 
+        console.log(`[Auth] listener: ${event}`)
         if (event === 'TOKEN_REFRESHED' && session) {
           // ONLY update session token — do NOT re-fetch profile or touch user/profile.
-          // This prevents App.jsx from re-rendering (which would unmount pages mid-navigation).
           set({ session })
         } else if (event === 'SIGNED_IN' && session?.user) {
           const profile = await get().fetchProfile(session.user.id)
@@ -69,9 +70,12 @@ const useAuthStore = create((set, get) => ({
       }
 
       if (session?.user) {
+        console.log('[Auth] session found, fetching profile...')
         const profile = await get().fetchProfile(session.user.id)
+        console.log(`[Auth] init complete: role=${profile?.role}`)
         set({ user: session.user, session, profile, loading: false, initialized: true })
       } else {
+        console.log('[Auth] no session, init complete')
         set({ loading: false, initialized: true })
       }
     } catch (error) {

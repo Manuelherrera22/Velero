@@ -85,6 +85,8 @@ const useBookingStore = create((set, get) => ({
 
   // Fetch bookings for captain's trips
   fetchCaptainBookings: async () => {
+    const t0 = Date.now()
+    console.log('[Bookings] fetchCaptainBookings started')
     set({ isLoadingBookings: true, error: null })
     try {
       const user = useAuthStore.getState().user
@@ -117,9 +119,11 @@ const useBookingStore = create((set, get) => ({
         .abortSignal(AbortSignal.timeout(6000))
 
       if (error) throw error
+      console.log(`[Bookings] fetchCaptainBookings OK: ${data?.length} bookings in ${Date.now() - t0}ms`)
       set({ bookings: data || [], isLoadingBookings: false, error: null })
       return data || []
     } catch (error) {
+      console.error(`[Bookings] fetchCaptainBookings FAILED in ${Date.now() - t0}ms:`, error.message)
       set({ error: error.message, isLoadingBookings: false })
       return []
     }
