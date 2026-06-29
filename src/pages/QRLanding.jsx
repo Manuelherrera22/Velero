@@ -34,6 +34,7 @@ export default function QRLanding() {
           .select('*, hotel:hotels!hotel_id(*, navigation_zone:navigation_zones!navigation_zone_id(name))')
           .eq('code', code)
           .eq('is_active', true)
+          .abortSignal(AbortSignal.timeout(10000))
           .single()
         if (e) throw e
         return d
@@ -76,7 +77,7 @@ export default function QRLanding() {
       }
 
       const tripsData = await withRetry(async () => {
-        const { data: d, error: e } = await query
+        const { data: d, error: e } = await query.abortSignal(AbortSignal.timeout(10000))
         if (e) throw e
         return d
       }, { label: 'fetchQRTrips', maxRetries: 2 }).catch(err => {

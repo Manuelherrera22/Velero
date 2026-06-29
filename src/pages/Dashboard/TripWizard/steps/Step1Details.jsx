@@ -14,6 +14,7 @@ const Step1Details = () => {
           .select('*')
           .eq('is_active', true)
           .order('name', { ascending: true })
+          .abortSignal(AbortSignal.timeout(10000))
         if (!error && data) {
           setNavigationZones(data)
         }

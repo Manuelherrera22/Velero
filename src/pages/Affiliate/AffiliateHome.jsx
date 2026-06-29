@@ -30,6 +30,7 @@ export default function AffiliateHome() {
         .from('hotels')
         .select('id')
         .eq('owner_id', user.id)
+        .abortSignal(AbortSignal.timeout(10000))
 
       if (!hotels?.length) {
         setLoading(false)
@@ -43,6 +44,7 @@ export default function AffiliateHome() {
         .from('qr_codes')
         .select('scan_count, code')
         .in('hotel_id', hotelIds)
+        .abortSignal(AbortSignal.timeout(10000))
 
       const totalScans = qrs?.reduce((acc, curr) => acc + (curr.scan_count || 0), 0) || 0
       const activeQRs = qrs?.length || 0
@@ -58,6 +60,7 @@ export default function AffiliateHome() {
           .select('affiliate_commission')
           .in('qr_code', qrCodes)
           .eq('status', 'confirmed')
+          .abortSignal(AbortSignal.timeout(10000))
 
         totalBookings = bookings?.length || 0
         totalCommissions = bookings?.reduce((acc, curr) => acc + (curr.affiliate_commission || 0), 0) || 0

@@ -22,7 +22,7 @@ export default function ManageCoupons() {
   const fetchCoupons = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase.from('coupons').select('*').order('created_at', { ascending: false }).abortSignal(AbortSignal.timeout(6000))
+      const { data, error } = await supabase.from('coupons').select('*').order('created_at', { ascending: false }).abortSignal(AbortSignal.timeout(10000))
       if (error) throw error
       setCoupons(data || [])
     } catch (err) {
@@ -64,7 +64,7 @@ export default function ManageCoupons() {
       .select('id')
       .eq('code', codeUpper)
       .limit(1)
-      .abortSignal(AbortSignal.timeout(6000))
+      .abortSignal(AbortSignal.timeout(10000))
 
     if (existing && existing.length > 0) {
       alert("⚠️ Error: Ya existe un cupón con este código (incluso en históricos). Por favor usa otro nombre.")

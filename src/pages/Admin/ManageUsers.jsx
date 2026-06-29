@@ -26,7 +26,7 @@ export default function ManageUsers() {
         query = query.eq('role', filter)
       }
 
-      const { data, error } = await query.abortSignal(AbortSignal.timeout(6000))
+      const { data, error } = await query.abortSignal(AbortSignal.timeout(10000))
       if (error) throw error
       setUsers(data || [])
     } catch (e) {

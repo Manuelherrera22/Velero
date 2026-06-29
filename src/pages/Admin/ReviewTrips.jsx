@@ -29,7 +29,7 @@ export default function ReviewTrips() {
         query = query.eq('status', filter)
       }
 
-      const { data, error } = await query.abortSignal(AbortSignal.timeout(6000))
+      const { data, error } = await query.abortSignal(AbortSignal.timeout(10000))
       if (error) throw error
       setTrips(data || [])
     } catch (e) {

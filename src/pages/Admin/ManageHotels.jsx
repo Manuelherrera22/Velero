@@ -35,7 +35,7 @@ export default function ManageHotels() {
         .from('profiles')
         .select('id, full_name, email, business_name, business_location, bank_alias, bank_holder, navigation_zone_id')
         .eq('role', 'affiliate')
-        .abortSignal(AbortSignal.timeout(6000))
+        .abortSignal(AbortSignal.timeout(10000))
       if (error) throw error
       setAffiliates(data || [])
     } catch (err) {
@@ -50,7 +50,7 @@ export default function ManageHotels() {
         .select('*')
         .eq('is_active', true)
         .order('name', { ascending: true })
-        .abortSignal(AbortSignal.timeout(6000))
+        .abortSignal(AbortSignal.timeout(10000))
       if (!error && data) {
         setZones(data)
       }
@@ -66,7 +66,7 @@ export default function ManageHotels() {
         .from('hotels')
         .select('*, qr_codes(*)')
         .order('created_at', { ascending: false })
-        .abortSignal(AbortSignal.timeout(6000))
+        .abortSignal(AbortSignal.timeout(10000))
       
       if (error) throw error
       setHotels(data || [])

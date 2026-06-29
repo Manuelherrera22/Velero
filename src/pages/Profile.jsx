@@ -42,16 +42,20 @@ export default function Profile() {
   useEffect(() => {
     if (profile?.role === 'affiliate') {
       // Fetch navigation zones
-      supabase.from('navigation_zones').select('*').order('name').then(({ data }) => {
-        setZones(data || [])
-      })
+      supabase.from('navigation_zones').select('*').order('name')
+        .abortSignal(AbortSignal.timeout(10000))
+        .then(({ data }) => {
+          setZones(data || [])
+        }).catch(err => console.error('Error fetching zones:', err))
       // Fetch the aliado's hotel
-      supabase.from('hotels').select('*').eq('owner_id', profile.id).limit(1).single().then(({ data }) => {
-        if (data) {
-          setMyHotel(data)
-          setSelectedZone(data.navigation_zone_id || '')
-        }
-      })
+      supabase.from('hotels').select('*').eq('owner_id', profile.id).limit(1).single()
+        .abortSignal(AbortSignal.timeout(10000))
+        .then(({ data }) => {
+          if (data) {
+            setMyHotel(data)
+            setSelectedZone(data.navigation_zone_id || '')
+          }
+        }).catch(err => console.error('Error fetching hotel:', err))
     }
   }, [profile])
 

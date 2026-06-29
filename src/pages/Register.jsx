@@ -67,7 +67,9 @@ export default function Register() {
         .select('id, name')
         .eq('is_active', true)
         .order('name', { ascending: true })
+        .abortSignal(AbortSignal.timeout(10000))
         .then(({ data }) => { if (data) setZones(data) })
+        .catch(err => console.error('Error fetching zones:', err))
     }
   }, [role])
 
