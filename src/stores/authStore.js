@@ -52,7 +52,16 @@ const useAuthStore = create((set, get) => ({
           } else {
             console.log('[Auth] listener: new user, fetching profile')
             const profile = await get().fetchProfile(session.user.id)
-            set({ user: session.user, session, profile, loading: false, initialized: true })
+            if (profile) {
+              set({ user: session.user, session, profile, loading: false, initialized: true })
+            } else {
+              // Profile fetch failed (permission denied / corrupt token) — don't set broken state
+              console.warn('[Auth] listener: profile fetch failed, clearing corrupt session')
+              set({ user: null, session: null, profile: null, loading: false, initialized: true })
+              try { localStorage.clear() } catch (_) {}
+              try { sessionStorage.clear() } catch (_) {}
+              supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+            }
           }
         } else if (event === 'SIGNED_OUT') {
           set({ user: null, session: null, profile: null, loading: false, initialized: true })
@@ -112,7 +121,11 @@ const useAuthStore = create((set, get) => ({
 
       return data
     } catch (err) {
-      console.error('Profile fetch exception:', err)
+      console.error('[Auth] fetchProfile failed:', err.message)
+      // If permission denied, the session token is corrupt/revoked
+      if (err.message?.includes('permission denied')) {
+        console.warn('[Auth] permission denied — session is corrupt, will sign out')
+      }
       return null
     }
   },

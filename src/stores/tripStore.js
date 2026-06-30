@@ -166,6 +166,57 @@ const useTripStore = create((set, get) => ({
       return { trip: { ...trip, avgRating, reviewCount: reviews?.length || 0 }, dates, addons, reviews }
     } catch (error) {
       console.error('Error en fetchTrip:', error)
+      
+      // If "permission denied" — the session token is corrupt. Clear it and retry once.
+      if (error.message?.includes('permission denied') || error.message?.includes('401')) {
+        console.warn('[Trips] fetchTrip: corrupt session detected, clearing and retrying as anonymous')
+        try { localStorage.clear() } catch (_) {}
+        try { sessionStorage.clear() } catch (_) {}
+        useAuthStore.getState().signOut?.().catch(() => {})
+        
+        // Retry the fetch — now without auth token, Supabase treats it as anon
+        try {
+          const { data: trip2, error: e2 } = await supabase
+            .from('trips')
+            .select(`
+              *,
+              captain:profiles!captain_id(id, full_name, avatar_url, is_verified, bio, location),
+              boat:boats!boat_id(*)
+            `)
+            .eq('id', get().currentTrip ? tripId : tripId)
+            .single()
+            .abortSignal(AbortSignal.timeout(6000))
+          
+          if (!e2 && trip2) {
+            const [datesR, addonsR, reviewsR] = await Promise.allSettled([
+              supabase.from('trip_dates').select('*').eq('trip_id', tripId).eq('is_active', true)
+                .gte('date', new Date().toISOString().split('T')[0]).order('date', { ascending: true })
+                .abortSignal(AbortSignal.timeout(5000)),
+              supabase.from('trip_addons').select('*').eq('trip_id', tripId).eq('is_active', true)
+                .abortSignal(AbortSignal.timeout(5000)),
+              supabase.from('reviews').select(`*, user:profiles!user_id(full_name, avatar_url)`)
+                .eq('trip_id', tripId).eq('is_published', true).order('created_at', { ascending: false })
+                .abortSignal(AbortSignal.timeout(5000)),
+            ])
+            const dates = datesR.status === 'fulfilled' ? datesR.value.data : []
+            const addons = addonsR.status === 'fulfilled' ? addonsR.value.data : []
+            const reviews = reviewsR.status === 'fulfilled' ? reviewsR.value.data : []
+            const avgRating = reviews?.length ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : null
+            
+            set({
+              currentTrip: { ...trip2, avgRating, reviewCount: reviews?.length || 0 },
+              tripDates: dates || [],
+              tripAddons: addons || [],
+              isLoadingTrip: false,
+              error: null,
+            })
+            return { trip: trip2, dates, addons, reviews }
+          }
+        } catch (retryErr) {
+          console.error('[Trips] fetchTrip retry also failed:', retryErr.message)
+        }
+      }
+      
       set({ error: error.message, isLoadingTrip: false })
       return null
     }
