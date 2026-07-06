@@ -463,27 +463,194 @@
   margin-top: var(--space-2);
 }
 
-/* Responsive */
+/* Responsive — Tablet */
 @media (max-width: 768px) {
-  .gc-amounts {
-    grid-template-columns: 1fr;
-    max-width: 320px;
+  .gift-cards {
+    padding: var(--space-10) 0;
+  }
+
+  .gc-hero {
+    margin-bottom: var(--space-10);
+    padding: 0 var(--space-4);
   }
 
   .gc-hero__title {
     font-size: var(--text-3xl);
   }
 
+  .gc-hero__subtitle {
+    font-size: var(--text-base);
+  }
+
+  .gc-amounts {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+    padding: 0 var(--space-4);
+  }
+
+  .gc-amount-card {
+    padding: var(--space-5) var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    text-align: left;
+  }
+
+  .gc-amount-card__value {
+    font-size: var(--text-2xl);
+    margin-bottom: 0;
+  }
+
+  .gc-amount-card__label {
+    font-size: var(--text-xs);
+  }
+
+  .gc-amount-card__check {
+    top: 50%;
+    right: var(--space-4);
+    transform: translateY(-50%) scale(0.5);
+  }
+
+  .gc-amount-card--selected .gc-amount-card__check {
+    transform: translateY(-50%) scale(1);
+  }
+
+  .gc-form {
+    padding: 0 var(--space-4);
+    margin-bottom: var(--space-8);
+  }
+
+  .gc-cta {
+    padding: 0 var(--space-4);
+  }
+
+  .gc-cta__button {
+    font-size: var(--text-base);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .gc-preview {
+    padding: 0 var(--space-4);
+    margin-top: var(--space-8);
+  }
+
+  .gc-preview__card {
+    padding: var(--space-8) var(--space-6);
+  }
+
   .gc-preview__value {
     font-size: var(--text-4xl);
   }
 
+  .gc-preview__logo {
+    height: 32px;
+    margin-bottom: var(--space-4);
+  }
+
   .gc-info {
     grid-template-columns: 1fr;
+    margin-top: var(--space-10);
+    padding: 0 var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .gc-info__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    text-align: left;
+    padding: var(--space-4);
+  }
+
+  .gc-info__icon {
+    margin: 0;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Confirmation page */
+  .gc-confirm {
+    padding: var(--space-10) 0;
+  }
+
+  .gc-confirm__title {
+    font-size: var(--text-2xl);
+    padding: 0 var(--space-4);
+  }
+
+  .gc-confirm__subtitle {
+    font-size: var(--text-base);
+    padding: 0 var(--space-4);
+    margin-bottom: var(--space-6);
   }
 
   .gc-confirm__actions {
     flex-direction: column;
+    align-items: stretch;
+    padding: 0 var(--space-4);
+  }
+
+  .gc-confirm__btn {
+    justify-content: center;
+    padding: var(--space-4) var(--space-6);
+  }
+}
+
+/* Responsive — Mobile */
+@media (max-width: 480px) {
+  .gift-cards {
+    padding: var(--space-8) 0;
+  }
+
+  .gc-hero {
+    margin-bottom: var(--space-8);
+  }
+
+  .gc-hero__badge {
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-3);
+  }
+
+  .gc-hero__title {
+    font-size: var(--text-2xl);
+  }
+
+  .gc-hero__subtitle {
+    font-size: var(--text-sm);
+  }
+
+  .gc-amounts {
+    max-width: 100%;
+  }
+
+  .gc-amount-card__value {
+    font-size: var(--text-xl);
+  }
+
+  .gc-preview__card {
+    padding: var(--space-6) var(--space-4);
+    border-radius: var(--radius-lg);
+  }
+
+  .gc-preview__value {
+    font-size: var(--text-3xl);
+  }
+
+  .gc-preview__footer {
+    flex-direction: column;
     align-items: center;
+    gap: var(--space-2);
+  }
+
+  .gc-confirm__icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .gc-confirm__title {
+    font-size: var(--text-xl);
   }
 }
