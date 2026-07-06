@@ -49,10 +49,12 @@ export default function Header() {
           <a href="/#testimonios" className="header__link">
             Testimonios
           </a>
+          {/* Gift Cards link — descomentar cuando Hernan apruebe:
           <Link to="/gift-cards" className="header__link">
             <Gift size={16} />
             Gift Cards
           </Link>
+          */}
 
           {user ? (
             <>
