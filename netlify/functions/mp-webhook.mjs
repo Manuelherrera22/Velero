@@ -22,55 +22,73 @@ export async function handler(event) {
       const paymentData = await mpResponse.json()
 
       if (paymentData.status === 'approved') {
-        const bookingId = paymentData.external_reference
+        const externalRef = paymentData.external_reference
 
-        if (bookingId) {
-          // 2. Update booking status in Supabase
+        if (externalRef) {
+          // 2. Connect to Supabase
           const supabaseUrl = process.env.VITE_SUPABASE_URL
           // Idealmente usar SERVICE_ROLE_KEY para evadir RLS en el backend
           const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
           const supabase = createClient(supabaseUrl, supabaseKey)
 
-          const { error } = await supabase
-            .from('bookings')
-            .update({ status: 'confirmed' })
-            .eq('id', bookingId)
+          // Check if this is a gift card payment (gc_ prefix)
+          if (externalRef.startsWith('gc_')) {
+            const giftCardId = externalRef.replace('gc_', '')
+            const { error: gcError } = await supabase
+              .from('gift_cards')
+              .update({ status: 'confirmed', payment_id: String(paymentId) })
+              .eq('id', giftCardId)
 
-          if (error) {
-            console.error('Error updating booking:', error)
-            return { statusCode: 500, body: 'Error updating database' }
-          }
-          
-          console.log(`Booking ${bookingId} marked as PAID.`)
-          
-          // Fetch booking details to send the ticket
-          const { data: bookingDetails } = await supabase
-            .from('bookings')
-            .select('*, trip:trips(*), trip_date:trip_dates(*)')
-            .eq('id', bookingId)
-            .single()
+            if (gcError) {
+              console.error('Error updating gift card:', gcError)
+              return { statusCode: 500, body: 'Error updating gift card' }
+            }
+            console.log(`Gift card ${giftCardId} marked as CONFIRMED.`)
+          } else {
+            // Regular booking payment
+            const bookingId = externalRef
 
-          if (bookingDetails) {
-            try {
-              const protocol = event.headers['x-forwarded-proto'] || 'https'
-              const host = event.headers.host
-              await fetch(`${protocol}://${host}/api/send-ticket`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  bookingId: bookingId,
-                  trip: bookingDetails.trip?.title,
-                  date: bookingDetails.trip_date ? { date: bookingDetails.trip_date.date, start_time: bookingDetails.trip_date.start_time } : null,
-                  email: bookingDetails.guest_email || bookingDetails.metadata?.contact?.email,
-                  name: bookingDetails.guest_name || bookingDetails.metadata?.contact?.name,
-                  guests: bookingDetails.quantity,
-                  total: bookingDetails.total,
-                  currency: bookingDetails.metadata?.currency || 'ARS'
+            const { error } = await supabase
+              .from('bookings')
+              .update({ status: 'confirmed' })
+              .eq('id', bookingId)
+
+            if (error) {
+              console.error('Error updating booking:', error)
+              return { statusCode: 500, body: 'Error updating database' }
+            }
+            
+            console.log(`Booking ${bookingId} marked as PAID.`)
+            
+            // Fetch booking details to send the ticket
+            const { data: bookingDetails } = await supabase
+              .from('bookings')
+              .select('*, trip:trips(*), trip_date:trip_dates(*)')
+              .eq('id', bookingId)
+              .single()
+
+            if (bookingDetails) {
+              try {
+                const protocol = event.headers['x-forwarded-proto'] || 'https'
+                const host = event.headers.host
+                await fetch(`${protocol}://${host}/api/send-ticket`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    bookingId: bookingId,
+                    trip: bookingDetails.trip?.title,
+                    date: bookingDetails.trip_date ? { date: bookingDetails.trip_date.date, start_time: bookingDetails.trip_date.start_time } : null,
+                    email: bookingDetails.guest_email || bookingDetails.metadata?.contact?.email,
+                    name: bookingDetails.guest_name || bookingDetails.metadata?.contact?.name,
+                    guests: bookingDetails.quantity,
+                    total: bookingDetails.total,
+                    currency: bookingDetails.metadata?.currency || 'ARS'
+                  })
                 })
-              })
-              console.log('Ticket sent automatically from webhook.')
-            } catch (emailErr) {
-              console.error('Error triggering send-ticket from webhook:', emailErr)
+                console.log('Ticket sent automatically from webhook.')
+              } catch (emailErr) {
+                console.error('Error triggering send-ticket from webhook:', emailErr)
+              }
             }
           }
         }

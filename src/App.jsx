@@ -19,12 +19,14 @@ import Review from './pages/Review'
 import Terms from './pages/Terms'
 import Cookies from './pages/Cookies'
 import Privacy from './pages/Privacy'
+import GiftCards from './pages/GiftCards'
+import GiftCardConfirmation from './pages/GiftCardConfirmation'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 
 // Version tag — check in console to confirm which build is deployed
-const BUILD_VERSION = '2026-06-30-v5'
+const BUILD_VERSION = '2026-07-06-v6'
 
 function App() {
   const initialize = useAuthStore((s) => s.initialize)
@@ -79,6 +81,8 @@ function App() {
           <Route path="/terminos" element={<Terms />} />
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/privacidad" element={<Privacy />} />
+          <Route path="/gift-cards" element={<GiftCards />} />
+          <Route path="/gift-cards/confirmacion" element={<GiftCardConfirmation />} />
           {/* Protected routes */}
           <Route path="/perfil" element={
             <ProtectedRoute>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X, Sailboat, User, LogOut, LayoutDashboard, Ticket, Building2, Shield } from 'lucide-react'
+import { Menu, X, Sailboat, User, LogOut, LayoutDashboard, Ticket, Building2, Shield, Gift } from 'lucide-react'
 import useAuthStore from '../../stores/authStore'
 import Notifications from './Notifications'
 import './Header.css'
@@ -49,6 +49,10 @@ export default function Header() {
           <a href="/#testimonios" className="header__link">
             Testimonios
           </a>
+          <Link to="/gift-cards" className="header__link">
+            <Gift size={16} />
+            Gift Cards
+          </Link>
 
           {user ? (
             <>
