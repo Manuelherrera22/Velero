@@ -126,7 +126,20 @@ const TripWizard = () => {
       if (existingId) {
         // Don't change status when auto-saving an existing trip (could be published)
         const { status, ...updateData } = draftData
-        await supabase.from('trips').update(updateData).eq('id', existingId)
+        const { data: updatedRows, error: updateError } = await supabase
+          .from('trips')
+          .update(updateData)
+          .eq('id', existingId)
+          .select('id')
+          
+        // If the row was deleted from the database (0 rows updated), fallback to insert
+        if (!updateError && (!updatedRows || updatedRows.length === 0)) {
+          console.warn('[AutoSave] Draft not found in DB, falling back to insert')
+          const { data } = await supabase.from('trips').insert(draftData).select('id').single()
+          if (data?.id) {
+            useTripWizardStore.getState().updateFormData({ id: data.id })
+          }
+        }
       } else {
         const { data } = await supabase.from('trips').insert(draftData).select('id').single()
         if (data?.id) {

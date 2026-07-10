@@ -234,13 +234,16 @@ const Step10Finalize = () => {
       }
 
       let tripInsertPromise;
+      let isUpdateFallback = false;
+
       if (formData.id) {
+        // Use maybeSingle instead of single so it doesn't throw if 0 rows are updated
         tripInsertPromise = supabase
           .from('trips')
           .update(tripData)
           .eq('id', formData.id)
           .select()
-          .single()
+          .maybeSingle()
       } else {
         tripInsertPromise = supabase
           .from('trips')
@@ -249,12 +252,26 @@ const Step10Finalize = () => {
           .single()
       }
 
-      const { data: trip, error: tripError } = await Promise.race([
+      let { data: trip, error: tripError } = await Promise.race([
         tripInsertPromise,
         new Promise((_, reject) => setTimeout(() => reject(new Error('La base de datos tardó demasiado. Verificá tu conexión a internet e intentá nuevamente.')), 120000))
       ])
 
       if (tripError) throw tripError
+
+      // If we tried to update but the trip was deleted from DB (returns no data, no error)
+      if (!trip && formData.id) {
+        console.warn('Trip not found for update, falling back to insert')
+        isUpdateFallback = true
+        const { data: newTrip, error: insertError } = await supabase
+          .from('trips')
+          .insert(tripData)
+          .select()
+          .single()
+        
+        if (insertError) throw insertError
+        trip = newTrip
+      }
 
       // 2. Save dates
       if (formData.custom_dates && formData.custom_dates.length > 0) {
