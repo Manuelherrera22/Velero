@@ -8,11 +8,15 @@ CREATE TABLE IF NOT EXISTS gift_cards (
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'redeemed', 'expired')),
   buyer_email TEXT NOT NULL,
   recipient_name TEXT,
+  sender_name TEXT,
   message TEXT,
   payment_id TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   redeemed_at TIMESTAMPTZ
 );
+
+-- Note: If table already exists, run this to add the sender_name column:
+-- ALTER TABLE gift_cards ADD COLUMN IF NOT EXISTS sender_name TEXT;
 
 -- Enable RLS
 ALTER TABLE gift_cards ENABLE ROW LEVEL SECURITY;
@@ -26,9 +30,6 @@ CREATE POLICY "Anyone can read confirmed gift cards"
 CREATE POLICY "Anyone can read their own pending gift cards by id"
   ON gift_cards FOR SELECT
   USING (true);
-
--- Policy: service role can insert/update (handled by Netlify functions with service key)
--- No additional policy needed — service role bypasses RLS
 
 -- Index for fast code lookups
 CREATE INDEX IF NOT EXISTS idx_gift_cards_code ON gift_cards(code);

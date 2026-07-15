@@ -3,9 +3,9 @@ import { Gift, Check, CreditCard, Send, Download, Loader } from 'lucide-react'
 import './GiftCards.css'
 
 const AMOUNTS = [
-  { value: 50000, label: '$50.000', description: 'Paseo compartido' },
-  { value: 100000, label: '$100.000', description: 'Experiencia privada' },
-  { value: 200000, label: '$200.000', description: 'Experiencia premium' },
+  { value: 50000, label: '$50.000' },
+  { value: 100000, label: '$100.000' },
+  { value: 200000, label: '$200.000' },
 ]
 
 function generatePreviewCode() {
@@ -20,6 +20,7 @@ function generatePreviewCode() {
 export default function GiftCards() {
   const [selectedAmount, setSelectedAmount] = useState(null)
   const [recipientName, setRecipientName] = useState('')
+  const [senderName, setSenderName] = useState('')
   const [buyerEmail, setBuyerEmail] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -48,6 +49,7 @@ export default function GiftCards() {
           amount: selectedAmount,
           buyerEmail: buyerEmail.trim(),
           recipientName: recipientName.trim(),
+          senderName: senderName.trim(),
           message: message.trim(),
         }),
         signal: controller.signal,
@@ -79,14 +81,12 @@ export default function GiftCards() {
       <div className="container">
         {/* Hero */}
         <div className="gc-hero">
-          <span className="gc-hero__badge">
-            <Gift size={14} />
-            Regala una experiencia
-          </span>
-          <h1 className="gc-hero__title">Gift Cards Kailu</h1>
+          <div className="gc-hero__image-container">
+            <img src="/demo-1.png" alt="Gift Cards Kailu" className="gc-hero__image" />
+            <h1 className="gc-hero__title">Gift Cards Kailu</h1>
+          </div>
           <p className="gc-hero__subtitle">
-            Regala una experiencia nautica inolvidable. Elige el monto, 
-            completa la compra y recibe un PDF listo para obsequiar.
+            Hay regalos que se guardan. Otros se viven. Regalá un momento. Lo demás, llega solo.
           </p>
         </div>
 
@@ -102,7 +102,6 @@ export default function GiftCards() {
                 <Check size={14} />
               </div>
               <div className="gc-amount-card__value">{amount.label}</div>
-              <div className="gc-amount-card__label">{amount.description}</div>
             </div>
           ))}
         </div>
@@ -124,7 +123,7 @@ export default function GiftCards() {
 
           <div className="gc-form__group">
             <label className="gc-form__label">
-              Nombre del destinatario <span className="gc-form__optional">(opcional)</span>
+              Nombre del destinatario (Para) <span className="gc-form__optional">(opcional)</span>
             </label>
             <input
               type="text"
@@ -132,6 +131,19 @@ export default function GiftCards() {
               placeholder="Ej: Maria"
               value={recipientName}
               onChange={(e) => setRecipientName(e.target.value)}
+            />
+          </div>
+
+          <div className="gc-form__group">
+            <label className="gc-form__label">
+              Tu nombre o seudónimo (De) <span className="gc-form__optional">(opcional)</span>
+            </label>
+            <input
+              type="text"
+              className="gc-form__input"
+              placeholder="Ej: Juan"
+              value={senderName}
+              onChange={(e) => setSenderName(e.target.value)}
             />
           </div>
 
@@ -165,7 +177,7 @@ export default function GiftCards() {
               <>
                 <CreditCard size={20} />
                 {selectedAmount 
-                  ? `Comprar Gift Card — ${selectedData?.label}` 
+                  ? `Quiero regalar` 
                   : 'Selecciona un monto'}
               </>
             )}
@@ -180,15 +192,23 @@ export default function GiftCards() {
             <div className="gc-preview__card">
               <img src="/logo-azul.png" alt="Kailu" className="gc-preview__logo" />
               <div className="gc-preview__label">Gift Card</div>
+              <div className="gc-preview__names">
+                {recipientName && (
+                  <div className="gc-preview__recipient">Para: {recipientName}</div>
+                )}
+                {senderName && (
+                  <div className="gc-preview__sender">De: {senderName}</div>
+                )}
+              </div>
               <div className="gc-preview__value">{selectedData?.label}</div>
-              {recipientName && (
-                <div className="gc-preview__recipient">Para: {recipientName}</div>
-              )}
               <div className="gc-preview__footer">
                 <span className="gc-preview__brand">kailu.travel</span>
                 <span className="gc-preview__code">{generatePreviewCode()}</span>
               </div>
             </div>
+            <p className="gc-preview__disclaimer">
+              *Válida por 12 meses, aplicable a cualquiera de las experiencias publicadas.
+            </p>
           </div>
         )}
 
@@ -207,7 +227,7 @@ export default function GiftCards() {
           <div className="gc-info__item">
             <div className="gc-info__icon"><Send size={22} /></div>
             <div className="gc-info__title">Descarga y comparte</div>
-            <div className="gc-info__desc">Recibe un PDF listo para enviar</div>
+            <div className="gc-info__desc">Recibe un PDF listo para enviar (incluso por WhatsApp)</div>
           </div>
         </div>
       </div>

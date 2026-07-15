@@ -101,12 +101,19 @@ export default function GiftCardConfirmation() {
     doc.setTextColor(255, 255, 255)
     doc.text(formatPrice(giftCard.amount), 20, 60)
 
-    // Recipient
+    // Recipient and Sender
     if (giftCard.recipient_name) {
       doc.setFontSize(11)
       doc.setFont('helvetica', 'italic')
       doc.setTextColor(180, 220, 230)
       doc.text(`Para: ${giftCard.recipient_name}`, 20, 72)
+    }
+    
+    if (giftCard.sender_name) {
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'italic')
+      doc.setTextColor(180, 220, 230)
+      doc.text(`De: ${giftCard.sender_name}`, 20, giftCard.recipient_name ? 78 : 72)
     }
 
     // Message
@@ -115,7 +122,12 @@ export default function GiftCardConfirmation() {
       doc.setFont('helvetica', 'italic')
       doc.setTextColor(150, 190, 200)
       const msgLines = doc.splitTextToSize(`"${giftCard.message}"`, 120)
-      doc.text(msgLines, 20, giftCard.recipient_name ? 80 : 72)
+      
+      let msgY = 72
+      if (giftCard.recipient_name && giftCard.sender_name) msgY = 85
+      else if (giftCard.recipient_name || giftCard.sender_name) msgY = 78
+      
+      doc.text(msgLines, 20, msgY)
     }
 
     // Divider line
@@ -206,10 +218,15 @@ export default function GiftCardConfirmation() {
           <div className="gc-preview__card">
             <img src="/logo-azul.png" alt="Kailu" className="gc-preview__logo" />
             <div className="gc-preview__label">Gift Card</div>
+            <div className="gc-preview__names">
+              {giftCard.recipient_name && (
+                <div className="gc-preview__recipient">Para: {giftCard.recipient_name}</div>
+              )}
+              {giftCard.sender_name && (
+                <div className="gc-preview__sender">De: {giftCard.sender_name}</div>
+              )}
+            </div>
             <div className="gc-preview__value">{formatPrice(giftCard.amount)}</div>
-            {giftCard.recipient_name && (
-              <div className="gc-preview__recipient">Para: {giftCard.recipient_name}</div>
-            )}
             <div className="gc-preview__footer">
               <span className="gc-preview__brand">kailu.travel</span>
               <span className="gc-preview__code">{giftCard.code}</span>

@@ -7,7 +7,7 @@ export async function handler(event) {
   }
 
   try {
-    const { amount, buyerEmail, recipientName, message } = JSON.parse(event.body)
+    const { amount, buyerEmail, recipientName, senderName, message } = JSON.parse(event.body)
 
     if (!amount || !buyerEmail) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing amount or email' }) }
@@ -39,6 +39,7 @@ export async function handler(event) {
         status: 'pending',
         buyer_email: buyerEmail,
         recipient_name: recipientName || null,
+        sender_name: senderName || null,
         message: message || null,
       })
       .select()
