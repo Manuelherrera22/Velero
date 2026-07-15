@@ -50,13 +50,27 @@ export async function handler(event) {
       return { statusCode: 500, body: JSON.stringify({ error: 'Error creating gift card' }) }
     }
 
+    const origin = event.headers.origin || 'https://kailu.travel'
+
+    // Bypass for testing WhatsApp and Confirmation Page flow without real money
+    if (buyerEmail.toLowerCase() === 'test@kailu.travel') {
+      await supabase
+        .from('gift_cards')
+        .update({ status: 'confirmed' })
+        .eq('id', giftCard.id)
+        
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ init_point: `${origin}/gift-cards/confirmacion?id=${giftCard.id}` })
+      }
+    }
+
     // Create Mercado Pago preference
     const client = new MercadoPagoConfig({
       accessToken: process.env.MP_ACCESS_TOKEN
     })
 
     const preference = new Preference(client)
-    const origin = event.headers.origin || 'https://kailu.travel'
 
     const formatPrice = (p) => `$${Number(p).toLocaleString('es-AR')}`
 
