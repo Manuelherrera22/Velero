@@ -96,21 +96,21 @@ export default function GiftCardConfirmation() {
     doc.text('Experiencias Nauticas', 48, 35)
 
     // Value
-    doc.setFontSize(36)
+    doc.setFontSize(28)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(255, 255, 255)
     doc.text(formatPrice(giftCard.amount), 20, 60)
 
     // Recipient and Sender
     if (giftCard.recipient_name) {
-      doc.setFontSize(11)
+      doc.setFontSize(14)
       doc.setFont('helvetica', 'italic')
       doc.setTextColor(180, 220, 230)
       doc.text(`Para: ${giftCard.recipient_name}`, 20, 72)
     }
     
     if (giftCard.sender_name) {
-      doc.setFontSize(11)
+      doc.setFontSize(14)
       doc.setFont('helvetica', 'italic')
       doc.setTextColor(180, 220, 230)
       doc.text(`De: ${giftCard.sender_name}`, 20, giftCard.recipient_name ? 78 : 72)
@@ -118,7 +118,7 @@ export default function GiftCardConfirmation() {
 
     // Message
     if (giftCard.message) {
-      doc.setFontSize(9)
+      doc.setFontSize(10)
       doc.setFont('helvetica', 'italic')
       doc.setTextColor(150, 190, 200)
       const msgLines = doc.splitTextToSize(`"${giftCard.message}"`, 120)
