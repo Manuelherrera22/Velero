@@ -152,7 +152,8 @@ export default function GiftCardConfirmation() {
     doc.setFontSize(7)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(100, 120, 140)
-    doc.text('Presenta este codigo al momento de reservar en kailu.travel', 20, 112)
+    doc.text('Para canjear tu regalo, contactanos por WhatsApp presentando este codigo', 20, 112)
+    doc.text('*Valida por 6 meses.', 20, 116)
 
     // Save
     doc.save(`GiftCard-Kailu-${giftCard.code}.pdf`)

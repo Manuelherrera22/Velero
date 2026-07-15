@@ -207,7 +207,7 @@ export default function GiftCards() {
               </div>
             </div>
             <p className="gc-preview__disclaimer">
-              *Válida por 12 meses, aplicable a cualquiera de las experiencias publicadas.
+              *Válida por 6 meses, aplicable a cualquiera de las experiencias publicadas.
             </p>
           </div>
         )}
