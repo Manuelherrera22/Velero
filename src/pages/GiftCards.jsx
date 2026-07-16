@@ -83,7 +83,7 @@ export default function GiftCards() {
         {/* Hero */}
         <div className="gc-hero">
           <div className="gc-hero__image-container">
-            <img src="/demo-1.png" alt="Gift Cards Kailu" className="gc-hero__image" />
+            <img src="/foto-gift.jpeg" alt="Gift Cards Kailu" className="gc-hero__image" />
             <h1 className="gc-hero__title">Gift Cards Kailu</h1>
           </div>
           <p className="gc-hero__subtitle">
