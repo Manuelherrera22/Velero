@@ -167,6 +167,15 @@ export default function GiftCardConfirmation() {
     })
   }
 
+  const getWhatsAppText = () => {
+    const url = `${window.location.origin}/gift-cards/confirmacion?id=${giftCardId}`
+    if (giftCard.message) {
+      return `${giftCard.message}\n\nPodés ver y descargar tu Gift Card acá: ${url}`
+    } else {
+      return `¡Hola! Te envié un regalo a través de Kailu. Podés ver y descargar tu Gift Card desde este enlace: ${url}`
+    }
+  }
+
   if (loading) {
     return (
       <div className="gc-confirm">
@@ -241,7 +250,7 @@ export default function GiftCardConfirmation() {
             <Download size={18} /> Descargar PDF
           </button>
           <a 
-            href={`https://wa.me/?text=${encodeURIComponent(`¡Hola! Te hicieron un regalo muy especial a través de Kailu. Podés ver y descargar tu Gift Card desde este enlace: ${window.location.origin}/gift-cards/confirmacion?id=${giftCardId}`)}`}
+            href={`https://wa.me/?text=${encodeURIComponent(getWhatsAppText())}`}
             target="_blank"
             rel="noopener noreferrer"
             className="gc-confirm__btn gc-confirm__btn--secondary"
