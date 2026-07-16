@@ -3,6 +3,7 @@ import { Gift, Check, CreditCard, Send, Download, Loader } from 'lucide-react'
 import './GiftCards.css'
 
 const AMOUNTS = [
+  { value: 10, label: '$10 (Prueba)' },
   { value: 50000, label: '$50.000' },
   { value: 100000, label: '$100.000' },
   { value: 200000, label: '$200.000' },
@@ -149,11 +150,11 @@ export default function GiftCards() {
 
           <div className="gc-form__group">
             <label className="gc-form__label">
-              Mensaje personalizado <span className="gc-form__optional">(opcional)</span>
+              Tu dedicatoria <span className="gc-form__optional">(opcional)</span>
             </label>
             <textarea
               className="gc-form__input gc-form__textarea"
-              placeholder="Ej: Feliz cumple! Disfruta del agua."
+              placeholder="Esta dedicatoria acompañará la Gift Card cuando la compartas por WhatsApp, PDF o enlace."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               maxLength={150}
