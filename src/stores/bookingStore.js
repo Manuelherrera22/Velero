@@ -48,6 +48,15 @@ const useBookingStore = create((set, get) => ({
         }
       }
 
+      // Mark gift card as redeemed if applicable
+      if (bookingInsert.metadata?.gift_card_id) {
+        try {
+          await supabase.from('gift_cards').update({ status: 'redeemed' }).eq('id', bookingInsert.metadata.gift_card_id)
+        } catch (err) {
+          console.error("No se pudo actualizar la gift card:", err)
+        }
+      }
+
       set({ currentBooking: data, isCreating: false })
       return { success: true, data }
     } catch (error) {
@@ -132,6 +141,31 @@ const useBookingStore = create((set, get) => ({
   // Validate coupon
   validateCoupon: async (code) => {
     try {
+      const isGiftCard = code.toUpperCase().startsWith('KGC-')
+      
+      if (isGiftCard) {
+        const { data, error } = await supabase
+          .from('gift_cards')
+          .select('*')
+          .eq('code', code.toUpperCase())
+          .single()
+
+        if (error) return { valid: false, error: 'Gift Card no encontrada' }
+        if (data.status === 'redeemed') return { valid: false, error: 'La Gift Card ya fue utilizada' }
+        if (data.status !== 'confirmed') return { valid: false, error: 'La Gift Card aún está pendiente de pago' }
+
+        return { 
+          valid: true, 
+          coupon: {
+            id: data.id,
+            code: data.code,
+            type: 'fixed',
+            value: data.amount,
+            isGiftCard: true
+          } 
+        }
+      }
+
       const { data, error } = await supabase
         .from('coupons')
         .select('*')

@@ -340,11 +340,12 @@ export default function Checkout() {
         addons_total: addonsTotal,
         discount: totalDiscount,
         total: advanceAmount,
-        coupon_id: coupon?.id || null,
-        status: 'pending',
+        coupon_id: coupon?.isGiftCard ? null : (coupon?.id || null),
+        status: advanceAmount === 0 ? 'confirmed' : 'pending',
         qr_code: qrCode || null,
         affiliate_commission: affiliateCommission,
         metadata: {
+          gift_card_id: coupon?.isGiftCard ? coupon.id : null,
           bookingMode: mode,
           capacity: trip?.max_capacity || trip?.capacity || 6,
           selected_addons: addonsList,
@@ -364,6 +365,31 @@ export default function Checkout() {
 
       if (result.success) {
         setBooking(result.data)
+
+        if (advanceAmount === 0) {
+          isRedirecting = true
+          // Call the send-ticket endpoint manually since we skip the MP Webhook
+          try {
+            await fetch('/api/send-ticket', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                bookingId: result.data.id,
+                trip: trip.title,
+                date: selectedDate ? { date: selectedDate.date, start_time: selectedDate.start_time } : null,
+                email: formData.email,
+                name: formData.name,
+                guests: mode === 'private' ? bookingCapacity : guests,
+                total: advanceAmount,
+                currency: trip?.currency || 'ARS'
+              })
+            })
+          } catch (err) {
+            console.error('Error sending ticket:', err)
+          }
+          window.location.href = `/mis-viajes?payment=success`
+          return
+        }
 
         // 2. Create Mercado Pago Preference
         try {
@@ -537,6 +563,33 @@ export default function Checkout() {
         <Link to={`/travesia/${id}`} className="trip-detail__back">
           <ArrowLeft size={18} /> Volver a la travesía
         </Link>
+
+        {/* --- COUPON SECTION --- */}
+        <section className="checkout-section checkout-section--coupon">
+          <div className="section-header">
+            <Tag size={20} className="section-icon text-accent" />
+            <h2>¿Tenés un Cupón o Gift Card?</h2>
+          </div>
+          
+          <div className="coupon-container">
+            <input 
+              type="text" 
+              className="input" 
+              placeholder="Código" 
+              value={couponCode} 
+              onChange={(e) => setCouponCode(e.target.value)} 
+            />
+            <button className="btn btn--outline" onClick={handleApplyCoupon} disabled={couponLoading}>
+              {couponLoading ? <Loader size={16} className="spin" /> : 'Aplicar'}
+            </button>
+          </div>
+          {couponError && <p className="coupon-error">{couponError}</p>}
+          {coupon && (
+            <p className="coupon-success">
+              ✓ {coupon.isGiftCard ? 'Gift Card' : 'Cupón'} aplicado: -{formatPrice(coupon.type === 'percentage' ? (subtotalOriginal * (coupon.value / 100)) : coupon.value)}
+            </p>
+          )}
+        </section>
 
         {/* Progress */}
         <div className="checkout-progress">
