@@ -148,36 +148,42 @@ export default function Checkout() {
       : Math.min(coupon.value, subtotalAfterCaptainDiscount)
     : 0
 
-  const totalDiscount = tripDiscountAmount + couponDiscountAmount
-  
-  // Subtotal 2: experience after all discounts
-  const subtotalAfterDiscounts = subtotalOriginal - totalDiscount
-
-  // Final total: discounted experience + addons (addons are NEVER discounted)
-  const total = subtotalAfterDiscounts + addonsTotal
+  // Final total before coupon: discounted experience + addons
+  const totalBeforeCoupon = subtotalAfterCaptainDiscount + addonsTotal;
 
   // Gross total for display purposes
-  const grossTotal = subtotalOriginal + addonsTotal
+  const grossTotal = subtotalOriginal + addonsTotal;
 
-  // Service Fee (3% over Net subtotal)
+  // Service Fee (3% over totalBeforeCoupon)
   const serviceFeePercent = 0.03;
-  const serviceFeeAmount = total * serviceFeePercent;
+  const serviceFeeAmount = totalBeforeCoupon * serviceFeePercent;
 
   // Advance Payment calculations (Anticipo)
   const isAdvancePayment = trip?.requires_full_payment === false;
   
-  // Down-payment percentage config (defaults to 100% if full payment required, or uses trip's deposit_percentage or 20% default if down-payment is enabled)
+  // Down-payment percentage config
   const depositPercent = isAdvancePayment
     ? ((trip?.deposit_percentage !== undefined ? parseFloat(trip.deposit_percentage) : 20.0) / 100)
     : 1.0;
   
-  const advanceAmount = isAdvancePayment 
-    ? ((total * depositPercent) + serviceFeeAmount) 
-    : (total + serviceFeeAmount);
+  const advanceAmountBeforeCoupon = isAdvancePayment 
+    ? ((totalBeforeCoupon * depositPercent) + serviceFeeAmount) 
+    : (totalBeforeCoupon + serviceFeeAmount);
     
-  const remainingAmount = isAdvancePayment 
-    ? (total - (total * depositPercent)) 
+  const remainingAmountBeforeCoupon = isAdvancePayment 
+    ? (totalBeforeCoupon - (totalBeforeCoupon * depositPercent)) 
     : 0;
+
+  const totalDiscount = tripDiscountAmount + couponDiscountAmount;
+
+  // Apply coupon discount at the very end
+  const total = totalBeforeCoupon + serviceFeeAmount - couponDiscountAmount;
+  const advanceAmount = Math.max(0, advanceAmountBeforeCoupon - couponDiscountAmount);
+  
+  let remainingAmount = remainingAmountBeforeCoupon;
+  if (couponDiscountAmount > advanceAmountBeforeCoupon) {
+    remainingAmount = Math.max(0, remainingAmountBeforeCoupon - (couponDiscountAmount - advanceAmountBeforeCoupon));
+  }
 
   const formatPrice = (p) => {
     if (!trip) return '$0'
@@ -564,32 +570,7 @@ export default function Checkout() {
           <ArrowLeft size={18} /> Volver a la travesía
         </Link>
 
-        {/* --- COUPON SECTION --- */}
-        <section className="checkout-section checkout-section--coupon">
-          <div className="section-header">
-            <Tag size={20} className="section-icon text-accent" />
-            <h2>¿Tenés un Cupón o Gift Card?</h2>
-          </div>
-          
-          <div className="coupon-container">
-            <input 
-              type="text" 
-              className="input" 
-              placeholder="Código" 
-              value={couponCode} 
-              onChange={(e) => setCouponCode(e.target.value)} 
-            />
-            <button className="btn btn--outline" onClick={handleApplyCoupon} disabled={couponLoading}>
-              {couponLoading ? <Loader size={16} className="spin" /> : 'Aplicar'}
-            </button>
-          </div>
-          {couponError && <p className="coupon-error">{couponError}</p>}
-          {coupon && (
-            <p className="coupon-success">
-              ✓ {coupon.isGiftCard ? 'Gift Card' : 'Cupón'} aplicado: -{formatPrice(coupon.type === 'percentage' ? (subtotalOriginal * (coupon.value / 100)) : coupon.value)}
-            </p>
-          )}
-        </section>
+
 
         {/* Progress */}
         <div className="checkout-progress">
@@ -1042,6 +1023,29 @@ export default function Checkout() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
                 <span>Tasa de servicio Kailu (3%)</span>
                 <span>{formatPrice(serviceFeeAmount)}</span>
+              </div>
+
+              {/* --- COUPON INPUT INSIDE SUMMARY --- */}
+              <div style={{ width: '100%', padding: '12px 0', borderTop: '1px solid var(--border-color)', marginTop: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input 
+                    type="text" 
+                    className="input" 
+                    style={{ flex: 1, padding: '8px 12px', fontSize: '14px' }}
+                    placeholder="Código de Gift Card o Cupón" 
+                    value={couponCode} 
+                    onChange={(e) => setCouponCode(e.target.value)} 
+                  />
+                  <button 
+                    className="btn btn--outline" 
+                    style={{ padding: '8px 16px', fontSize: '14px' }}
+                    onClick={handleApplyCoupon} 
+                    disabled={couponLoading}
+                  >
+                    {couponLoading ? <Loader size={14} className="spin" /> : 'Aplicar'}
+                  </button>
+                </div>
+                {couponError && <p className="coupon-error" style={{ fontSize: '12px', marginTop: '4px' }}>{couponError}</p>}
               </div>
 
               {/* TOTAL FINAL */}
