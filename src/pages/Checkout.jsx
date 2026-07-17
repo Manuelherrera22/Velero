@@ -352,6 +352,7 @@ export default function Checkout() {
         affiliate_commission: affiliateCommission,
         metadata: {
           gift_card_id: coupon?.isGiftCard ? coupon.id : null,
+          captain_transfer_amount: (couponDiscountAmount > advanceAmountBeforeCoupon) ? (couponDiscountAmount - advanceAmountBeforeCoupon) : 0,
           bookingMode: mode,
           capacity: trip?.max_capacity || trip?.capacity || 6,
           selected_addons: addonsList,
@@ -970,59 +971,19 @@ export default function Checkout() {
               {/* Valor de la experiencia */}
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '8px 0', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
                 <span>Valor de la experiencia</span>
-                <span>{formatPrice(subtotalOriginal)}</span>
-              </div>
-
-              {/* Descuento del capitán */}
-              {tripDiscountPercent > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)', flexWrap: 'wrap', gap: '4px' }}>
-                  <span style={{ flex: 1, minWidth: '150px' }}>🏷️ Descuento del capitán ({tripDiscountPercent}%)</span>
-                  <span>− {formatPrice(tripDiscountAmount)}</span>
-                </div>
-              )}
-
-              {/* Subtotal 1 after captain discount */}
-              {tripDiscountPercent > 0 && coupon && couponDiscountAmount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '4px 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                  <span>Subtotal 1</span>
-                  <span>{formatPrice(subtotalAfterCaptainDiscount)}</span>
-                </div>
-              )}
-
-              {/* Descuento cupón */}
-              {coupon && couponDiscountAmount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)', flexWrap: 'wrap', gap: '4px' }}>
-                  <span style={{ flex: 1, minWidth: '150px' }}>🎟️ Cupón {coupon.code} ({coupon.type === 'percentage' ? `${coupon.value}%` : formatPrice(coupon.value)})</span>
-                  <span>− {formatPrice(couponDiscountAmount)}</span>
-                </div>
-              )}
-
-              {/* Adicionales (sin descuento) */}
-              {addonsTotal > 0 && (
-                <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '4px 0', fontSize: 'var(--text-sm)', color: 'var(--text-muted)', fontStyle: 'italic', borderTop: '1px dashed var(--border-color)', marginTop: '4px' }}>
-                    <span>Subtotal experiencia</span>
-                    <span>{formatPrice(subtotalAfterDiscounts)}</span>
-                  </div>
-                  {tripAddons.filter(a => selectedAddons[a.id] > 0).map(a => (
-                    <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '4px 0', fontSize: 'var(--text-md)', color: 'var(--text-secondary)' }}>
-                      <span>🎁 {a.name} {selectedAddons[a.id] > 1 ? `× ${selectedAddons[a.id]}` : ''}</span>
-                      <span>{formatPrice(a.price * selectedAddons[a.id])}</span>
-                    </div>
-                  ))}
-                </>
-              )}
-
-              {/* Total (experiencia descontada + adicionales) */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '10px 0', borderTop: '1px solid var(--border-color)', marginTop: '4px', fontWeight: 600 }}>
-                <span>Subtotal</span>
-                <span>{formatPrice(total)}</span>
+                <span>{formatPrice(grossTotal)}</span>
               </div>
 
               {/* Tasa de servicio */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)' }}>
                 <span>Tasa de servicio Kailu (3%)</span>
                 <span>{formatPrice(serviceFeeAmount)}</span>
+              </div>
+
+              {/* Subtotal (Experiencia + Tasa) */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '10px 0', borderTop: '1px solid var(--border-color)', marginTop: '4px', fontWeight: 600 }}>
+                <span>Subtotal</span>
+                <span>{formatPrice(totalBeforeCoupon + serviceFeeAmount)}</span>
               </div>
 
               {/* --- COUPON INPUT INSIDE SUMMARY --- */}
@@ -1048,29 +1009,38 @@ export default function Checkout() {
                 {couponError && <p className="coupon-error" style={{ fontSize: '12px', marginTop: '4px' }}>{couponError}</p>}
               </div>
 
-              {/* TOTAL FINAL */}
+              {/* Descuento cupón */}
+              {coupon && couponDiscountAmount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)', flexWrap: 'wrap', gap: '4px' }}>
+                  <span style={{ flex: 1, minWidth: '150px' }}>🏷️ Cupón {coupon.code}</span>
+                  <span>− {formatPrice(couponDiscountAmount)}</span>
+                </div>
+              )}
+
+              {/* TOTAL FINAL (Advance) */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '12px', borderTop: '2px solid var(--color-primary)', paddingTop: '12px' }}>
                 <span style={{ fontSize: 'var(--text-lg)', fontWeight: 'bold' }}>
                   {isAdvancePayment ? '💳 Pagás ahora online' : '💳 Total a pagar'}
                 </span>
-                <strong style={{ fontSize: 'var(--text-xl)', color: 'var(--color-primary)' }}>
-                  {formatPrice(advanceAmount)}
-                </strong>
+                <span style={{ fontSize: 'var(--text-2xl)', fontWeight: 'bold' }}>{formatPrice(advanceAmount)}</span>
               </div>
-              
               {isAdvancePayment && (
-                <>
-                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '4px', lineHeight: 1.4 }}>
-                    Incluye anticipo ({Math.round(depositPercent * 100)}%) + tasa de servicio (3%)
-                  </p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '10px', fontSize: 'var(--text-md)', backgroundColor: 'rgba(245, 158, 11, 0.08)', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '4px' }}>
+                  Incluye anticipo ({trip?.deposit_percentage || 20}%) + tasa de servicio (3%)
+                </div>
+              )}
+              
+              {/* Saldo a abonar al capitan */}
+              {isAdvancePayment && remainingAmount > 0 && (
+                <div className="checkout-summary__remaining" style={{ marginTop: '16px', padding: '16px', backgroundColor: 'var(--color-warning-light)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-warning)', color: 'var(--text-primary)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', fontSize: 'var(--text-md)' }}>
                     <span>🤝 Saldo a abonar al capitán</span>
-                    <strong>{formatPrice(remainingAmount)}</strong>
+                    <span style={{ fontSize: 'var(--text-lg)' }}>{formatPrice(remainingAmount)}</span>
                   </div>
-                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: '4px', lineHeight: 1.4 }}>
-                    Se abona directamente al capitán antes de zarpar
-                  </p>
-                </>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                    Se abona directamente al capitán antes de zarpar.
+                  </div>
+                </div>
               )}
             </div>
           </div>

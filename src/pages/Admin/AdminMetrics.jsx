@@ -45,6 +45,7 @@ export default function AdminMetrics() {
 
   // Capacity Alerts & Navigation Zones states
   const [capacityAlerts, setCapacityAlerts] = useState([])
+  const [captainPayoutAlerts, setCaptainPayoutAlerts] = useState([])
   const [navigationZones, setNavigationZones] = useState([])
   const [newZoneName, setNewZoneName] = useState('')
   const [zoneActionLoading, setZoneActionLoading] = useState(false)
@@ -191,7 +192,7 @@ export default function AdminMetrics() {
         tTotal, tPublished, tPending, tDraft, tRejected,
         uTotal, uViewer, uPublisher, uAffiliate, uAdmin,
         boatCount, qrResult, topTripsResult, hotelsResult, recentResult,
-        alertsResult, zonesResult,
+        alertsResult, zonesResult, captainPayoutsResult,
       ] = await Promise.allSettled([
         applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).abortSignal(sig)),
         applyDateFilter(supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'confirmed').abortSignal(sig)),
@@ -218,6 +219,7 @@ export default function AdminMetrics() {
           .select('id, date, start_time, available_spots, trip:trips!trip_id(id, title, location, capacity, min_passengers, max_passengers, captain:profiles!captain_id(id, full_name, email, phone))')
           .gte('date', nowStr).lte('date', limitStr).eq('is_active', true).order('date', { ascending: true }).abortSignal(sig),
         supabase.from('navigation_zones').select('*').order('name', { ascending: true }).abortSignal(sig),
+        supabase.from('bookings').select('id, guest_name, created_at, status, metadata, trip:trips!trip_id(title, captain:profiles!captain_id(full_name, phone)), trip_date:trip_dates!trip_date_id(date, start_time)').not('metadata', 'is', null).abortSignal(sig),
       ])
 
       // Helper: safely extract from settled result
@@ -245,6 +247,7 @@ export default function AdminMetrics() {
       const recentData = val(recentResult).data || []
       const alertsData = val(alertsResult).data || []
       const zonesData = val(zonesResult).data || []
+      const captainPayoutsList = (val(captainPayoutsResult).data || []).filter(b => b.metadata?.captain_transfer_amount > 0)
 
       const totalRevenue = (bookingsData || []).reduce((s, b) => s + (b.total || 0), 0)
       const totalQRScans = (qrData || []).reduce((s, q) => s + (q.scan_count || 0), 0)
@@ -304,6 +307,7 @@ export default function AdminMetrics() {
         }
       }
       setCapacityAlerts(processedAlerts)
+      setCaptainPayoutAlerts(captainPayoutsList || [])
 
       if (zonesData) {
         setNavigationZones(zonesData)
@@ -585,6 +589,65 @@ export default function AdminMetrics() {
                         Email
                       </a>
                     )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Payout Alerts Section */}
+      <div className="metrics-alerts-section" style={{ marginBottom: 'var(--space-6)' }}>
+        <h3 className="metrics-table__title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444' }}>
+          <DollarSign size={18} /> Alertas de Transferencia a Capitanes (Gift Cards)
+        </h3>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+          Reservas pagadas con Gift Card donde el valor de la Gift Card supera el anticipo, dejando un saldo a favor del capitán que Kailu debe transferir manualmente.
+        </p>
+        {captainPayoutAlerts.length === 0 ? (
+          <div className="glass" style={{ padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)', color: 'var(--text-secondary)', fontSize: '14px' }}>
+            ✅ No hay transferencias pendientes a capitanes por reservas con Gift Cards.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 'var(--space-4)' }}>
+            {captainPayoutAlerts.map(booking => {
+              const captain = booking.trip?.captain
+              const payoutAmount = booking.metadata?.captain_transfer_amount || 0
+              
+              const formatPrice = (p) => {
+                const opts = { minimumFractionDigits: 0, maximumFractionDigits: 2 }
+                return `$${p?.toLocaleString('es-AR', opts)}`
+              }
+
+              return (
+                <div key={booking.id} className="glass alert-card" style={{
+                  padding: 'var(--space-4)',
+                  borderRadius: 'var(--radius-lg)',
+                  borderLeft: '4px solid #ef4444',
+                  background: 'rgba(239, 68, 68, 0.02)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>{booking.trip?.title || 'Experiencia'}</h4>
+                    <p style={{ margin: '6px 0 2px 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                      📅 <strong>Fecha:</strong> {booking.trip_date?.date ? new Date(booking.trip_date.date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : 'A coordinar'}
+                    </p>
+                    <p style={{ margin: '2px 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                      👤 <strong>Pasajero:</strong> {booking.guest_name}
+                    </p>
+                    {captain && (
+                      <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: 'var(--text-tertiary)' }}>
+                        ⚓ <strong>Capitán:</strong> {captain.full_name || 'Sin nombre'} ({captain.phone || 'Sin teléfono'})
+                      </p>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', padding: '10px', backgroundColor: 'rgba(239, 68, 68, 0.08)', borderRadius: '6px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#ef4444' }}>A transferir:</span>
+                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#ef4444' }}>{formatPrice(payoutAmount)}</span>
                   </div>
                 </div>
               )
