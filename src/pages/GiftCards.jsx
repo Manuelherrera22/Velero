@@ -3,7 +3,6 @@ import { Gift, Check, CreditCard, Send, Download, Loader } from 'lucide-react'
 import './GiftCards.css'
 
 const AMOUNTS = [
-  { value: 10, label: '$10 (Prueba)' },
   { value: 50000, label: '$50.000' },
   { value: 100000, label: '$100.000' },
   { value: 200000, label: '$200.000' },
