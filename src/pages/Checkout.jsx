@@ -1011,9 +1011,9 @@ export default function Checkout() {
 
               {/* Descuento cupón */}
               {coupon && couponDiscountAmount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-md)', color: 'var(--color-success)', flexWrap: 'wrap', gap: '4px' }}>
-                  <span style={{ flex: 1, minWidth: '150px' }}>🏷️ Cupón {coupon.code}</span>
-                  <span>− {formatPrice(couponDiscountAmount)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
+                  <span>🏷️ Cupón {coupon.code}</span>
+                  <span style={{ color: 'var(--color-success)' }}>− {formatPrice(couponDiscountAmount)}</span>
                 </div>
               )}
 

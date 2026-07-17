@@ -606,9 +606,29 @@ export default function AdminMetrics() {
           Reservas pagadas con Gift Card donde el valor de la Gift Card supera el anticipo, dejando un saldo a favor del capitán que Kailu debe transferir manualmente.
         </p>
         {captainPayoutAlerts.length === 0 ? (
-          <div className="glass" style={{ padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)', color: 'var(--text-secondary)', fontSize: '14px' }}>
-            ✅ No hay transferencias pendientes a capitanes por reservas con Gift Cards.
-          </div>
+          <>
+            <div className="glass" style={{ padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: 'var(--space-4)' }}>
+              ✅ No hay transferencias pendientes a capitanes por reservas con Gift Cards.
+            </div>
+            {/* Ejemplo Visual para el Admin */}
+            <div style={{ opacity: 0.6, filter: 'grayscale(0.5)' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>👉 Así se verá una alerta cuando suceda (Ejemplo visual):</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 'var(--space-4)' }}>
+                <div className="glass alert-card" style={{ padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)', borderLeft: '4px solid #ef4444', background: 'rgba(239, 68, 68, 0.02)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>Atardecer a Vela (Ejemplo)</h4>
+                    <p style={{ margin: '6px 0 2px 0', fontSize: '13px', color: 'var(--text-secondary)' }}>📅 <strong>Fecha:</strong> 24 jul 2026</p>
+                    <p style={{ margin: '2px 0', fontSize: '13px', color: 'var(--text-secondary)' }}>👤 <strong>Pasajero:</strong> Usuario Ejemplo</p>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: 'var(--text-tertiary)' }}>⚓ <strong>Capitán:</strong> Juan Pérez (1123456789)</p>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', padding: '10px', backgroundColor: 'rgba(239, 68, 68, 0.08)', borderRadius: '6px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#ef4444' }}>A transferir:</span>
+                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#ef4444' }}>$12.050</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 'var(--space-4)' }}>
             {captainPayoutAlerts.map(booking => {
