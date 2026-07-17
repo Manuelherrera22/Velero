@@ -46,15 +46,13 @@ export default function Header() {
           <a href="/#beneficios" className="header__link">
             ¿Por qué Kailu?
           </a>
-          <a href="/#testimonios" className="header__link">
-            Testimonios
-          </a>
-          {/* Gift Cards link — descomentar cuando Hernan apruebe:
-          <Link to="/gift-cards" className="header__link">
+          <Link to="/gift-cards" className="header__link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Gift size={16} />
             Gift Cards
           </Link>
-          */}
+          <a href="/#testimonios" className="header__link">
+            Testimonios
+          </a>
 
           {user ? (
             <>
