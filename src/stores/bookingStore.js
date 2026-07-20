@@ -161,7 +161,10 @@ const useBookingStore = create((set, get) => ({
             code: data.code,
             type: 'fixed',
             value: data.amount,
-            isGiftCard: true
+            isGiftCard: true,
+            is_experience_based: data.is_experience_based,
+            trip_id: data.trip_id,
+            guests: data.guests
           } 
         }
       }

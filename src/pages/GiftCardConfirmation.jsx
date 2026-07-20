@@ -32,7 +32,7 @@ export default function GiftCardConfirmation() {
       while (attempts < 5) {
         const { data: gc, error: fetchErr } = await supabase
           .from('gift_cards')
-          .select('*')
+          .select('*, trip:trips(title)')
           .eq('id', giftCardId)
           .single()
           .abortSignal(AbortSignal.timeout(6000))
@@ -96,10 +96,16 @@ export default function GiftCardConfirmation() {
     doc.text('Experiencias Nauticas', 48, 35)
 
     // Value
-    doc.setFontSize(28)
+    doc.setFontSize(giftCard.is_experience_based ? 14 : 28)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(255, 255, 255)
-    doc.text(formatPrice(giftCard.amount), 20, 60)
+    if (giftCard.is_experience_based) {
+      doc.text(`Valido para: ${giftCard.trip?.title}`, 20, 58)
+      doc.setFontSize(10)
+      doc.text(`(${giftCard.guests} persona${giftCard.guests > 1 ? 's' : ''})`, 20, 64)
+    } else {
+      doc.text(formatPrice(giftCard.amount), 20, 60)
+    }
 
     // Recipient and Sender
     if (giftCard.recipient_name) {
@@ -218,8 +224,8 @@ export default function GiftCardConfirmation() {
         <h1 className="gc-confirm__title">Tu Gift Card esta lista</h1>
         <p className="gc-confirm__subtitle">
           {giftCard.recipient_name 
-            ? `Gift card de ${formatPrice(giftCard.amount)} para ${giftCard.recipient_name}`
-            : `Gift card de ${formatPrice(giftCard.amount)}`
+            ? `Gift card ${giftCard.is_experience_based ? 'de experiencia' : `de ${formatPrice(giftCard.amount)}`} para ${giftCard.recipient_name}`
+            : `Gift card ${giftCard.is_experience_based ? 'de experiencia' : `de ${formatPrice(giftCard.amount)}`}`
           }
         </p>
 
@@ -236,7 +242,11 @@ export default function GiftCardConfirmation() {
                 <div className="gc-preview__sender">De: {giftCard.sender_name}</div>
               )}
             </div>
-            <div className="gc-preview__value">{formatPrice(giftCard.amount)}</div>
+            <div className="gc-preview__value" style={{ fontSize: giftCard.is_experience_based ? '18px' : '36px', textAlign: giftCard.is_experience_based ? 'left' : 'right', lineHeight: '1.2' }}>
+              {giftCard.is_experience_based
+                ? `Válido para: ${giftCard.trip?.title} (${giftCard.guests} persona${giftCard.guests > 1 ? 's' : ''})`
+                : formatPrice(giftCard.amount)}
+            </div>
             <div className="gc-preview__footer">
               <span className="gc-preview__brand">kailu.travel</span>
               <span className="gc-preview__code">{giftCard.code}</span>

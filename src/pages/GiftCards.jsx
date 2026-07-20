@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Gift, Check, CreditCard, Send, Download, Loader } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 import './GiftCards.css'
 
 const AMOUNTS = [
@@ -26,10 +27,29 @@ export default function GiftCards() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const [mode, setMode] = useState('amount') // 'amount' | 'experience'
+  const [trips, setTrips] = useState([])
+  const [selectedTripId, setSelectedTripId] = useState('')
+  const [guests, setGuests] = useState(2)
+
+  useEffect(() => {
+    supabase.from('trips').select('id, title, price_per_person').eq('status', 'published')
+      .then(({data}) => { if (data) setTrips(data) })
+  }, [])
+
   const selectedData = AMOUNTS.find(a => a.value === selectedAmount)
 
   const handlePurchase = async () => {
-    if (!selectedAmount) return
+    const isExperienceMode = mode === 'experience'
+    const finalAmount = isExperienceMode 
+      ? (trips.find(t => t.id === selectedTripId)?.price_per_person * guests)
+      : selectedAmount
+
+    if (!finalAmount) {
+      setError('Por favor seleccioná un monto o una experiencia válida.')
+      return
+    }
+
     if (!buyerEmail.trim()) {
       setError('Ingresa tu email para recibir la gift card.')
       return
@@ -46,11 +66,14 @@ export default function GiftCards() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: selectedAmount,
+          amount: finalAmount,
           buyerEmail: buyerEmail.trim(),
           recipientName: recipientName.trim(),
           senderName: senderName.trim(),
           message: message.trim(),
+          is_experience_based: isExperienceMode,
+          trip_id: isExperienceMode ? selectedTripId : null,
+          guests: isExperienceMode ? guests : null
         }),
         signal: controller.signal,
       })
@@ -90,21 +113,47 @@ export default function GiftCards() {
           </p>
         </div>
 
-        {/* Amount Selection */}
-        <div className="gc-amounts">
-          {AMOUNTS.map(amount => (
-            <div
-              key={amount.value}
-              className={`gc-amount-card ${selectedAmount === amount.value ? 'gc-amount-card--selected' : ''}`}
-              onClick={() => { setSelectedAmount(amount.value); setError('') }}
-            >
-              <div className="gc-amount-card__check">
-                <Check size={14} />
-              </div>
-              <div className="gc-amount-card__value">{amount.label}</div>
-            </div>
-          ))}
+        {/* Mode Toggle */}
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', justifyContent: 'center' }}>
+          <button className={`btn ${mode === 'amount' ? 'btn--primary' : 'btn--outline'}`} onClick={() => setMode('amount')}>Regalar Monto Fijo</button>
+          <button className={`btn ${mode === 'experience' ? 'btn--primary' : 'btn--outline'}`} onClick={() => setMode('experience')}>Regalar Experiencia</button>
         </div>
+
+        {/* Selection */}
+        {mode === 'amount' ? (
+          <div className="gc-amounts">
+            {AMOUNTS.map(amount => (
+              <div
+                key={amount.value}
+                className={`gc-amount-card ${selectedAmount === amount.value ? 'gc-amount-card--selected' : ''}`}
+                onClick={() => { setSelectedAmount(amount.value); setError('') }}
+              >
+                <div className="gc-amount-card__check">
+                  <Check size={14} />
+                </div>
+                <div className="gc-amount-card__value">{amount.label}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="gc-experience" style={{ maxWidth: '600px', margin: '0 auto 40px auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="gc-form__group">
+              <label className="gc-form__label">Seleccioná una Travesía</label>
+              <select className="gc-form__input" value={selectedTripId} onChange={e => setSelectedTripId(e.target.value)}>
+                <option value="">-- Elegí la experiencia a regalar --</option>
+                {trips.map(t => (
+                  <option key={t.id} value={t.id}>{t.title}</option>
+                ))}
+              </select>
+            </div>
+            {selectedTripId && (
+              <div className="gc-form__group">
+                <label className="gc-form__label">Cantidad de Personas (Pasajeros a invitar)</label>
+                <input type="number" min="1" className="gc-form__input" value={guests} onChange={e => setGuests(parseInt(e.target.value) || 1)} />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Form */}
         <div className="gc-form">
@@ -165,7 +214,7 @@ export default function GiftCards() {
         <div className="gc-cta">
           <button
             className="gc-cta__button"
-            disabled={!selectedAmount || loading}
+            disabled={(mode === 'amount' ? !selectedAmount : !selectedTripId) || loading}
             onClick={handlePurchase}
           >
             {loading ? (
@@ -176,9 +225,9 @@ export default function GiftCards() {
             ) : (
               <>
                 <CreditCard size={20} />
-                {selectedAmount 
+                {(mode === 'amount' ? selectedAmount : selectedTripId) 
                   ? `Quiero regalar` 
-                  : 'Selecciona un monto'}
+                  : 'Seleccioná una opción'}
               </>
             )}
           </button>
@@ -186,7 +235,7 @@ export default function GiftCards() {
         </div>
 
         {/* Live Preview */}
-        {selectedAmount && (
+        {(mode === 'amount' ? selectedAmount : selectedTripId) && (
           <div className="gc-preview">
             <h3 className="gc-preview__title">Vista previa</h3>
             <div className="gc-preview__card">
@@ -200,7 +249,11 @@ export default function GiftCards() {
                   <div className="gc-preview__sender">De: {senderName}</div>
                 )}
               </div>
-              <div className="gc-preview__value">{selectedData?.label}</div>
+              <div className="gc-preview-card__amount" style={{ fontSize: mode === 'experience' ? '20px' : '36px', textAlign: mode === 'experience' ? 'left' : 'right' }}>
+                {mode === 'experience' 
+                  ? `Válido para: ${trips.find(t => t.id === selectedTripId)?.title} (${guests} persona${guests > 1 ? 's' : ''})` 
+                  : (selectedData ? selectedData.label : '$0')}
+              </div>
               <div className="gc-preview__footer">
                 <span className="gc-preview__brand">kailu.travel</span>
                 <span className="gc-preview__code">{generatePreviewCode()}</span>

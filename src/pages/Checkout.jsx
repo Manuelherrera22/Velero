@@ -1013,7 +1013,9 @@ export default function Checkout() {
               {coupon && couponDiscountAmount > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
                   <span>🏷️ Cupón {coupon.code}</span>
-                  <span style={{ color: 'var(--color-success)' }}>− {formatPrice(couponDiscountAmount)}</span>
+                  <span style={{ color: 'var(--color-success)' }}>
+                    {coupon.is_experience_based ? 'CUBIERTO' : `− ${formatPrice(couponDiscountAmount)}`}
+                  </span>
                 </div>
               )}
 

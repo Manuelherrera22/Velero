@@ -7,16 +7,18 @@ export async function handler(event) {
   }
 
   try {
-    const { amount, buyerEmail, recipientName, senderName, message } = JSON.parse(event.body)
+    const { amount, buyerEmail, recipientName, senderName, message, is_experience_based, trip_id, guests } = JSON.parse(event.body)
 
     if (!amount || !buyerEmail) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing amount or email' }) }
     }
 
     // Validate amount
-    const validAmounts = [10, 50000, 100000, 200000]
-    if (!validAmounts.includes(Number(amount))) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid amount' }) }
+    if (!is_experience_based) {
+      const validAmounts = [50000, 100000, 200000]
+      if (!validAmounts.includes(Number(amount))) {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Invalid amount' }) }
+      }
     }
 
     // Generate unique gift card code
@@ -35,12 +37,15 @@ export async function handler(event) {
       .from('gift_cards')
       .insert({
         code,
-        amount: Number(amount) === 10 ? 50000 : Number(amount), // Hack to bypass DB constraint for the $10 test
+        amount: Number(amount),
         status: 'pending',
         buyer_email: buyerEmail,
         recipient_name: recipientName || null,
         sender_name: senderName || null,
         message: message || null,
+        is_experience_based: is_experience_based || false,
+        trip_id: trip_id || null,
+        guests: guests || null
       })
       .select()
       .single()
@@ -78,7 +83,7 @@ export async function handler(event) {
       items: [
         {
           id: giftCard.id,
-          title: `Gift Card Kailu — ${formatPrice(amount)}`,
+          title: is_experience_based ? `Gift Card Kailu — Experiencia` : `Gift Card Kailu — ${formatPrice(amount)}`,
           quantity: 1,
           unit_price: Number(amount),
           currency_id: 'ARS',
