@@ -33,7 +33,7 @@ export default function GiftCards({ defaultMode = 'amount', disableToggle = fals
   const [guests, setGuests] = useState(2)
 
   useEffect(() => {
-    supabase.from('trips').select('id, title, price_per_person').eq('status', 'published')
+    supabase.from('trips').select('id, title, price_per_person').eq('status', 'published').gt('price_per_person', 0)
       .then(({data}) => { if (data) setTrips(data) })
   }, [])
 

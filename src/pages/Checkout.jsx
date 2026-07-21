@@ -988,6 +988,14 @@ export default function Checkout() {
                 <span>{formatPrice(grossTotal)}</span>
               </div>
 
+              {/* Descuento Especial del Capitán */}
+              {tripDiscountAmount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
+                  <span>Descuento Especial ({tripDiscountPercent}%)</span>
+                  <span style={{ color: 'var(--color-success)' }}>-{formatPrice(tripDiscountAmount)}</span>
+                </div>
+              )}
+
               {/* Tasa de servicio */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '6px 0', fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)' }}>
                 <span>Tasa de servicio Kailu (3%)</span>
