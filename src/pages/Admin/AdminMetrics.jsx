@@ -214,7 +214,7 @@ export default function AdminMetrics() {
         supabase.from('qr_codes').select('scan_count').abortSignal(sig),
         supabase.from('trips').select('id, title, location, price_per_person, currency, bookings(id)').eq('status', 'published').order('created_at', { ascending: false }).limit(10).abortSignal(sig),
         supabase.from('hotels').select('*, qr_codes(scan_count)').order('created_at', { ascending: false }).abortSignal(sig),
-        applyDateFilter(supabase.from('bookings').select('*, trip:trips!trip_id(title)').order('created_at', { ascending: false }).limit(8).abortSignal(sig)),
+        applyDateFilter(supabase.from('bookings').select('*, trip:trips!trip_id(title), trip_date:trip_dates!trip_date_id(date, start_time)').order('created_at', { ascending: false }).limit(8).abortSignal(sig)),
         supabase.from('trip_dates')
           .select('id, date, start_time, available_spots, trip:trips!trip_id(id, title, location, capacity, min_passengers, max_passengers, captain:profiles!captain_id(id, full_name, email, phone))')
           .gte('date', nowStr).lte('date', limitStr).eq('is_active', true).order('date', { ascending: true }).abortSignal(sig),
