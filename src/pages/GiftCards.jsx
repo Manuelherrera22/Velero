@@ -18,7 +18,7 @@ function generatePreviewCode() {
   return code
 }
 
-export default function GiftCards() {
+export default function GiftCards({ defaultMode = 'amount', disableToggle = false }) {
   const [selectedAmount, setSelectedAmount] = useState(null)
   const [recipientName, setRecipientName] = useState('')
   const [senderName, setSenderName] = useState('')
@@ -27,7 +27,7 @@ export default function GiftCards() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const [mode, setMode] = useState('amount') // 'amount' | 'experience'
+  const [mode, setMode] = useState(defaultMode) // 'amount' | 'experience'
   const [trips, setTrips] = useState([])
   const [selectedTripId, setSelectedTripId] = useState('')
   const [guests, setGuests] = useState(2)
@@ -114,10 +114,12 @@ export default function GiftCards() {
         </div>
 
         {/* Mode Toggle */}
-        <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', justifyContent: 'center' }}>
-          <button className={`btn ${mode === 'amount' ? 'btn--primary' : 'btn--outline'}`} onClick={() => setMode('amount')}>Regalar Monto Fijo</button>
-          <button className={`btn ${mode === 'experience' ? 'btn--primary' : 'btn--outline'}`} onClick={() => setMode('experience')}>Regalar Experiencia</button>
-        </div>
+        {!disableToggle && (
+          <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', justifyContent: 'center' }}>
+            <button className={`btn ${mode === 'amount' ? 'btn--primary' : 'btn--outline'}`} onClick={() => setMode('amount')}>Regalar Monto Fijo</button>
+            <button className={`btn ${mode === 'experience' ? 'btn--primary' : 'btn--outline'}`} onClick={() => setMode('experience')}>Regalar Experiencia</button>
+          </div>
+        )}
 
         {/* Selection */}
         {mode === 'amount' ? (

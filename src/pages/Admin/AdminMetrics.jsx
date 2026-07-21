@@ -913,6 +913,7 @@ export default function AdminMetrics() {
             overflowY: 'auto',
             position: 'relative',
             boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
+            color: '#F8FAFC'
           }} onClick={(e) => e.stopPropagation()}>
             <button 
               style={{

@@ -133,57 +133,71 @@ export default function Checkout() {
   const subtotalOriginal = mode === 'private' ? basePriceOriginal : basePriceOriginal * guests
   const addonsTotal = tripAddons.reduce((sum, a) => sum + (selectedAddons[a.id] || 0) * a.price, 0)
   
-  // Discounts apply ONLY to the experience price, NOT to addons
-  // Trip Promotional Discount (%) — stored in metadata
+  // Trip Promotional Discount (%)
   const tripDiscountPercent = trip?.metadata?.discount_percentage || 0
   const tripDiscountAmount = tripDiscountPercent > 0 ? (subtotalOriginal * (tripDiscountPercent / 100)) : 0
 
-  // Subtotal 1: experience after captain's discount
-  const subtotalAfterCaptainDiscount = subtotalOriginal - tripDiscountAmount
+  // Promo Code Discount (percentage or fixed, applies to base price)
+  let promoCodeDiscountAmount = 0
+  if (coupon && !coupon.isGiftCard) {
+    if (coupon.type === 'percentage') {
+      promoCodeDiscountAmount = (subtotalOriginal - tripDiscountAmount) * (coupon.value / 100)
+    } else {
+      promoCodeDiscountAmount = Math.min(coupon.value, (subtotalOriginal - tripDiscountAmount))
+    }
+  }
 
-  // Coupon Discount — applied to Subtotal 1 (still without addons)
-  const couponDiscountAmount = coupon
-    ? coupon.type === 'percentage'
-      ? subtotalAfterCaptainDiscount * (coupon.value / 100)
-      : Math.min(coupon.value, subtotalAfterCaptainDiscount)
-    : 0
+  // Discounted Base
+  const subtotalAfterPromo = subtotalOriginal - tripDiscountAmount - promoCodeDiscountAmount
 
-  // Final total before coupon: discounted experience + addons
-  const totalBeforeCoupon = subtotalAfterCaptainDiscount + addonsTotal;
+  // Final Experience Total before service fee
+  const totalBeforeServiceFee = subtotalAfterPromo + addonsTotal;
 
   // Gross total for display purposes
   const grossTotal = subtotalOriginal + addonsTotal;
 
-  // Service Fee (3% over totalBeforeCoupon)
+  // Service Fee (3% over discounted total)
   const serviceFeePercent = 0.03;
-  const serviceFeeAmount = totalBeforeCoupon * serviceFeePercent;
+  const serviceFeeAmount = totalBeforeServiceFee * serviceFeePercent;
 
-  // Advance Payment calculations (Anticipo)
+  // Total amount due
+  const totalDue = totalBeforeServiceFee + serviceFeeAmount;
+
+  // Split into Advance and Remaining
   const isAdvancePayment = trip?.requires_full_payment === false;
-  
-  // Down-payment percentage config
   const depositPercent = isAdvancePayment
     ? ((trip?.deposit_percentage !== undefined ? parseFloat(trip.deposit_percentage) : 20.0) / 100)
     : 1.0;
-  
-  const advanceAmountBeforeCoupon = isAdvancePayment 
-    ? ((totalBeforeCoupon * depositPercent) + serviceFeeAmount) 
-    : (totalBeforeCoupon + serviceFeeAmount);
+
+  let advanceAmount = isAdvancePayment 
+    ? ((totalBeforeServiceFee * depositPercent) + serviceFeeAmount) 
+    : totalDue;
     
-  const remainingAmountBeforeCoupon = isAdvancePayment 
-    ? (totalBeforeCoupon - (totalBeforeCoupon * depositPercent)) 
+  let remainingAmount = isAdvancePayment 
+    ? (totalBeforeServiceFee - (totalBeforeServiceFee * depositPercent)) 
     : 0;
 
-  const totalDiscount = tripDiscountAmount + couponDiscountAmount;
-
-  // Apply coupon discount at the very end
-  const total = totalBeforeCoupon + serviceFeeAmount - couponDiscountAmount;
-  const advanceAmount = Math.max(0, advanceAmountBeforeCoupon - couponDiscountAmount);
-  
-  let remainingAmount = remainingAmountBeforeCoupon;
-  if (couponDiscountAmount > advanceAmountBeforeCoupon) {
-    remainingAmount = Math.max(0, remainingAmountBeforeCoupon - (couponDiscountAmount - advanceAmountBeforeCoupon));
+  // Gift Card Payments
+  let giftCardAppliedAmount = 0;
+  let captain_transfer_amount = 0;
+  if (coupon && coupon.isGiftCard) {
+    const gcValue = coupon.is_experience_based ? totalDue : coupon.value;
+    giftCardAppliedAmount = Math.min(gcValue, totalDue);
+    
+    if (giftCardAppliedAmount >= advanceAmount) {
+      const remainingGc = giftCardAppliedAmount - advanceAmount;
+      advanceAmount = 0;
+      captain_transfer_amount = Math.min(remainingAmount, remainingGc);
+      remainingAmount = Math.max(0, remainingAmount - remainingGc);
+    } else {
+      advanceAmount = advanceAmount - giftCardAppliedAmount;
+    }
   }
+
+  // Unified variable for UI display
+  const couponDiscountAmount = (coupon && !coupon.isGiftCard) ? promoCodeDiscountAmount : giftCardAppliedAmount;
+  const totalDiscount = tripDiscountAmount + promoCodeDiscountAmount;
+  const total = totalDue - giftCardAppliedAmount;
 
   const formatPrice = (p) => {
     if (!trip) return '$0'
@@ -983,7 +997,7 @@ export default function Checkout() {
               {/* Subtotal (Experiencia + Tasa) */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '10px 0', borderTop: '1px solid var(--border-color)', marginTop: '4px', fontWeight: 600 }}>
                 <span>Subtotal</span>
-                <span>{formatPrice(totalBeforeCoupon + serviceFeeAmount)}</span>
+                <span>{formatPrice(totalBeforeServiceFee + serviceFeeAmount)}</span>
               </div>
 
               {/* --- COUPON INPUT INSIDE SUMMARY --- */}
