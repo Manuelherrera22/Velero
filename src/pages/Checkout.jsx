@@ -366,7 +366,7 @@ export default function Checkout() {
         affiliate_commission: affiliateCommission,
         metadata: {
           gift_card_id: coupon?.isGiftCard ? coupon.id : null,
-          captain_transfer_amount: (couponDiscountAmount > advanceAmountBeforeCoupon) ? (couponDiscountAmount - advanceAmountBeforeCoupon) : 0,
+          captain_transfer_amount: captain_transfer_amount,
           bookingMode: mode,
           capacity: trip?.max_capacity || trip?.capacity || 6,
           selected_addons: addonsList,
