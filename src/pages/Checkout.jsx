@@ -933,6 +933,12 @@ export default function Checkout() {
                   </div>
                 </div>
 
+                {error && (
+                  <div className="login-error" style={{ marginBottom: 'var(--space-4)' }}>
+                    <AlertCircle size={16} style={{ verticalAlign: '-3px' }} /> {error}
+                  </div>
+                )}
+
                 <button
                   onClick={handleCreateBooking}
                   className="btn btn--accent btn--lg checkout-form__submit"
