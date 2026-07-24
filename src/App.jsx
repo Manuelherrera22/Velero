@@ -81,8 +81,7 @@ function App() {
           <Route path="/terminos" element={<Terms />} />
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/privacidad" element={<Privacy />} />
-          <Route path="/gift-cards" element={<GiftCards defaultMode="amount" disableToggle={true} />} />
-          <Route path="/gift-cards/experiencias" element={<GiftCards defaultMode="experience" disableToggle={true} />} />
+          <Route path="/gift-cards" element={<GiftCards />} />
           <Route path="/gift-cards/confirmacion" element={<GiftCardConfirmation />} />
           {/* Protected routes */}
           <Route path="/perfil" element={
